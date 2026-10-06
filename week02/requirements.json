@@ -1,15 +1,5 @@
 {
-  "_how_to_fill_this_in": [
-    "One object per requirement. Fill in every field; replace every '…'. Do not rename the fields.",
-    "id: REQ-001, REQ-002 … in order. Ids never change after this week — design, tests and traceability point at them. A requirement you drop keeps its id and gets 'dropped': true.",
-    "description: one sentence, one behaviour, something you could test. Not 'the app is user-friendly'; 'a student books a free slot of 30 to 120 minutes'.",
-    "functional: true if it says WHAT the system does (a user can…, the system sends…); false if it says HOW WELL (speed, security, privacy, capacity, phone screen, language).",
-    "priority: must (the product is pointless without it — ships in Week 11), should (important, cut only if time runs out), could (nice to have). Not everything is a must: that is the point of the field.",
-    "acceptance: the test that proves the requirement is met — what you do and what you must see. It is the test you will actually run in Week 9. Example: 'Enter the code from the e-mail within 10 minutes: logged in. A wrong code three times: locked for 15 minutes.'",
-    "At least 8: at least 5 functional and at least 3 non-functional. REQ-001 (login) and REQ-006 (phone screen) are the same for everyone: keep them, adjust the wording to your product if you need to.",
-    "You may delete this _how_to_fill_this_in block once you have read it; the checker ignores it."
-  ],
-  "project": "the title from PROPOSAL.md §1",
+  "project": "KitchenOps — commercial kitchen inventory depletion and smart restock logistics",
   "requirements": [
     {
       "id": "REQ-001",
@@ -20,31 +10,31 @@
     },
     {
       "id": "REQ-002",
-      "description": "…",
+      "description": "A kitchen chef logs prepared dish portions on mobile, and the server automatically deducts raw ingredient stocks based on the recipe bill of materials.",
       "functional": true,
-      "priority": "…",
-      "acceptance": "…"
+      "priority": "must",
+      "acceptance": "Logging 10 portions of a recipe containing 120g pasta and 80g sauce deducts exactly 1.2kg pasta and 0.8kg sauce from active stock, generating an audit log in under two seconds."
     },
     {
       "id": "REQ-003",
-      "description": "…",
+      "description": "When an ingredient's stock level drops below its safety threshold, the server automatically appends the required replenishment quantity to the active supplier purchase order.",
       "functional": true,
-      "priority": "…",
-      "acceptance": "…"
+      "priority": "must",
+      "acceptance": "Cooking cream stock dropping below the 5-liter safety threshold triggers an automatic 20-liter replenishment entry in the pending supplier purchase order sheet."
     },
     {
       "id": "REQ-004",
-      "description": "…",
+      "description": "The system tags inbound ingredient crates with batch arrival and expiration dates, enforcing First-In First-Out (FIFO) usage priority and alerting staff 48 hours prior to spoilage.",
       "functional": true,
-      "priority": "…",
-      "acceptance": "…"
+      "priority": "should",
+      "acceptance": "Batches expiring within 48 hours display an amber alert banner on mobile and web; recipes automatically draw quantities from the oldest unexpired batch."
     },
     {
       "id": "REQ-005",
-      "description": "…",
+      "description": "A receiving staff member records inbound wholesale deliveries on mobile by entering quantities and lot dates, instantly incrementing warehouse inventory.",
       "functional": true,
-      "priority": "…",
-      "acceptance": "…"
+      "priority": "should",
+      "acceptance": "Submitting a received delivery of 25kg flour updates the active inventory count by 25kg and creates an inbound receipt record visible on the web dashboard."
     },
     {
       "id": "REQ-006",
@@ -55,17 +45,17 @@
     },
     {
       "id": "REQ-007",
-      "description": "…",
+      "description": "Inventory stock deductions initiated from the mobile app synchronize and update the web dashboard inventory monitor within three seconds.",
       "functional": false,
-      "priority": "…",
-      "acceptance": "…"
+      "priority": "should",
+      "acceptance": "Confirming a dish preparation on mobile reflects the updated ingredient balance on the web client in under three seconds over standard Wi-Fi/4G."
     },
     {
       "id": "REQ-008",
-      "description": "…",
+      "description": "The server API returns ingredient catalogs, active purchase orders, and stock levels in under 800 milliseconds for catalogs up to 500 items.",
       "functional": false,
-      "priority": "…",
-      "acceptance": "…"
+      "priority": "could",
+      "acceptance": "Querying the 200-item kitchen pantry inventory endpoint responds in under 800 milliseconds measured across twenty consecutive requests."
     }
   ]
 }

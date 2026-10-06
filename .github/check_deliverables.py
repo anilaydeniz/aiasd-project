@@ -427,7 +427,7 @@ def week2() -> None:
 
 def week3() -> None:
     """Pitch and review in the lab; Part B of the proposal and the hostile-reviewer log
-    by Saturday. The pitch is read at the end of the lecture (11:50 push) as it was pushed before it."""
+    by Saturday. The pitch is read as it was pushed by the end of the lecture (11:45)."""
     # --- the pitch: six slides, each with the student's own words -----------------
     pitch = read("week03/PITCH_03.md")
     if pitch is None:
@@ -461,10 +461,25 @@ def week3() -> None:
               f"{len(set(same))} of {len(cited)} match an id + description in week02/requirements.json — copy them, do not paraphrase")
         dn = re.search(r"(does not|yapmaz)\s*:?\**\s*(.+)$", slide(3), re.I | re.M)
         check(3, "slide 4 — says what it does not do", bool(dn and len(dn.group(2).strip()) > 15 and "[" not in dn.group(2)), "the one sentence from §4")
-        has_img = re.search(r"!\[[^\]]*\]\((week03/[^)]+)\)", slide(4))
-        img_ok = bool(has_img and read(has_img.group(1)) is not None)
-        boxes = len(re.findall(r"^\+[-+]+\+$", slide(4), re.M)) >= 2
-        check(3, "slide 5 — the main screen, drawn", img_ok or boxes, "no image in week03/ and no text boxes")
+        def local_image(md: str) -> bool:
+            """An image in the repository, linked from the slide. The link may be relative to
+            week03/ (where PITCH_03.md is, so the preview shows it) or to the root (fixed 6 Oct 2026:
+            only 'week03/...' counted, which the preview cannot show)."""
+            srcs = re.findall(r"!\[[^\]]*\]\(\s*<?([^)>\s]+)", md)
+            srcs += re.findall(r"<img[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"']", md, re.I)
+            for src in srcs:
+                src = urllib.parse.unquote(src.split("#")[0].split("?")[0]).strip()
+                if not src or re.match(r"^[a-z][a-z0-9+.-]*:", src, re.I):
+                    continue  # a web address is not a drawing of yours
+                for base in (ROOT / "week03", ROOT):
+                    f = (base / src.lstrip("/")).resolve()
+                    if f.is_file() and ROOT.resolve() in f.parents:
+                        return True
+            return False
+        img_ok = local_image(slide(4))
+        boxes = len(re.findall(r"^\s*\+[-+=]+\+\s*$", slide(4), re.M)) >= 2
+        check(3, "slide 5 — the main screen, drawn", img_ok or boxes,
+              "no image from your repository linked on the slide, and no text-box drawing")
         check(3, "slide 6 — one honest doubt", len(slide(5).strip()) > 60 and "[" not in slide(5), "the question and two lines on why")
     # --- the review: three reviewers, quoted sentences, a decision each -----------
     items = contributors(3) or []
@@ -507,7 +522,8 @@ def week3() -> None:
               len(valid) == len(nums) and len(set(valid)) == len(valid) and len(valid) in (4, 5) and (me == "" or me in valid),
               f"{len(valid)} valid numbers of {len(nums)}" + ("" if me in valid else " — your own number is missing"))
         reviewers = [str(i.get("student_id", "")).strip().split("-")[0] for i in (contributors(3) or []) if isinstance(i, dict)]
-        outside = [r for r in reviewers if r and r not in valid]
+        reviewers = [r for r in reviewers if re.fullmatch(r"\d{9}", r)]  # empty entries are not reviewers (6 Oct 2026)
+        outside = [r for r in reviewers if r not in valid]
         check(3, "your reviewers are members of your group", bool(reviewers) and not outside,
               f"not in group_03.json: {outside[:3]}" if outside else "no reviewers in contributors_03.json")
     # --- the main flow: the screens the Week 4 prototype is built from (added 5 Oct 2026;
