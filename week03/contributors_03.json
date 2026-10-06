@@ -1,15 +1,26 @@
 {
-  "_how_to_fill_this_in": [
-    "The three classmates in your review group this week, in the role 'reviewer'. Not yourself; a different group from Week 2's stakeholders.",
-    "student_id: their 9-digit student number (ask them; do not guess).",
-    "what: the most useful sentence they wrote on your pitch — their answer to one of the three questions on slide 6. Quote it; it is the evidence the review happened.",
-    "accepted: true if you changed the proposal because of it (say what in the Change log of PROPOSAL.md), false if you did not — with a reason in 'why'. Rejecting with a reason is fine; 'they said, I changed' with nothing behind it is not.",
-    "You may delete this block once you have read it; the checker ignores it."
-  ],
   "week": 3,
   "contributors": [
-    { "student_id": "", "role": "reviewer", "what": "", "accepted": null, "why": "" },
-    { "student_id": "", "role": "reviewer", "what": "", "accepted": null, "why": "" },
-    { "student_id": "", "role": "reviewer", "what": "", "accepted": null, "why": "" }
+    {
+      "student_id": "220504024",
+      "role": "reviewer",
+      "what": "Asked whether busy dinner cooks will remember to log recipe portions on their phones or if it will be abandoned during rushes.",
+      "accepted": true,
+      "why": "Added aggregate prep batch logging in §4 and §12 so cooks log batches rather than single plates."
+    },
+    {
+      "student_id": "220504031",
+      "role": "reviewer",
+      "what": "Questioned if wholesale suppliers will accept auto-generated orders without manual phone confirmation.",
+      "accepted": true,
+      "why": "Clarified that purchase orders require explicit manager approval before dispatch in UC2."
+    },
+    {
+      "student_id": "220504010",
+      "role": "reviewer",
+      "what": "Suggested integrating an offline queue for walk-in cold rooms since concrete walls block cellular signals.",
+      "accepted": true,
+      "why": "Included local client caching as Risk 2 in §12 to handle offline refrigerator areas."
+    }
   ]
 }
