@@ -1,29 +1,15 @@
-"""
-week01/hello.py — prove you can write Python, not just run it.
+# Anıl Aydeniz - Student ID: 220504045
+# AI-Assisted Software Development (AIASD) - Week 01
 
-Requirements for this file (see the Week 1 assignment):
-  * read a name with input()
-  * use an f-string
-  * use a list
-  * use a for-loop
+user_name = input("Enter your name to start today's development log: ")
 
-Ten lines is plenty. Replace the TODOs with your own code.
+tasks = [
+    "Review Transformer architecture paper",
+    "Configure Git environment and SSH credentials",
+    "Build initial mobile/web project proposal",
+    "Prepare weekly AI prompt log reflection",
+]
 
-Run with:
-    python week01/hello.py
-"""
-
-import sys
-
-
-def main() -> None:
-    print("Python " + sys.version.split()[0])
-
-    # TODO: read a name with input()
-    # TODO: build a list of something — greetings, courses, languages, your choice
-    # TODO: loop over the list and print each item with an f-string that
-    #       includes the name you read
-
-
-if __name__ == "__main__":
-    main()
+print(f"\nWelcome back, {user_name}! Here are your key focus areas for this week:")
+for index, task in enumerate(tasks, start=1):
+    print(f"[{index}] {task}")
