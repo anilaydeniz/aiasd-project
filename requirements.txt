@@ -1,0 +1,8 @@
+# Week 1 — the minimum needed to start.
+# Heavier dependencies arrive per week: see weekNN/requirements.txt
+#
+#   pip install -r requirements.txt
+
+streamlit==1.41.1
+python-dotenv==1.0.1
+requests==2.32.3

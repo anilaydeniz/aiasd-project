@@ -1,0 +1,15 @@
+{
+  "_how_to_fill_this_in": [
+    "The three classmates in your review group this week, in the role 'reviewer'. Not yourself; a different group from Week 2's stakeholders.",
+    "student_id: their 9-digit student number (ask them; do not guess).",
+    "what: the most useful sentence they wrote on your pitch — their answer to one of the three questions on slide 6. Quote it; it is the evidence the review happened.",
+    "accepted: true if you changed the proposal because of it (say what in the Change log of PROPOSAL.md), false if you did not — with a reason in 'why'. Rejecting with a reason is fine; 'they said, I changed' with nothing behind it is not.",
+    "You may delete this block once you have read it; the checker ignores it."
+  ],
+  "week": 3,
+  "contributors": [
+    { "student_id": "", "role": "reviewer", "what": "", "accepted": null, "why": "" },
+    { "student_id": "", "role": "reviewer", "what": "", "accepted": null, "why": "" },
+    { "student_id": "", "role": "reviewer", "what": "", "accepted": null, "why": "" }
+  ]
+}

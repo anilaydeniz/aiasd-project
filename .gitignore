@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Secrets — never commit these
+.env
+*.key
+*.pem
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# The checker's local cache of the published week. Deliberately not tracked:
+# it is rewritten on every run, and a tracked copy would show up as a change
+# in every student's working tree and collide when the template updates.
+CURRENT_WEEK_CACHE.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Data / large files
+*.csv
+*.parquet
+*.db
+*.sqlite
+chroma_db/
+faiss_index/
+
+# never student data (this repository is pushed)
+*-students*.xlsx
+class-list*.xlsx
+roster*.csv
+grades/
+private/
+~$*
+*.pptx

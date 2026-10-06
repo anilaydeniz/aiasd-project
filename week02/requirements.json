@@ -1,0 +1,71 @@
+{
+  "_how_to_fill_this_in": [
+    "One object per requirement. Fill in every field; replace every '…'. Do not rename the fields.",
+    "id: REQ-001, REQ-002 … in order. Ids never change after this week — design, tests and traceability point at them. A requirement you drop keeps its id and gets 'dropped': true.",
+    "description: one sentence, one behaviour, something you could test. Not 'the app is user-friendly'; 'a student books a free slot of 30 to 120 minutes'.",
+    "functional: true if it says WHAT the system does (a user can…, the system sends…); false if it says HOW WELL (speed, security, privacy, capacity, phone screen, language).",
+    "priority: must (the product is pointless without it — ships in Week 11), should (important, cut only if time runs out), could (nice to have). Not everything is a must: that is the point of the field.",
+    "acceptance: the test that proves the requirement is met — what you do and what you must see. It is the test you will actually run in Week 9. Example: 'Enter the code from the e-mail within 10 minutes: logged in. A wrong code three times: locked for 15 minutes.'",
+    "At least 8: at least 5 functional and at least 3 non-functional. REQ-001 (login) and REQ-006 (phone screen) are the same for everyone: keep them, adjust the wording to your product if you need to.",
+    "You may delete this _how_to_fill_this_in block once you have read it; the checker ignores it."
+  ],
+  "project": "the title from PROPOSAL.md §1",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "A new user signs up with an e-mail address and logs in with the 4-digit code sent to it; no passwords are stored.",
+      "functional": true,
+      "priority": "must",
+      "acceptance": "The code arrives by e-mail within one minute; entering it within 10 minutes logs the user in; an expired or wrong code is refused with a message."
+    },
+    {
+      "id": "REQ-002",
+      "description": "…",
+      "functional": true,
+      "priority": "…",
+      "acceptance": "…"
+    },
+    {
+      "id": "REQ-003",
+      "description": "…",
+      "functional": true,
+      "priority": "…",
+      "acceptance": "…"
+    },
+    {
+      "id": "REQ-004",
+      "description": "…",
+      "functional": true,
+      "priority": "…",
+      "acceptance": "…"
+    },
+    {
+      "id": "REQ-005",
+      "description": "…",
+      "functional": true,
+      "priority": "…",
+      "acceptance": "…"
+    },
+    {
+      "id": "REQ-006",
+      "description": "Every screen is usable on a phone about 390 px wide without horizontal scrolling.",
+      "functional": false,
+      "priority": "must",
+      "acceptance": "Every screen opened on a 390 px wide phone (or the browser's phone view): no horizontal scroll bar, no text cut off, every button reachable."
+    },
+    {
+      "id": "REQ-007",
+      "description": "…",
+      "functional": false,
+      "priority": "…",
+      "acceptance": "…"
+    },
+    {
+      "id": "REQ-008",
+      "description": "…",
+      "functional": false,
+      "priority": "…",
+      "acceptance": "…"
+    }
+  ]
+}

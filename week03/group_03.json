@@ -1,0 +1,11 @@
+{
+  "_how_to_fill_this_in": [
+    "Your group, formed in this lecture, for the rest of the term: the 9-digit student numbers of all its members, your own included.",
+    "Every member of the group writes exactly the same list; the order does not matter. After the lecture I compare the lists of all members. If they are not the same, every member of the group loses one point of the end-of-lecture mark.",
+    "A group has four members. If the class does not divide into fours, the students left over join a group, which then has five members: write all five numbers.",
+    "meeting: the day, the time and the tool of your weekly one-hour online meeting from Week 4 on, for example 'Thursday 20:00, Discord'.",
+    "You may delete this block once you have read it; the checker ignores it."
+  ],
+  "group": ["", "", "", ""],
+  "meeting": ""
+}
