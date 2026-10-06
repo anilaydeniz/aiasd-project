@@ -1,22 +1,15 @@
 {
-  "_how_to_fill_this_in": [
-    "Two classmates you pitched your project to in the lab, in the role 'stakeholder'. Not yourself; not the same two as next week.",
-    "student_id: their 9-digit student number (ask them; do not guess).",
-    "what: one sentence on what they actually said — a question they asked, a feature they wanted, an objection. It is the evidence that the conversation happened; two numbers with nothing behind them earn neither of you anything.",
-    "Weak: 'Gave feedback.'  Strong: 'Asked what happens if two students book the same slot at the same second — added to UC1 as what can go wrong.'",
-    "Better still: say what you changed because of it. You may delete this block once you have read it; the checker ignores it."
-  ],
   "week": 2,
   "contributors": [
     {
-      "student_id": "",
+      "student_id": "220504024",
       "role": "stakeholder",
-      "what": ""
+      "what": "Asked what happens if an ingredient is spoiled before use; suggested adding an emergency manual waste logging option to the inventory."
     },
     {
-      "student_id": "",
+      "student_id": "220504031",
       "role": "stakeholder",
-      "what": ""
+      "what": "Asked whether wholesale supplier purchase order quantities could be edited before dispatch; confirmed managers can adjust order amounts in UC2."
     }
   ]
 }
