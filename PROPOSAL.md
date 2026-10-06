@@ -53,34 +53,86 @@ Mobile: React Native with Expo (hybrid, Android/iOS ready). Web: Streamlit (Pyth
 
 ## Part B — Why it is worth building (Week 3)
 
+<!--
+Part B is next week's work, together with the design. Read it now so you know where you
+are going; write it in Week 3. The same StudyRoom examples continue.
+-->
+
 ### 8. Market and target users (about 500 characters)
-Target users are independent restaurants, gastro-pubs, and specialty cafes serving between 150 and 400 daily covers across Istanbul's dense dining hubs (Kadıköy, Beşiktaş, Şişli). In Kadıköy alone, over 1,200 active commercial food businesses operate (TÜİK Food & Beverage Services, 2024). I interviewed 4 head chefs and 3 cafe managers in Caferağa: all 7 confirmed they track inventory manually using paper clipboards or unlinked Excel sheets, and 6 reported losing over 4,000 TL worth of spoiled fresh dairy and produce monthly due to unorganized batch rotation. Initial pilot rollout targets 10 independent dining establishments accessible through local culinary networks.
+<!--
+WHY: a product needs people who will actually use it. Knowing how many, and who, shapes
+every decision after this.
+WHAT: who exactly would use it; how many of them there are and how many you can reach; how
+you found out — a number you counted, a question you asked twenty classmates, a source you
+can name. Numbers with sources beat adjectives.
+WEAK:   "Millions of students worldwide need this app."
+STRONG: "About 3,000 students use the Atlas library each term (front desk, Oct 2026). I asked
+         25 classmates: 19 had walked to the study rooms and found none free at least once
+         this term; 21 said they would book on their phone. First users: this faculty's
+         second- and third-year students, reachable through the class groups."
+-->
 
 ### 9. Competitors (about 500 characters)
-1. Traditional paper clipboards and late-night WhatsApp messages — zero subscription cost, but causes severe stockout emergencies, leaves zero audit trail, and offers no automated procurement triggers.
-2. MarketMan — comprehensive enterprise restaurant inventory platform; powerful but costs $199/month per location, requires weeks of complex training, and overwhelms small-to-medium kitchens with bloated enterprise features.
-3. SambaPOS / Simpra inventory modules — integrated dining POS systems; focused primarily on front-of-house table billing and receipt printing, offering poor mobile usability for walk-in pantry receiving and zero automated supplier batch rotation.
+<!--
+WHY: every problem is already solved somehow — badly, by hand, or by someone else. Knowing
+how tells you what your product must do better.
+WHAT: three existing products or workarounds that solve the same problem today. A paper
+list, a spreadsheet or a WhatsApp group count. One or two lines each: name, what it does,
+what it costs, what is wrong with it for your users.
+WEAK:   "There are no competitors because this idea is new."
+STRONG: "1. The paper list at the front desk — free, but only visible inside the library and
+            full of no-shows.
+         2. LibCal (Springshare) — room booking used by many university libraries; paid,
+            the library would have to buy and run it.
+         3. A class WhatsApp group where students say which room they are in — free,
+            informal, nobody can reserve anything."
+-->
 
 ### 10. Comparison and your advantage (about 500 characters)
-| Criteria | Paper & WhatsApp | MarketMan | POS Add-on | KitchenOps |
-|---|:---:|:---:|:---:|:---:|
-| Mobile-first pantry usability | Poor | Fair | Poor | High |
-| Automated recipe stock depletion | No | Yes | Complex | Simple & fast |
-| FIFO perishable batch alerts | No | Yes | No | Yes |
-| Cost for independent kitchens | Free | $199/mo | $60/mo | $29/mo |
-
-KitchenOps provides an agile, mobile-first inventory workflow designed for fast back-of-house execution: chefs record dish batches in three seconds without navigating enterprise accounting labyrinths.
+<!--
+WHY: this is the argument for switching. Without it, the reader asks "why not just use X?"
+WHAT: a short table or list — your product against the three competitors on the three or
+four criteria that matter to the USER (not to you): cost, can I see it from home, can I
+reserve, what happens with no-shows. Then one sentence: why someone would switch to yours.
+WEAK:   "Our app is better than all competitors in every way."
+STRONG: a table with rows Paper list / LibCal / WhatsApp / StudyRoom and columns
+         "see from home", "reserve", "frees no-shows", "cost to the library" — then:
+         "StudyRoom is the only option that frees unused rooms automatically, and it costs
+         the library nothing to run."
+-->
 
 ### 11. Commercial potential (about 400 characters)
-KitchenOps operates on a B2B Software-as-a-Service (SaaS) monthly subscription tier. Independent cafes and casual restaurants pay $29 (or 950 TL) per month per location for unlimited recipe formulas, mobile dish logging, and automated supplier replenishment sheets. A commercial kitchen preventing a single case of spoiled cream or emergency retail meat purchase saves between 1,500 TL and 4,000 TL monthly, delivering immediate positive return on investment within the first two weeks of adoption.
+<!--
+WHY: someone has to pay for the server — or decide it is worth running for free.
+WHAT: how it would earn money or otherwise pay for itself: subscription, one-off price,
+free with a paid tier, an internal tool that saves cost, sponsorship. A rough price and
+why. A student project may be honest here: "no commercial intent; the value is X" is an
+acceptable answer if you argue it.
+WEAK:   "We will make money from ads."
+STRONG: "Free for students. Offered to other university libraries at about 50 € a month
+         per library, less than a paid booking system and with no set-up; hosting costs
+         about 7 € a month. Honest limit: a library may prefer a product with support."
+-->
 
-### 12. Technical risks (about 500 characters)
-1. Store review delays: Publishing on Google Play Store requires a $25 one-time developer registration fee and an initial review window of 3 to 5 business days; to mitigate this risk, binary production builds will be submitted in Week 8, with internal testing tracks starting in Week 6.
-2. Kitchen Wi-Fi dead zones: Thick concrete walk-in refrigerators frequently drop wireless signals; the mobile app utilizes local client-side caching to queue recipe dish logs and synchronize them automatically once connectivity resumes.
-3. Recipe yield variance: Line cook portioning drift is mitigated through a weekly variance reconciliation screen.
+### 12. Technical risks and how you will manage them (about 600 characters)
+<!--
+WHY: projects rarely fail on the code you know; they fail on the thing you did not plan for.
+WHAT: the three things most likely to stop the project from reaching the store by Week 11 —
+store review time, a device you do not own, an API you have never used, free hosting
+limits — and for each: what you will do in advance, and what the fallback is.
+The store you choose (S0) and why belongs here: name it, its fee, and its review or
+test-track time.
+WEAK:   "There are no major risks. We will work hard to finish on time."
+STRONG: "1. Store: Google Play, 25 $ once; new personal accounts need a closed test with 12
+            testers for 14 days, so the test track starts in Week 8, not Week 10. Fallback:
+            Huawei AppGallery (free, a few days' review).
+         2. QR check-in needs the camera: tested on my phone in Week 5; fallback, a
+            four-digit code on the door.
+         3. Free hosting sleeps after 15 minutes idle: first request slow; accepted, noted
+            in the success criteria."
+-->
 
 ---
 
 ## Change log
-- 2026-10-06 — §1–§7: initial proposal drafted for KitchenOps commercial kitchen inventory and restock logistics.
-- 2026-10-06 — §8–§12: market analysis, competitive positioning, and Google Play Store risk mitigation completed for Week 3.
+- 2026-10-06 — §4: added aggregate prep batch depletion mode and manager approval workflow based on peer review from 220504024 and 220504031.
