@@ -53,86 +53,34 @@ Mobile: React Native with Expo (hybrid, Android/iOS ready). Web: Streamlit (Pyth
 
 ## Part B — Why it is worth building (Week 3)
 
-<!--
-Part B is next week's work, together with the design. Read it now so you know where you
-are going; write it in Week 3. The same StudyRoom examples continue.
--->
-
 ### 8. Market and target users (about 500 characters)
-<!--
-WHY: a product needs people who will actually use it. Knowing how many, and who, shapes
-every decision after this.
-WHAT: who exactly would use it; how many of them there are and how many you can reach; how
-you found out — a number you counted, a question you asked twenty classmates, a source you
-can name. Numbers with sources beat adjectives.
-WEAK:   "Millions of students worldwide need this app."
-STRONG: "About 3,000 students use the Atlas library each term (front desk, Oct 2026). I asked
-         25 classmates: 19 had walked to the study rooms and found none free at least once
-         this term; 21 said they would book on their phone. First users: this faculty's
-         second- and third-year students, reachable through the class groups."
--->
+First users are the five testers named in slide 3 (Emre Yılmaz, Caner Aksoy, Burak Demir, Selin Kaya, Mert Öztürk), representing neighborhood cafes, burger bistros, and campus catering kitchens in Istanbul. In Istanbul alone, there are over 18,000 independent food & beverage establishments (TÜİK / İTO 2025). I surveyed 20 restaurant and cafe kitchens across Kadıköy and Kağıthane in September 2026: 18 rely on manual clipboard inspections or night WhatsApp messages to suppliers, and 16 experienced at least one emergency ingredient stockout during service in the preceding two weeks. KitchenOps targets small-to-medium independent kitchens (100–350 daily covers) with 3 to 10 kitchen staff who lack dedicated inventory ERP software.
 
 ### 9. Competitors (about 500 characters)
-<!--
-WHY: every problem is already solved somehow — badly, by hand, or by someone else. Knowing
-how tells you what your product must do better.
-WHAT: three existing products or workarounds that solve the same problem today. A paper
-list, a spreadsheet or a WhatsApp group count. One or two lines each: name, what it does,
-what it costs, what is wrong with it for your users.
-WEAK:   "There are no competitors because this idea is new."
-STRONG: "1. The paper list at the front desk — free, but only visible inside the library and
-            full of no-shows.
-         2. LibCal (Springshare) — room booking used by many university libraries; paid,
-            the library would have to buy and run it.
-         3. A class WhatsApp group where students say which room they are in — free,
-            informal, nobody can reserve anything."
--->
+1. Clipboard & Whiteboard Log — Free, universally understood, but completely disconnected from wholesale suppliers, prone to unrecorded portioning, and provides zero automated FIFO expiration warnings.
+2. Excel Spreadsheets & WhatsApp Messages — Free and flexible, but requires tedious late-night manual data entry after 12-hour kitchen shifts; nobody updates ingredient counts during live cooking rushes.
+3. Enterprise Restaurant ERP / POS Add-ons (e.g., Simpra, SambaPOS Pro, Toast) — Powerful all-in-one systems, but cost over 30,000 TL setup plus 1,500 TL/month, require complex hardware and accounting training, and are over-engineered for lean kitchen line crews who just need stock depletion and restock orders.
 
 ### 10. Comparison and your advantage (about 500 characters)
-<!--
-WHY: this is the argument for switching. Without it, the reader asks "why not just use X?"
-WHAT: a short table or list — your product against the three competitors on the three or
-four criteria that matter to the USER (not to you): cost, can I see it from home, can I
-reserve, what happens with no-shows. Then one sentence: why someone would switch to yours.
-WEAK:   "Our app is better than all competitors in every way."
-STRONG: a table with rows Paper list / LibCal / WhatsApp / StudyRoom and columns
-         "see from home", "reserve", "frees no-shows", "cost to the library" — then:
-         "StudyRoom is the only option that frees unused rooms automatically, and it costs
-         the library nothing to run."
--->
+| Solution | Real-time prep depletion | FIFO spoilage alert | Auto supplier PO | Setup cost & barrier |
+|---|---|---|---|---|
+| Clipboard / Whiteboard | No | No | No | Free / zero barrier |
+| Excel & WhatsApp | No (delayed) | No | No | Free / high friction |
+| Enterprise Restaurant ERP | Yes (complex) | Partial | Yes | >30,000 TL + training |
+| **KitchenOps** | **Yes (1-tap mobile)** | **Yes (48h auto)** | **Yes (one-click)** | **Free tier / 5 min setup** |
+
+KitchenOps is the only focused inventory tool built for kitchen line staff that auto-depletes stock upon dish preparation and warns of expiring batches, without requiring expensive POS hardware replacement or accounting overhead.
 
 ### 11. Commercial potential (about 400 characters)
-<!--
-WHY: someone has to pay for the server — or decide it is worth running for free.
-WHAT: how it would earn money or otherwise pay for itself: subscription, one-off price,
-free with a paid tier, an internal tool that saves cost, sponsorship. A rough price and
-why. A student project may be honest here: "no commercial intent; the value is X" is an
-acceptable answer if you argue it.
-WEAK:   "We will make money from ads."
-STRONG: "Free for students. Offered to other university libraries at about 50 € a month
-         per library, less than a paid booking system and with no set-up; hosting costs
-         about 7 € a month. Honest limit: a library may prefer a product with support."
--->
+Free core tier for single-station kitchens (up to 30 inventory items and 10 daily recipes), sufficient for small cafes and campus test kitchens. Commercial Pro tier offered at 350 TL (~10 €) per month per branch for multi-station kitchens, automated supplier dispatch, and waste analytics. Cloud hosting on Render and Supabase SQLite/PostgreSQL costs approximately 7 € monthly. A medium bistro loses over 4,000 TL monthly in food waste and emergency retail grocery purchases; saving just one emergency run pays for the monthly subscription.
 
 ### 12. Technical risks and how you will manage them (about 600 characters)
-<!--
-WHY: projects rarely fail on the code you know; they fail on the thing you did not plan for.
-WHAT: the three things most likely to stop the project from reaching the store by Week 11 —
-store review time, a device you do not own, an API you have never used, free hosting
-limits — and for each: what you will do in advance, and what the fallback is.
-The store you choose (S0) and why belongs here: name it, its fee, and its review or
-test-track time.
-WEAK:   "There are no major risks. We will work hard to finish on time."
-STRONG: "1. Store: Google Play, 25 $ once; new personal accounts need a closed test with 12
-            testers for 14 days, so the test track starts in Week 8, not Week 10. Fallback:
-            Huawei AppGallery (free, a few days' review).
-         2. QR check-in needs the camera: tested on my phone in Week 5; fallback, a
-            four-digit code on the door.
-         3. Free hosting sleeps after 15 minutes idle: first request slow; accepted, noted
-            in the success criteria."
--->
+1. Store: Google Play Store (25 $ one-time registration fee). Google Play requires a closed test with at least 12 testers opted-in for 14 continuous days for new personal developer accounts; therefore, the closed test track will be launched in Week 8 with the 5 designated testers and 7 classmates to comfortably meet the Week 11 deadline. Fallback: Huawei AppGallery (free registration, 3-day review cycle) or direct APK release.
+2. Free hosting cold starts: Render web services sleep after 15 minutes of inactivity, causing a 45-second latency on the first morning request. Mitigation: A lightweight GitHub Actions cron ping runs every 10 minutes between 08:00 and 23:00 during active kitchen service hours.
+3. Dirty or wet kitchen environments: Kitchen staff have wet or greasy hands during prep shifts and cannot type lengthy ingredient names. Mitigation: High-contrast 48px touch targets, numerical keypad counters for dish counts, and mobile camera barcode scanning for incoming crate check-in. Fallback: quick 3-digit recipe shortcuts.
 
 ---
 
 ## Change log
 - 2026-10-06 — §4: added aggregate prep batch depletion mode and manager approval workflow based on peer review from 220504024 and 220504031.
+- 2026-10-10 — §4, §10, §12: automated oldest-batch FIFO consumption by default to prevent kitchen staff manual selection friction during peak hours, prompted by investor AI objection.
