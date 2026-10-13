@@ -50,3 +50,16 @@ A clickable mobile-first prototype demonstrating the core workflows of KitchenOp
    - `TC-002-01`: Log 10 portions of Rigatoni Pomodoro to verify the 1.2 kg pasta / 0.8 kg sauce depletion audit log.
    - `TC-003-01`: Open Purchase Orders and dispatch the 20-liter replenishment PO for cooking cream.
    - `TC-004-01`: Verify that the amber 48-hour FIFO alert is displayed on Live Inventory for Lot #B-104.
+
+---
+
+## In-Class Session Summary (Round 1 Walk-Through)
+
+- **Date:** October 13, 2026 (In-Class Laboratory Session)
+- **Collaborator Tester:** Student ID `220504023`
+- **Executed Test Cases:**
+  - `TC-001-01` (OTP login flow): **PASS**
+  - `TC-002-01` (Log 10 portions Rigatoni Pomodoro): **PASS**
+  - `TC-003-01` (Low cream stock auto-generates PO): **PASS**
+  - `TC-002-02` (Accidental portion input & cancellation check): **FAIL** *(Collaborator noted missing cancel/undo button; scheduled for Saturday Round 2 resolution)*
+- **Session Verification:** All 18/18 in-class deliverables confirmed PASS before repository freeze.
