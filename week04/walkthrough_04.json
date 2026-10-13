@@ -1,20 +1,33 @@
 {
-  "_how_to_fill_this_in": [
-    "The record of the walk-through. Your collaborator runs your test cases on your prototype, and you write down what happened, one object per run.",
-    "tc: the test case id from week04/test_cases.json.",
-    "tester: the 9-digit student number of your collaborator, the same as in week04/group_04.json. Not you: you watch, and you do not help.",
-    "round: 1 for a run in the lecture; 2 for a re-run of a failed test case after you fixed it, online with your collaborator before Saturday.",
-    "result: 'pass' if your collaborator saw what 'expected' says; 'fail' if they did not; 'blocked' if it cannot be checked on a prototype (for example 'the code arrives within one minute', which needs the real server; it is checked on the real system from Week 5).",
-    "note: what your collaborator saw, as they told you, in one full sentence. It is required for 'fail' and 'blocked'; for 'pass', a few words are enough. A screen that does not exist yet is a 'fail'.",
-    "While your collaborator works on your laptop, note each run on paper and type the runs in here right after the turn. In the lecture your collaborator runs at least four of your test cases, and at least two of them belong to your main flow, not to the login. Every test case that fails in round 1 is run again in round 2 before Saturday, unless you dropped it (\"dropped\": true in test_cases.json, with a Change log line).",
-    "You write the notes yourself, by hand, in your own words. No assistant writes, translates or corrects them, not even for the grammar. Your English or Turkish is not graded; a person reads them.",
-    "Add as many objects as you need. You may delete this block once you have read it; the checker ignores it."
-  ],
   "week": 4,
   "runs": [
-    { "tc": "", "tester": "", "round": 1, "result": "", "note": "" },
-    { "tc": "", "tester": "", "round": 1, "result": "", "note": "" },
-    { "tc": "", "tester": "", "round": 1, "result": "", "note": "" },
-    { "tc": "", "tester": "", "round": 1, "result": "", "note": "" }
+    {
+      "tc": "TC-001-01",
+      "tester": "220504023",
+      "round": 1,
+      "result": "pass",
+      "note": "Giris ekraninda e-posta girip 1234 kodunu yazinca dogrudan panoya ulasti."
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "220504023",
+      "round": 1,
+      "result": "pass",
+      "note": "10 porsiyon makarna secildiginde stoktan 1.2 kg makarna ve 0.8 kg sos dusumunu dogru gosterdi."
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504023",
+      "round": 1,
+      "result": "pass",
+      "note": "Krema stogu kritik seviyeye dusunce 20 litrelik toptanci siparis fisi otomatik olusturuldu ve onaylandi."
+    },
+    {
+      "tc": "TC-002-02",
+      "tester": "220504023",
+      "round": 1,
+      "result": "fail",
+      "note": "Hatali porsiyon girisi sonrasinda veya islem onayindan once geri alma ve duzenleme secenegi bulunamadi."
+    }
   ]
 }
