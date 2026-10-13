@@ -38,3 +38,15 @@ A clickable mobile-first prototype demonstrating the core workflows of KitchenOp
 - **Automated Purchase Order:** `PO-2026-041` for `20.0 L` Cooking Cream (4 crates × 5L) to Wholesale Dairy & Produce Logistics Ltd.
 - **Expiring FIFO Batch:** Cooking Cream `Lot #B-104` expiring in `36 hours` (amber alert banner displayed)
 - **Inbound Goods Delivery:** `25 kg` All-Purpose Flour bag, Batch `LOT-FL-20261013`, expiry date `2027-04-15`
+
+---
+
+## Walk-Through Instructions for Testers
+
+1. **Open in Browser:** Double-click `index.html` to open in Chrome or Edge.
+2. **Device Viewport:** Press `F12`, click the mobile device simulation icon (`Ctrl+Shift+M` / `Cmd+Shift+M`), and set the viewport width to `390 px`.
+3. **Execute Test Cases:** Follow the step-by-step actions in `week04/test_cases.json`:
+   - `TC-001-01`: Enter `chef@kitchenops.internal` and code `1234` to access the main station dashboard.
+   - `TC-002-01`: Log 10 portions of Rigatoni Pomodoro to verify the 1.2 kg pasta / 0.8 kg sauce depletion audit log.
+   - `TC-003-01`: Open Purchase Orders and dispatch the 20-liter replenishment PO for cooking cream.
+   - `TC-004-01`: Verify that the amber 48-hour FIFO alert is displayed on Live Inventory for Lot #B-104.
