@@ -27,7 +27,7 @@
       "tester": "220504023",
       "round": 1,
       "result": "fail",
-      "note": "Hatali porsiyon girisi sonrasinda veya islem onayindan once geri alma ve duzenleme secenegi bulunamadi."
+      "note": "Porsiyon hatali girilirse veya vazgecilirse islemi geri alacak bir iptal veya duzenleme butonu bulunamadi."
     }
   ]
 }

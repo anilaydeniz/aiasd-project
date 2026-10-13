@@ -4,7 +4,7 @@
     {
       "student_id": "220504023",
       "role": "collaborator",
-      "what": "Hazırlanan yemek porsiyonunu yanlış girersem (örneğin 10 yerine 100) stoktan hemen düşüyor, onaylamadan önce geri alma veya düzeltme imkanı göremedim.",
+      "what": "Yemek porsiyonunu girip onaylayınca stoktan hemen düşüyor ama aşçı yanlışlıkla 10 yerine 100 yazarsa bunu iptal edip geri alacak hiçbir buton göremedim.",
       "accepted": null,
       "why": ""
     }
