@@ -105,7 +105,7 @@ Bundan iki sonuç çıkar:
 
 - **Google Play'in test kanalı kuralı, planlarsanız bir armağandır.** On dört gün boyunca
   on iki testçi, tam olarak sınıf arkadaşlarınızın testçi olduğu beta haftasıdır (9. Hafta)
-  ve o testçiler sizin `contributors_09.json` dosyanızdır. Kuralı ilk kez 10. Hafta'da
+  ve o testçileri 9. Hafta test raporunuzda listelersiniz. Kuralı ilk kez 10. Hafta'da
   duyarsanız felakettir. Kural yalnızca yeni *bireysel* hesaplara uygulanır.
 - **Google servislerine bağımlı olmayın.** Girişiniz *kendi* sunucunuzdan e-posta kodu ya
   da OTP ile yapılır; öyle kalsın, uygulamanız her mağazada çalışır. Harita ya da push

@@ -1,4 +1,4 @@
-# AIASD Projesi — Öğrenci Deposu
+# AIASD Projesi — Öğrenci Reposu
 
 **AI-Assisted Software Development · Atlas Üniversitesi · Güz 2026–2027**
 **Prof. Dr. Vedat Coşkun**
@@ -7,11 +7,11 @@
 
 ---
 
-## Bu depo nasıl kullanılır
+## Bu repo nasıl kullanılır
 
-Bu, 12 haftalık dersin tamamı için kişisel proje deponuzdur (depo, projenizin git
+Bu, 12 haftalık dersin tamamı için kişisel proje reponuzdur (repo, projenizin git
 tarafından izlenen klasörüdür; hem bilgisayarınızda hem GitHub'da durur). Onu 1. Hafta'da
-ders şablonundan (GitHub'ın sizin için kopyaladığı hazır bir depo) oluşturursunuz ve her
+ders şablonundan (GitHub'ın sizin için kopyaladığı hazır bir repo) oluşturursunuz ve her
 hafta ona commit edersiniz (commit, dosyalarınızın git tarafından kaydedilen bir anlık
 görüntüsüdür).
 
@@ -23,16 +23,16 @@ Dönem boyunca tek bir ürün yaparsınız ve o ürün sizindir: bir mobil istem
 istemcisi ve bir sunucu. Onu seçtiğiniz bir public mağazada yayınlarsınız ve dönem
 sonunda, o mağazadan yüklediğiniz uygulama üzerinden savunursunuz.
 
-Çoğu hafta ayrıca bir yapay zekâ günlüğü ister (o hafta bir yapay zekâ asistanını nasıl
+Çoğu hafta ayrıca bir yapay zeka günlüğü ister (o hafta bir yapay zeka asistanını nasıl
 kullandığınızın yazılı kaydı). Günlük, o haftanın klasörünün içindeki
 `weekNN/ai_log_NN.md` dosyasıdır.
 
 ### Şu an burada ne var, ne yok
 
-Şu anda bu depoda dönem boyunca burada kalan dosyalar ve `week01/` var. `week02/` klasörü
+Şu anda bu repoda dönem boyunca burada kalan dosyalar ve `week01/` var. `week02/` klasörü
 yok ve olmamalı, çünkü **her haftanın klasörünü, o haftanın ödevi söylediğinde siz
 oluşturursunuz.** Dosyayı doğru yere koymak işin parçasıdır. Yanlış yere koyduğunuzda
-denetleyici (her haftanın gerektirdiği dosyaları arayan otomatik betik; aşağıdaki
+denetleyici (her haftanın gerektirdiği dosyaları arayan otomatik script; aşağıdaki
 "Otomatik kontroller" bölümüne bakın) aradığı tam yolu adıyla söyler.
 
 Aşağıdaki dosyalar köktedir ve dönem boyunca orada kalır:
@@ -41,7 +41,7 @@ Aşağıdaki dosyalar köktedir ve dönem boyunca orada kalır:
 |---|---|
 | `app.py` | Bu dosya uygulamanızdır. Şimdilik boştur ve hafta hafta büyüyerek ürünün tamamı olur |
 | `week01/ASSIGNMENT_01_EN.md`, `_TR.md` | Bu dosyalar bu haftanın ne istediğini iki dilde söyler. Haftanın klasörüyle birlikte gelirler ve görevlerin yazılı olduğu tek yerdirler |
-| `week01/ai_log_01.md` | Bu dosya bu haftanın yapay zekâ günlüğüdür ve bu haftanın klasöründe durur. Her haftanın bir tane vardır ve haftayla birlikte gelir |
+| `week01/ai_log_01.md` | Bu dosya bu haftanın yapay zeka günlüğüdür ve bu haftanın klasöründe durur. Her haftanın bir tane vardır ve haftayla birlikte gelir |
 | `student.json` | Bu dosya kim olduğunuzu söyler. 1. Hafta'da bir kez doldurun |
 | `requirements.txt`, `weekNN/requirements.txt` | Bu dosyalar bağımlılıkları (uygulamanızın ihtiyaç duyduğu Python paketlerini) listeler. Hafta hafta gelirler |
 | `.github/` | Bu klasör her push'ta çalışan kontrolleri tutar |
@@ -74,10 +74,10 @@ bölündüğünü ve takıldığınızda ne deneyeceğinizi söyler.
 
 **1. Hafta'dan önce okuyun.** Üç ön okuma ve makale köktedir. Ön okumalar `AI_Doc2` AI
 Technical Background, `AI_Doc3` Development Environment and Tools ve `AI_Doc4` Working
-with AI Tools'dur. Makale ise `AI_Doc1`, Transformer makalesidir (bugünkü yapay zekâ
+with AI Tools'dur. Makale ise `AI_Doc1`, Transformer makalesidir (bugünkü yapay zeka
 asistanlarının arkasındaki araştırma makalesi). Ders, bu dört belgenin yirmi dakikalık
 özetidir. Sonraki okumalar aynı biçimde, sırayla numaralanmış olarak gelir. `AI_Doc5`
-Yazılım Geliştirmede Yapay Zekâyı Doğru Kullanmak, haftalık yapay zekâ günlüğünüzün
+Yazılım Geliştirmede Yapay Zekayı Doğru Kullanmak, haftalık yapay zeka günlüğünüzün
 istediği sekiz tekniği anlatır. 4. Hafta'dan itibaren her hafta bir teknik zorunludur ve
 bu belge final sınavında çıkar.
 
@@ -109,7 +109,7 @@ pip install -r weekNN/requirements.txt
 
 ## Kim olduğunuz — `student.json`
 
-Bu dosyayı 1. Hafta'da, depo kökünde doldurun:
+Bu dosyayı 1. Hafta'da, repo kökünde doldurun:
 
 ```json
 {
@@ -127,10 +127,10 @@ etmeden önce kontrol edin.
 
 **nickname** alanınız, her ders sonunda yansıtılan sınıf panosunda görünen addır; böylece
 kendi satırınızı bir bakışta bulursunuz. Harf, rakam, `-` ve `_` içerebilir ve 2–20
-karakter uzunluğunda olmalıdır. İstediğinizi seçin, ama Aralık'ta hâlâ tanıyacağınız bir
+karakter uzunluğunda olmalıdır. İstediğinizi seçin, ama Aralık'ta hala tanıyacağınız bir
 şey seçin.
 
-Ders sürerken bu depoyu **private** tutun, çünkü öğrenci numaranızı ve adınızı taşır.
+Ders sürerken bu repoyu **private** tutun, çünkü öğrenci numaranızı ve adınızı taşır.
 
 ---
 
@@ -141,34 +141,35 @@ yanında yeşil tik ya da kırmızı çarpı görürsünüz ve tam olarak hangi 
 olduğunu görebilirsiniz.
 
 **Açmanız gereken bir şey yok.** Denetleyici her çalıştığında derse hangi haftada
-olduğunu sorar; bu yüzden gördüğünüz her zaman size karşı çalıştırılan şeydir. Depo
+olduğunu sorar; bu yüzden gördüğünüz her zaman size karşı çalıştırılan şeydir. Repo
 kökündeki `CURRENT_WEEK_CACHE.txt` dosyası yalnızca o hafta numarasının önbelleğidir.
 Kendini günceller ve ona hiçbir zaman dokunmanız gerekmez.
 
-Çıktı iki parça hâlinde gelir, çünkü haftanın iki teslim anı vardır:
+Çıktı iki parça halinde gelir, çünkü haftanın iki teslim anı vardır:
 
 ```
 In the lab:     11 of 13 done
 By Saturday:     2 of  8 done
 ```
 
-**In the lab**, ders sonu anlık görüntüsünün okuduğu kısımdır (anlık görüntü, deponuzun
-o andaki hâlinin birebir kopyasıdır). Haftanın on puanının beşi bu kısımdandır. **By
+**In the lab**, ders sonu anlık görüntüsünün okuduğu kısımdır (anlık görüntü, reponuzun
+o andaki halinin birebir kopyasıdır). Haftanın on puanının beşi bu kısımdandır. **By
 Saturday** gerisidir, yani yazılar, diyagramlar ve `ai_log_NN.md`. İkinci gruptakiler
 hafta açıkken çalıştırmayı başarısız kılmaz, çünkü henüz teslim vakti gelmemiştir.
 Birinci gruptaki hiçbir şey evde yapmanız gereken bir şey değildir. (1. Hafta
 istisnadır: ilk dersin sonunda hiçbir şey okunmaz ve beş puanının tamamı Cumartesi
 okunur.)
 
-Haftalar birikimli denetlenir; yani 3. Hafta, 1 ve 2. Haftaları da yeniden denetler.
-Sonraki bir değişiklik eskiyi bozarsa bunu Aralık'ta değil CI'dan (GitHub'ın her push'ta
-çalıştırdığı otomatik kontroller) duymak istersiniz.
+Checker tek bir haftayı gösterir: içinde bulunulan haftayı. Listenin altındaki bir satır,
+önceki haftalarda kaç maddenin hala başarısız olduğunu söyler; böylece sonraki bir değişiklik
+eskiyi bozarsa bunu Aralık'ta değil hemen öğrenirsiniz. (GitHub'ın her push'ta çalıştırdığı
+otomatik kontroller, yani CI, aynı checker'ı çalıştırır ve o da içinde bulunulan haftaya bakar.)
 
-Tek bir haftaya bakmak için, örneğin 2. Hafta'nın hâlâ geçtiğini doğrulamak için şunu
-çalıştırın:
+Başka bir haftaya bakmak için, örneğin 2. Hafta'nın hala geçtiğini doğrulamak için, sonuna
+hafta numarasını ekleyin:
 
 ```bash
-AIASD_WEEK=2 python .github/check_deliverables.py
+python .github/check_deliverables.py 2
 ```
 
 Push etmeden önce kontrolleri yerelde (kendi bilgisayarınızda) çalıştırın:
@@ -177,22 +178,22 @@ Push etmeden önce kontrolleri yerelde (kendi bilgisayarınızda) çalıştırı
 python .github/check_deliverables.py
 ```
 
-Kırmızı çarpı bir not değildir. Hâlâ eksik olanların listesidir ve o listeyi teslimden
+Kırmızı çarpı bir not değildir. Hala eksik olanların listesidir ve o listeyi teslimden
 sonra değil Salı günü görmek çok daha iyidir.
 
 **Gizli anahtar taraması her push'ta, her hafta çalışır.** Gizli anahtar taraması
 dosyalarınızda şifre ve anahtar arar. Bir API anahtarı (bir programın sizin adınıza bir
-hizmeti kullanmasını sağlayan gizli bir dize) depoya ulaşırsa kontrol gürültüyle başarısız
+hizmeti kullanmasını sağlayan gizli bir dize) repoya ulaşırsa kontrol gürültüyle başarısız
 olur. Anahtarı kaldırın, hemen yenileyin (yani eski anahtarı iptal edip yenisini
 oluşturun) ve commit edilmiş bir anahtarın otomatik 10 puan kesinti olduğunu unutmayın.
 
 ---
 
-## Depo kuralları
+## Repo kuralları
 
 - **Her derste birkaç kez push edin** (en az üç), her seferinde yeni işle; ders dışında da **çalıştıkça birkaç kez commit edin**; her birinde biraz yeni iş olsun, bitmiş bir parça olması gerekmez. Cumartesi gecesi tek bir push yapıp başka bir şey yapmazsanız, bu size commit disiplini puanına mal olur.
 - O haftanın `ai_log_NN.md` dosyasını doldurun. Her haftanın bir tane vardır ve onu bir insan okur.
 - `.venv/`, `__pycache__/` ya da API anahtarlarını **commit etmeyin**.
-- Commit'ten önce `ruff check .` çalıştırın (`ruff`, Python kodundaki yaygın hataları bildiren bir araçtır). Yapay zekânın geride bırakma eğilimindeki kullanılmayan import'ları yakalar.
+- Commit'ten önce `ruff check .` çalıştırın (`ruff`, Python kodundaki yaygın hataları bildiren bir araçtır). Yapay zekanın geride bırakma eğilimindeki kullanılmayan import'ları yakalar.
 - Gizli değerler için `.env` (gizli değerleri tutan küçük bir dosya) kullanın ve onu `.gitignore` içinde (git'in asla commit etmemesi gereken dosyaların listesi) tutun.
 - Uygulamanız dizüstünde olduğu kadar telefonda da çalışmalı. Tarayıcı pencerenizi ara sıra ~390px'e daraltın. Bir şey kesiliyor ya da yana kayıyorsa sayfa küçükken düzeltin, 10. Hafta'da değil.

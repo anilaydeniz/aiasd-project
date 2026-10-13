@@ -1,0 +1,15 @@
+{
+  "_how_to_fill_this_in": [
+    "Your path to the store, one step at a time. This file stays in week04/ for the rest of the term, as requirements.json stays in week02/: you add the later steps to it in Weeks 6, 8, 9, 10 and 11.",
+    "store: the store that you named in PROPOSAL.md §12, written as 'Google Play', 'Huawei AppGallery', 'Samsung Galaxy Store' or 'Apple App Store'. If you change your mind, change it here and in §12, and add a line to the Change log.",
+    "S1 is your developer account, due this Saturday. Apply in the lecture or on the same day: the identity check takes from one day to a week, and no later step can start without it.",
+    "date: the day you applied, written as 2026-10-13.",
+    "developer_name: the developer name that the store will show under your app.",
+    "status: 'applied' while the store is still checking you, and 'verified' once it has accepted you. 'applied' is enough for this week; change it when the answer comes.",
+    "evidence: the file name of a screenshot of your developer console, or of your application, saved in week04/ (for example week04/store_s1.png). Cover your address, your ID number and any card details before you save it.",
+    "Never write a password, a card number or an ID number in this file or anywhere else in the repository.",
+    "You may delete this block once you have read it; the checker ignores it."
+  ],
+  "store": "",
+  "S1": { "date": "", "developer_name": "", "status": "", "evidence": "" }
+}

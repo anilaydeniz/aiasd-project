@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Log Prepared Dishes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-002, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Log Prep Dish</h1>
+    <a href="home.html" class="meta">Back</a>
+  </div>
+  <p>Select completed recipe and portion count to automatically deduct raw stock using calibrated Bill of Materials.</p>
+
+  <form id="prep-form" action="prep_success.html">
+    <label for="recipe">Recipe Selection</label>
+    <select id="recipe" required>
+      <option value="rigatoni" selected>Rigatoni Pomodoro (120g pasta, 80g sauce)</option>
+      <option value="chicken_cream">Creamy Chicken Pasta (140g pasta, 60ml cream)</option>
+      <option value="caesar">Caesar Salad (150g romaine, 40g dressing)</option>
+    </select>
+
+    <label for="portions">Completed Portions</label>
+    <input id="portions" type="number" min="1" max="100" value="10" required>
+    <p id="portions-error" class="error hidden">Please enter at least 1 portion.</p>
+
+    <div class="card" id="preview-box">
+      <strong>Calculated Raw Stock Depletion:</strong>
+      <div class="list" style="margin-top: 8px;">
+        <div class="item-row">
+          <span>Pasta (Rigatoni)</span>
+          <span style="color: #c53030; font-weight: 600;">-1.20 kg</span>
+        </div>
+        <div class="item-row">
+          <span>Tomato Sauce Base</span>
+          <span style="color: #c53030; font-weight: 600;">-0.80 kg</span>
+        </div>
+        <div class="item-row">
+          <span>FIFO Lot Source</span>
+          <span class="meta">Lot #P-201, Lot #S-108</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="button" type="submit">Confirm &amp; Deplete Stock</button>
+  </form>
+
+  <a class="button secondary" href="home.html">Cancel</a>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a href="inventory.html">Inventory</a>
+    <a class="active" href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+<script>
+  document.getElementById("prep-form").addEventListener("submit", function(e) {
+    var val = parseInt(document.getElementById("portions").value, 10);
+    if (!val || val < 1) {
+      e.preventDefault();
+      document.getElementById("portions-error").classList.remove("hidden");
+    }
+  });
+</script>
+</body>
+</html>

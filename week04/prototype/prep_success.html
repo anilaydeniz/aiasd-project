@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Stock Depleted</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-002, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Stock Depleted</h1>
+    <span class="badge success">Success</span>
+  </div>
+  <p>Raw ingredient quantities have been deducted from central walk-in inventory based on standard recipe portion ratios.</p>
+
+  <div class="card" style="border-color: #38a169; background: #f0fff4;">
+    <strong>Audit Log #TX-9042 Generated</strong>
+    <p class="meta" style="margin-top: 4px;">Recipe: Rigatoni Pomodoro · 10 portions</p>
+    <div class="list" style="margin-top: 10px;">
+      <div class="item-row">
+        <span>Pasta (Rigatoni)</span>
+        <span>14.5 kg → <strong>13.3 kg</strong> (-1.2 kg)</span>
+      </div>
+      <div class="item-row">
+        <span>Tomato Sauce Base</span>
+        <span>8.2 kg → <strong>7.4 kg</strong> (-0.8 kg)</span>
+      </div>
+      <div class="item-row">
+        <span>FIFO Rotation</span>
+        <span>Oldest Lot #P-201 depleted first</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list">
+    <a class="button" href="inventory.html">View Updated Inventory</a>
+    <a class="button secondary" href="prep.html">Log Another Dish</a>
+    <a class="button secondary" href="home.html">Return to Dashboard</a>
+  </div>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a href="inventory.html">Inventory</a>
+    <a class="active" href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>

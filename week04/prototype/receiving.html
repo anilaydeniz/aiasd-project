@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Goods Receiving</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-005, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Receive Delivery</h1>
+    <a href="home.html" class="meta">Dashboard</a>
+  </div>
+  <p>Record newly arrived wholesale ingredient crates with batch numbers and expiration dates for FIFO intake.</p>
+
+  <form action="inventory.html">
+    <label for="ing-select">Delivered Ingredient</label>
+    <select id="ing-select" required>
+      <option value="flour" selected>All-Purpose Flour (25 kg bag)</option>
+      <option value="cream">Cooking Cream 35% (4 × 5 L crate)</option>
+      <option value="pasta">Rigatoni Pasta (10 kg box)</option>
+    </select>
+
+    <label for="quantity">Received Quantity</label>
+    <input id="quantity" type="number" min="1" value="25" required>
+
+    <label for="batch-id">Batch / Lot Number</label>
+    <input id="batch-id" type="text" value="LOT-FL-20261013" required>
+
+    <label for="exp-date">Lot Expiry Date</label>
+    <input id="exp-date" type="date" value="2027-04-15" required>
+
+    <button class="button" type="submit">Verify &amp; Increment Stock</button>
+  </form>
+
+  <a class="button secondary" href="home.html">Cancel</a>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>

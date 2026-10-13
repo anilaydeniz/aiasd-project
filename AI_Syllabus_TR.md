@@ -7,13 +7,13 @@
 | | |
 |---|---|
 | **Ders Kodu** | 1413002043 |
-| **Ders Adı** | AI – Assisted Software Development (Yapay Zekâ Destekli Yazılım Geliştirme) |
+| **Ders Adı** | AI – Assisted Software Development (Yapay Zeka Destekli Yazılım Geliştirme) |
 | **Yıl ve Dönem** | 2026 – 2027 Güz |
 | **Öğretim Üyesi** | Prof. Dr. Vedat COŞKUN |
 
 ## Dersin Tanımı
 
-Öğrenciler yapay zekâyı yazılım geliştirme yaşam döngüsü boyunca disiplinli bir mühendislik aracı olarak kullanır. Her öğrenci dönem boyunca tek başına tek bir ürün geliştirir. Ürün bir mobil istemci, bir web istemcisi ve bir sunucudan oluşur; kullanıcılar e-postayla gönderilen bir kodla ya da OTP ile (tek kullanımlık şifre, yalnızca bir kez geçerli olan kısa bir kod) giriş yapar. Ürün ayrıca projenin kendisi hakkındaki soruları yanıtlayan bir sohbet botu içerir ve bu sohbet botu açık ağırlıklı modellerle (ağırlıkları yayımlanmış, dolayısıyla öğrencinin kendi bilgisayarında çalıştırabildiği yapay zekâ modelleri) çalışır. Öğrenci ürünü public bir uygulama mağazasında yayınlar: Google Play, Huawei AppGallery, Samsung Galaxy Store ya da Apple App Store. Uygulama native (platformun kendi dilinde yazılmış) ya da hybrid (bir kez yazılıp iki platform için derlenen) olabilir; bu seçim öğrencinindir.
+Öğrenciler yapay zekayı yazılım geliştirme yaşam döngüsü boyunca disiplinli bir mühendislik aracı olarak kullanır. Her öğrenci dönem boyunca tek başına tek bir ürün geliştirir. Ürün bir mobil istemci, bir web istemcisi ve bir sunucudan oluşur; kullanıcılar e-postayla gönderilen bir kodla ya da OTP ile (tek kullanımlık şifre, yalnızca bir kez geçerli olan kısa bir kod) giriş yapar. Ürün ayrıca projenin kendisi hakkındaki soruları yanıtlayan bir sohbet botu içerir ve bu sohbet botu açık ağırlıklı modellerle (ağırlıkları yayımlanmış, dolayısıyla öğrencinin kendi bilgisayarında çalıştırabildiği yapay zeka modelleri) çalışır. Öğrenci ürünü public bir uygulama mağazasında yayınlar: Google Play, Huawei AppGallery, Samsung Galaxy Store ya da Apple App Store. Uygulama native (platformun kendi dilinde yazılmış) ya da hybrid (bir kez yazılıp iki platform için derlenen) olabilir; bu seçim öğrencinindir.
 
 Ders, üretimi değil değerlendirmeyi notlandırır: asistanın ne ürettiğini değil, öğrencinin onu ne kadar iyi tanımladığını, denetlediğini, düzelttiğini ve hesabını verdiğini notlar. Her haftanın işi, öğrencinin ders şablonundan (GitHub'ın öğrenci için kopyaladığı hazır bir repo) oluşturduğu kendi GitHub reposuna push edilir ve her push'ta otomatik olarak denetlenir.
 
@@ -27,7 +27,7 @@ Dersi tamamlayan öğrenci:
 4. **Full-stack uygulama geliştirir.** Öğrenci e-posta kodu ya da OTP ile giriş yapılan bir sunucu, bir web istemcisi ve bir mobil istemci geliştirir; aynı özellik üç katmanda birden çalışır (5. ve 8. Hafta).
 5. **Mobil uygulama geliştirir.** Öğrenci mobil istemciyi Flutter, React Native–Expo, Kotlin ya da Swift ile geliştirir; istemci telefonda çalışır ve mağazaya hazırdır (7–8. Hafta).
 6. **Açık ağırlıklı modellerle sohbet botu kurar.** Öğrenci, Ollama (açık ağırlıklı modelleri yerelde çalıştıran bir program) üzerinde Qwen modeli ve BGE-M3 gömmeleriyle (metnin, benzer parçaların bulunmasını sağlayan sayısal gösterimleri) projenin kendi belgeleri üzerinden getirme destekli bir sohbet botu (önce bir belge kümesindeki ilgili parçaları bulan, sonra onlardan yanıt veren sohbet botu) kurar, chat endpoint'ini yazar ve istemcilere entegre eder (6–7. Hafta).
-7. **Yapay zekâ asistanlarını mühendislik aracı olarak kullanır.** Öğrenci asistana istem yazar, çıktısını doğrular ve düzeltir, hatalarını kanıtla haftalık yapay zekâ günlüğünde belgeler ve asistanı kendi işinin düşman gözden geçireni olarak kullanır. Ders üretileni değil değerlendirmeyi notlar (her hafta).
+7. **Yapay zeka asistanlarını mühendislik aracı olarak kullanır.** Öğrenci asistana istem yazar, çıktısını doğrular ve düzeltir, hatalarını kanıtla haftalık yapay zeka günlüğünde belgeler ve asistanı kendi işinin düşman gözden geçireni olarak kullanır. Ders üretileni değil değerlendirmeyi notlar (her hafta).
 8. **Sürüm kontrolü ve sürekli entegrasyon uygular.** Öğrenci günlük küçük commit'ler yapar, GitHub'da otomatik kontrollerin çalışmasını sağlar, kod kalitesini ruff ile (Python kodundaki stil ve hata sorunlarını bildiren bir araç) korur ve parola gibi gizli anahtarları repo dışında tutar (her hafta; CI, yani sürekli entegrasyon, 7. Hafta'dan).
 9. **Formal test süreçleri yürütür.** Öğrenci birim ve entegrasyon testleri yazar, kayıtlı testçilerle beta test yapar, hata listesi tutar, test raporu yazar ve gerçek kullanıcılarla Kullanıcı Kabul Testi (gerçek kullanıcıların ürünü deneyip ihtiyaçlarını karşılayıp karşılamadığını söylediği bir oturum) yürütür (7. ve 9–10. Hafta).
 10. **Uygulamayı mağazada yayınlar.** Öğrenci S0–S6 izini izler: mağazayı seçer, geliştirici hesabı açar, uygulama kaydını oluşturur, test kanalına bir build yükler, testçi kaydeder, uygulamayı incelemeye gönderir, inceleme düzeltmelerini uygular ve yayınlar (3–11. Hafta).
@@ -38,7 +38,7 @@ Dersi tamamlayan öğrenci:
 
 Ders şablonu ve haftalık ödevler github.com/vedatcoskun-course/aiasd-template adresindedir. Her haftanın `ASSIGNMENT_NN` dosyası orada İngilizce ve Türkçe olarak bulunur; `AI_SETUP_CARD`, `AI_WEEKLY_WORKFLOW_STUDENT` ve `AI_SKELETON` köktedir.
 
-1. Hafta'nın ön okuması Vaswani vd., "Attention Is All You Need" (2017) makalesi ve dört ders belgesidir: AI Technical Background; Development Environment and Tools; Working with AI Tools; ve Yazılım Geliştirmede Yapay Zekâyı Doğru Kullanmak (`AI_Doc5`; haftalık yapay zekâ günlüğünün istediği sekiz tekniği anlatır ve sınav kapsamındadır). 2. Hafta için öğrenciler iki tam SDLC belge seti (bir sınav salonu tahsis sistemi; simülatörlü bir asansör denetleyicisi) ile Platforms and Stores el kitabını okur.
+1. Hafta'nın ön okuması Vaswani vd., "Attention Is All You Need" (2017) makalesi ve dört ders belgesidir: AI Technical Background; Development Environment and Tools; Working with AI Tools; ve Yazılım Geliştirmede Yapay Zekayı Doğru Kullanmak (`AI_Doc5`; haftalık yapay zeka günlüğünün istediği sekiz tekniği anlatır ve sınav kapsamındadır). 2. Hafta için öğrenciler iki tam SDLC belge seti (bir sınav salonu tahsis sistemi; simülatörlü bir asansör denetleyicisi) ile Platforms and Stores el kitabını okur.
 
 Araçlar: Python 3.12, Git/GitHub, VS Code, Streamlit, açık ağırlıklı bir modelle Ollama, öğrencinin seçtiği iki sohbet asistanı (ücretsiz katman) ve bir mobil çatı (Flutter / React Native–Expo / Kotlin / Swift). Öğrenciler her hafta kendi dizüstü bilgisayarlarını getirir.
 
@@ -46,10 +46,10 @@ Araçlar: Python 3.12, Git/GitHub, VS Code, Streamlit, açık ağırlıklı bir 
 
 | Kalem | Puan | Açıklama |
 |---|---|---|
-| Haftalık Projeler | 60 | 12 hafta × 10 puan, 60'a ölçeklenir. Her hafta 5 puan dersin sonunda, 5 puan Cumartesi 23:59'da repodan okunur (1. Hafta 5 puandır ve tamamı Cumartesi okunur). Otomatik kontroller derste 5, Cumartesi 2 puan verir; öğretim üyesi yapay zekâ günlüğü (2) ve commit disiplini (1; her hafta değerlendirilir: derste farklı zamanlarda birkaç push (en az üç), her birinde yeni iş, ders dışında iş ilerledikçe yapılmış, her birinde biraz yeni iş olan birkaç commit (bir commit'in bitmiş bir parça olması gerekmez); şüpheli bir durumda önceki haftalara da bakılır) puanlarını verir. Kaçırılan ders için telafi yoktur. |
+| Haftalık Projeler | 60 | 12 hafta × 10 puan, 60'a ölçeklenir. Her hafta 5 puan dersin sonunda, 5 puan Cumartesi 23:59'da repodan okunur (1. Hafta 5 puandır ve tamamı Cumartesi okunur). Otomatik kontroller derste 5, Cumartesi 2 puan verir; öğretim üyesi yapay zeka günlüğü (2) ve commit disiplini (1; her hafta değerlendirilir: derste farklı zamanlarda birkaç push (en az üç), her birinde yeni iş, ders dışında iş ilerledikçe yapılmış, her birinde biraz yeni iş olan birkaç commit (bir commit'in bitmiş bir parça olması gerekmez); şüpheli bir durumda önceki haftalara da bakılır) puanlarını verir. Kaçırılan ders için telafi yoktur. |
 | Mağaza Bonusu | 15 | Yayın bonusu. Mağaza izi S0–S6 (öğrenci mağazayı seçer, geliştirici hesabı açar, uygulama kaydını oluşturur, test kanalına build yükler, testçi kaydeder, uygulamayı gönderir ve uygulama canlıya çıkar) her adımın teslim haftasında adım adım notlandırılır. O hafta yardım eden sınıf arkadaşları (katkıcılar) öğrencinin notundan pay kazanır. |
 | Sunum | 15 | 13–14. Haftalarda proje savunması. Öğrenci uygulamayı sınav yapanın önünde mağazadan yükler ve koddaki ve belgelerdeki kararlar hakkındaki soruları yanıtlar. Uygulama geliştirme makinesinden değil, mağaza build'inden çalıştırılır. |
-| Final Sınavı | 40 | Üniversitenin sınav döneminde yazılı final sınavı. SDLC belgelerini, yapay zekâ günlüğü pratiğini ve on iki haftanın teknik içeriğini kapsar. |
+| Final Sınavı | 40 | Üniversitenin sınav döneminde yazılı final sınavı. SDLC belgelerini, yapay zeka günlüğü pratiğini ve on iki haftanın teknik içeriğini kapsar. |
 
 ## Sınıf İçi Kurallar
 
@@ -57,7 +57,7 @@ Araçlar: Python 3.12, Git/GitHub, VS Code, Streamlit, açık ağırlıklı bir 
 - Ders sırasında konuşmaları en aza indirin. Uzun ya da dersi bozan tartışmalara izin verilmez. Bu kuralı ihlal eden öğrenciden yer değiştirmesi ya da salondan ayrılması istenir.
 - Ders sırasında telefon görüşmesi, kısa mesaj, anlık mesaj, e-posta ve genel web gezintisine izin verilmez. Bilgisayarlar yalnızca dersin materyalini izlemek için kullanılabilir.
 - Ders sırasında ses ya da görüntü kaydı kesinlikle yasaktır.
-- Her türlü kopya ve akademik sahtekârlık, ilgili yasal kurallara göre işlem görür.
+- Her türlü kopya ve akademik sahtekarlık, ilgili yasal kurallara göre işlem görür.
 
 ## Ders Planı
 

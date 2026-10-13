@@ -5,7 +5,7 @@
 **Sürüm 1 · 20 Eylül 2026** — bu belge dönem içinde yenilenir. Her haftanın dosyalarını
 çektiğinizde onlarla birlikte gelir ("çekmek" ya da "pull yapmak", git'e GitHub'daki
 en yeni dosyaları bilgisayarınızdaki kopyaya indirmesini söylemek demektir); dolayısıyla
-pull yapmayı sürdürdüğünüz sürece deponuzdaki (depo, projenizin git tarafından takip
+pull yapmayı sürdürdüğünüz sürece reponuzdaki (repo, projenizin git tarafından takip
 edilen klasörüdür; hem bilgisayarınızda hem GitHub'da bulunur) kopya günceldir.
 
 > [!IMPORTANT]
@@ -28,24 +28,24 @@ Takıldığınızda buraya dönün.
 |------|-------------|--------|
 | Dersten önce | `weekNN/ASSIGNMENT_NN_TR.md` dosyasını okuyun | — |
 | Ders sırasında (3 saat) | Çalışın ve sık push edin (push, bilgisayarınızda kaydettiğiniz işi GitHub'a gönderir) | — |
-| Ders sonunda | Son bir push yapın; hemen ardından anlık görüntü alırım (anlık görüntü, deponuzun o andaki hâlinin birebir kopyasıdır) | 5 |
+| Ders sonunda | Son bir push yapın; hemen ardından anlık görüntü alırım (anlık görüntü, reponuzun o andaki halinin birebir kopyasıdır) | 5 |
 | Dersten sonra | Kalanı bitirin ve `ai_log_NN.md` dosyasını yazın | — |
-| Cumartesi 23:59'a kadar | **Yeniden push edin.** Deponuzun ikinci bir anlık görüntüsünü alırım | 5 |
+| Cumartesi 23:59'a kadar | **Yeniden push edin.** Reponuzun ikinci bir anlık görüntüsünü alırım | 5 |
 
 Her hafta on puan değerindedir ve bu puan iki ana eşit bölünür: **beşi dersin sonunda,
 beşi Cumartesi teslim saatinde ölçülür.** İki yarı da GitHub'dan okunur, dolayısıyla
-ikisi de push ister (push, bilgisayarınızdaki commit'leri GitHub'daki deponuza gönderen
+ikisi de push ister (push, bilgisayarınızdaki commit'leri GitHub'daki reponuza gönderen
 `git push` komutudur). **1. Hafta tek istisnadır:** beş puan değerindedir, ilk dersin
-sonunda hiçbir şey okunmaz ve beşinin tamamı Cumartesi 23:59'da deponuzdan okunur.
+sonunda hiçbir şey okunmaz ve beşinin tamamı Cumartesi 23:59'da reponuzdan okunur.
 Bitmiş ama push edilmemiş iş, hiç yapılmamış işle tamamen aynı puanı alır.
 
 Haftanın notunun yarısının derse bağlı olması bilinçlidir. İşin yeri derstir:
-sınıftasınızdır ve hâlâ soru sorabilirsiniz. Diğer yarısı, haftanın işini bitirmeye ve
-bir denetleyicinin (her haftanın istediği dosyaları arayan otomatik betik; nasıl
+sınıftasınızdır ve hala soru sorabilirsiniz. Diğer yarısı, haftanın işini bitirmeye ve
+bir denetleyicinin (her haftanın istediği dosyaları arayan otomatik script; nasıl
 çalıştırılacağını §2 gösterir) göremeyeceği iki şeye dayanır. O iki şeyi §3 anlatır.
 
 **Teslim saati her hafta aynıdır: Cumartesi 23:59.** Hesaplanacak bir şey yoktur, çünkü
-Cumartesi gece yarısı deponuzda ne varsa onu notlandırırım. İşin çoğu, soru
+Cumartesi gece yarısı reponuzda ne varsa onu notlandırırım. İşin çoğu, soru
 sorabileceğiniz laboratuvarda yapılmalıdır; dersten sonraki günler başlamak için değil,
 açıkları kapatmak içindir.
 
@@ -54,7 +54,7 @@ açıkları kapatmak içindir.
 ## Bir kez, bir daha asla
 
 İlk ders başlamadan önce üç şeyin doğru olması gerekir ve hiçbiri dersin içeriğinin bir
-parçası değildir: (a) bir GitHub hesabınız vardır, (b) deponuz vardır ve (c) o depoya
+parçası değildir: (a) bir GitHub hesabınız vardır, (b) reponuz vardır ve (c) o repoya
 push etmesine izin verilen bir bilgisayarınız vardır. Gerekli komutlar
 [**Kurulum Kartı**](AI_SETUP_CARD_TR.md)'ndadır. Kartta dört adım vardır ve son adım,
 diğer üçünün çalışıp çalışmadığını söyler.
@@ -78,14 +78,14 @@ haftanın tam olarak hangi dosyaları istediğini listeler.
 
 ### Hangi yarıda çalıştığınızı bilin
 
-Deponuzun kökünden (projenizin en üst klasörü, yani `.github` klasörünü içeren klasör)
+Reponuzun kökünden (projenizin en üst klasörü, yani `.github` klasörünü içeren klasör)
 çalıştırın:
 
 ```bash
 python .github/check_deliverables.py
 ```
 
-İki parça hâlinde yanıt verir:
+İki parça halinde yanıt verir:
 
 ```
 In the lab:     11 of 14 done
@@ -100,7 +100,7 @@ Bu maddeler, benimle ve aynı yerde takılmış, diyelim, yirmi dokuz kişiyle a
 yapmaya değer şeylerdir.
 
 **By Saturday** haftanın geri kalanıdır: yazılar, diyagramlar ve `ai_log_NN.md` (yapay
-zekâ asistanıyla yaptığınız işin haftalık günlüğü; §3 açıklar).
+zeka asistanıyla yaptığınız işin haftalık günlüğü; §3 açıklar).
 Bu, gerçekten yalnız yaptığınız iştir. Hafta içinde kontrolü başarısız kılmaz, çünkü
 henüz teslim vakti gelmemiştir; ama notun diğer yarısıdır ve Cumartesi anlık görüntüsü
 onu okur.
@@ -110,7 +110,7 @@ demektir.
 
 ### Çalışın ve sık push edin
 
-Her şeyi sonda tek devasa yığın hâlinde commit etmek yerine iş ilerledikçe commit edin
+Her şeyi sonda tek devasa yığın halinde commit etmek yerine iş ilerledikçe commit edin
 (commit, git geçmişinde `git commit` ile kaydedilen tek bir adımdır). Her commit'in
 mesajı ne yaptığınızı söylemelidir:
 
@@ -125,7 +125,7 @@ böyle mesajlar size commit hijyeni puanına (§3'te anlatılan commit disiplini
 olur.
 
 **10:00'da, 11:00'de ve dersin sonunda (11:45) push edin**; bu, iş hangi durumda olursa olsun her
-derste en az üç push demektir. 10:00'da ve 11:00'de sınıf tablosuna (her öğrencinin deposunun
+derste en az üç push demektir. 10:00'da ve 11:00'de sınıf tablosuna (her öğrencinin reposunun
 ne durumda olduğunu gösteren, perdeye yansıtılan tablo) bakıp herkesin nerede olduğunu
 görürüm; dersin puanını belirleyen push, dersin sonundaki (11:45) push'tur. Push etmek hiçbir şeye mal
 olmaz ve push edilmiş yarım bir bölüm, push edilmemiş bitmiş bir bölümden daha değerlidir.
@@ -143,25 +143,25 @@ listeler. Bir not değil, yapılacaklar listesidir ve çalıştırmanın maliyet
 
 ### Ders bitmeden bir kez daha push edin
 
-Son push dersin sonundadır (11:45). Hemen ardından her depoyu olduğu gibi dondururum (bir anlık görüntü,
-yani deponun o andaki hâlinin birebir kopyasını alırım) ve kontrolleri o anlık görüntü
+Son push dersin sonundadır (11:45). Hemen ardından her repoyu olduğu gibi dondururum (bir anlık görüntü,
+yani reponun o andaki halinin birebir kopyasını alırım) ve kontrolleri o anlık görüntü
 üzerinde çalıştırırım. Push etmediğiniz iş görünmezdir: bilgisayarınızda durur ve
 sayılmaz.
 
 Sonuç anonimleştirilmiş bir tablo (kimsenin gerçek adının görünmediği bir tablo) olarak
-yansıtılır; satırınızı `student.json` (deponuzda bilgilerinizi, seçtiğiniz takma ad
-dâhil, tutan dosya) içindeki takma adınızla bulun. O tablo **5 puan — haftanın yarısı**
+yansıtılır; satırınızı `student.json` (reponuzda bilgilerinizi, seçtiğiniz takma ad
+dahil, tutan dosya) içindeki takma adınızla bulun. O tablo **5 puan — haftanın yarısı**
 değerindedir.
 
 Bir öğrenci bir bilgisayarda, bir GitHub hesabıyla çalışır. Bir sınıf arkadaşınızın
 bilgisayarında ya da onun GitHub oturumunda yapılan iş, ders için hiçbir puan getirmez.
 
 **Commit disiplini (haftada 1 puan) her hafta değerlendirilir.** Derste farklı
-zamanlarda birkaç push (en az üç) ararım; her birinde yeni iş olmalı. Ders dışında tek oturuşta çalışabilirsiniz; baktığım şey,
+zamanlarda birkaç push (en az üç) ararım; her birinde yeni iş olmalı. Ders dışında tek oturumda çalışabilirsiniz; baktığım şey,
 çalıştıkça yapılmış, her birinde biraz yeni iş ve ne değiştiğini söyleyen bir mesaj olan
 birkaç commit'tir. Bir commit'in bitmiş bir parça olması gerekmez. Üç soru sorarım: iş adım adım mı büyümüş, bir commit'ten
-diğerine gerçek bir ilerleme var mı, metin üzerinde çalışılmış mı yoksa bitmiş hâlde mi
-yapıştırılmış? Hafta sonunda tek bir commit ya da tek parça hâlinde gelen metin puan
+diğerine gerçek bir ilerleme var mı, metin üzerinde çalışılmış mı yoksa bitmiş halde mi
+yapıştırılmış? Hafta sonunda tek bir commit ya da tek parça halinde gelen metin puan
 getirmez. Bir haftada şüpheli bir durum görürsem karar vermeden önce önceki haftalarınıza
 da bakarım. Ayrıca herhangi bir derste size projeniz hakkında iki dakikalık bir soru
 sorabilirim. Her hafta çalıştıkça commit edin; gerisi kendiliğinden hallolur.
@@ -199,7 +199,7 @@ belgelerle birlikte gelir ve siz doldurursunuz. Hangi asistanı kullandığını
 yaptığını, neyi düzeltmek zorunda kaldığınızı ve ne öğrendiğinizi yazarsınız. **Kendiniz,
 kendi cümlelerinizle yazarsınız**: Kanıt bloğu dışında asistan kullanılmaz, dili düzeltmek
 için bile. İngilizceniz ya da Türkçeniz notlanmaz; asistanın yazdığı bir günlük, ne kadar
-düzgün olursa olsun 2 puanın en çok 1'ini alır.
+düzgün olursa olsun 4. haftadan itibaren 0 alır (1–3. haftalarda 2 puanın en çok 1'ini alıyordu).
 
 **Evidence bloğu zorunludur.** Gerçek yazışmayı iddianızın altına, kod bloğunun (üçer
 ters tırnaktan oluşan iki satır arasındaki blok) içine yapıştırın: gönderdiğiniz istemi
@@ -207,7 +207,7 @@ ve aldığınız yanlış yanıtı. Konuşmanın tamamını yapıştırmayın; h
 yapıştırın, bu da genellikle kısa bir kesittir, diyelim on–on beş satır. Evidence bloğu
 boş olan bir iddia hiçbir şey kazandırmaz.
 
-Bu neden zorunlu? Herkes "yapay zekâ hata yaptı, ben düzelttim" yazabilir. Gerçek bir
+Bu neden zorunlu? Herkes "yapay zeka hata yaptı, ben düzelttim" yazabilir. Gerçek bir
 model çıktısını inandırıcı biçimde uydurmak zordur, çünkü uydurma transkriptler fazla
 temiz okunur ve hataları fazlasıyla kolay fark edilir. Ve uzun bir konuşmanın hangi
 kısmının kanıt sayılacağını seçmek, değerlendirilen becerinin ta kendisidir.
@@ -227,7 +227,7 @@ git commit -m "week01: llm_notes written up"
 git push
 ```
 
-GitHub'da deponuzun **Actions** sekmesi her push'un sonucunu gösterir: GitHub her push'tan
+GitHub'da reponuzun **Actions** sekmesi her push'un sonucunu gösterir: GitHub her push'tan
 sonra aynı kontrolleri çalıştırır ve bu otomatik çalıştırmaya CI (sürekli entegrasyon)
 denir. Cumartesi durumunuzdaki yeşil tik **2 puan** değerindedir.
 
@@ -242,34 +242,35 @@ olmalıdır. Projenin kendisi (problemi ve ürünü) 3. Hafta dersinin sonunda (
 satırlık bir gerekçeyle bırakılan bir gereksinim hiçbir şeye mal olmaz. Mühendislik
 böyle görünür.
 
-**İnsan katkısı — 2 puan.** Bu, bu haftanın işini yalnızca modellerin değil, insanların
-da yaptığının kanıtıdır. Kendi payınız `weekNN/ai_log_NN.md` içinde görünür: somut bir
-yapay zekâ hatası, yapıştırılmış kanıt ve elle değiştirdiğiniz şey; bu iki puan o günlük
-için ödenir. 2. Hafta'dan itibaren her hafta en çok iki sınıf arkadaşınız, ödevin
-adlandırdığı rolde (örneğin paydaş, tasarım gözden geçireni ya da testçi olarak) size
-yardım edebilir ve onları `weekNN/contributors_NN.json` içine, her biri için ne yaptığını
-söyleyen bir cümle ve o işin kanıtıyla birlikte kaydedersiniz; kanıt, onların notları,
-hata listeleri ya da günlüğünüzdeki tarihli bir paragraf olabilir. 2. Hafta'da katkıcı
-zorunlu değildir: sıfır, bir ya da iki kişi; yalnız çalışmak size hiçbir şeye mal olmaz.
-3. Hafta'dan itibaren zorunludur: derste sizi değerlendiren üç kişi, 4. Hafta'dan
-itibaren de grubunuzun üç üyesi her hafta dosyada yer almalıdır. Listelediğiniz kişi
-gerçek olmalıdır; arkasında hiçbir şey olmayan isimler bir listedir, kanıt değil, ve kanıt
-olmadan katkıcı bonusu ödenmez.
+**İnsan katkısı — 2 puan.** Bu, bu haftanın işini yalnızca modellerin değil, insanların da
+yaptığının kanıtıdır. Kendi payınız `weekNN/ai_log_NN.md` içinde görünür: somut bir yapay
+zeka hatası, yapıştırılmış kanıt ve elle değiştirdiğiniz şey; bu iki puan o günlük için
+ödenir. Size yardım eden sınıf arkadaşları da kaydedilir: her biri için ne yaptığını
+söyleyen bir cümle ve o işin kanıtı; kanıt, onların notları, hata listeleri ya da
+günlüğünüzdeki tarihli bir paragraf olabilir. 2. Hafta'da en çok iki sınıf arkadaşınız
+paydaş olarak yardım edebilir ve `week02/contributors_02.json` içine kaydedilir; zorunlu
+değildir, yalnız çalışmak size hiçbir şeye mal olmaz. 3. Hafta'da derste sizi
+değerlendiren üç kişi `week03/contributors_03.json` içine kaydedilir. 4. Hafta'dan
+itibaren size yardım edenler grubunuzdur ve ödevin adlandırdığı rolde (örneğin testçi ya
+da tasarım gözden geçireni olarak) her hafta `weekNN/group_NN.json` içine kaydedilir.
+Listelediğiniz kişi gerçek olmalıdır; arkasında hiçbir şey olmayan isimler bir listedir,
+kanıt değil, ve kanıt olmadan katkıcı bonusu ödenmez.
 
-**4. Hafta'dan itibaren katkıcılarınız grubunuzdur.** 3. Hafta'da dört kişilik grubunuzu
-kendiniz kurarsınız ve o grup dönem boyunca birlikte kalır. Her hafta, ders ile Cumartesi
-arasında, dördünüz **bir saat çevrimiçi** buluşursunuz: her kişi o hafta projesinde neyin
-değiştiğini anlatır ve diğer üçü ne düşündüğünü söyler. `weekNN/contributors_NN.json`
-içindeki üç kaydınız bu üç kişidir; her biri için ne söylediğini, alıntı olarak, ve
-bunun üzerine sizin ne yaptığınızı yazarsınız. Orada olmayan biri için o kayıtları kimse
-yazamaz.
+**4. Hafta'dan itibaren grubunuz `weekNN/group_NN.json` içindedir.** 3. Hafta'da dört
+kişilik grubunuzu kendiniz kurarsınız (sınıf dörde bölünmüyorsa beş kişilik) ve o grup
+dönem boyunca birlikte kalır. Her hafta, ders ile Cumartesi arasında, grubunuz **bir saat
+çevrimiçi** buluşur: her kişi o hafta projesinde neyin değiştiğini anlatır ve diğerleri ne
+düşündüğünü söyler. Her hafta `weekNN/group_NN.json` dosyasında grubunuzun diğer her üyesi
+için bir kayıt vardır; her biri için ne söylediğini, alıntı olarak, ve bunun üzerine sizin
+ne yaptığınızı yazarsınız. Grubunuz siz ve bu üyelerdir ve grubun her üyesinin dosyası
+aynı grubu göstermelidir. Orada olmayan biri için o kayıtları kimse yazamaz.
 
 **Katkıcılar bonus kazanır.** Size yardım eden bir sınıf arkadaşı o haftaki notunuzun
 %10'unu kazanır; bu, haftada en fazla üç katkı için geçerlidir. Siz onlara yardım
 ettiğinizde de aynısı sizin için geçerlidir. 2. Hafta'da isimler sizin seçiminizdir;
 3. Hafta'dan itibaren grubunuzdur. 1. Hafta'da katkıcı yoktur.
 
-Bir LLM (büyük dil modeli; yapay zekâ asistanlarının arkasındaki model türü) bir ödevin
+Bir LLM (büyük dil modeli; yapay zeka asistanlarının arkasındaki model türü) bir ödevin
 istediği her dosyayı üretebilir. Yapamadığı şey, o dosyaları çevresindeki on haftayla
 tutarlı kılmak ya da kendi hatalarını sizin yerinize fark etmektir. Asıl değerlendirilen
 budur.
@@ -282,7 +283,7 @@ budur.
 kullanmasını sağlayan, parolaya benzer gizli bir dizgidir.) Anahtar `.env` içinde yaşar
 (yalnızca kendi bilgisayarınızın okuduğu küçük bir ayar dosyası) ve `.env`,
 `.gitignore` içinde listelenir (git'e hangi dosyaların asla commit edilmeyeceğini
-söyleyen dosya). Bir anahtar depoya ulaşırsa otomatik tarama
+söyleyen dosya). Bir anahtar repoya ulaşırsa otomatik tarama
 onu yakalar ve **10 puan** kaybedersiniz. Anahtar bir kez push edildiyse silmek yetmez,
 çünkü git geçmişinde kalır. O anahtarı iptal edip yenisini almanız gerekir.
 
@@ -295,7 +296,7 @@ ruff check . --fix    # otomatik düzeltilebilenleri düzelt
 ruff format .         # biçimlendir
 ```
 
-Yapay zekâ üretimi kod sık sık arkasında kullanılmayan import bırakır (import satırı,
+Yapay zeka üretimi kod sık sık arkasında kullanılmayan import bırakır (import satırı,
 kodun hiç kullanmadığı bir modülü yükleyen satırdır); `ruff` bunları anında yakalar.
 
 **Uygulamanız telefonda çalışmalı.** Tarayıcı pencerenizi ara sıra yaklaşık 390 piksele
@@ -324,7 +325,7 @@ farklı `ruff` sürümleri çalıştırıyordur. Elinizde hangisi varsa onu değ
 `requirements.txt` dosyasında (haftanın ihtiyaç duyduğu paketlerin, tam sürümleriyle
 birlikte listesi) sabitlenmiş sürümü kurun.
 
-**Ollama çalışmıyor / model inmiyor.** (Ollama, bir yapay zekâ modelini kendi
+**Ollama çalışmıyor / model inmiyor.** (Ollama, bir yapay zeka modelini kendi
 bilgisayarınızda çalıştıran programdır.) Daha küçük bir modele geçin. Hiçbiri
 çalışmıyorsa bulut arka ucunu (bir sağlayıcının sunucularında çalışan ve internet
 üzerinden ulaştığınız bir model) kullanın ve nedenini `model_notes.md` içine yazın; bu
@@ -338,7 +339,7 @@ git diff                    # şu an ne değişti
 git checkout -- file.py     # bir dosyayı son commit'e döndür
 ```
 
-**Hâlâ takıldınız mı?** Derste sorun ya da bir yapay zekâya sorun. Bir yapay zekâya
+**Hala takıldınız mı?** Derste sorun ya da bir yapay zekaya sorun. Bir yapay zekaya
 sorarsanız söylediğini doğrulayın ve yazışmayı `ai_log_NN.md` içine kaydedin. Bu ders
 tam olarak bununla ilgilidir.
 
@@ -349,7 +350,7 @@ tam olarak bununla ilgilidir.
 ```bash
 # çalışırken
 python .github/check_deliverables.py     # neyin eksik olduğunu göster
-AIASD_WEEK=2 python .github/check_deliverables.py   # istersen yalnızca bir hafta
+python .github/check_deliverables.py 2   # istersen başka bir hafta
 ruff check . --fix                       # kodu temizle
 git add . && git commit -m "weekNN: ..." && git push
 

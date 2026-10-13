@@ -1,0 +1,119 @@
+{
+  "project": "KitchenOps — commercial kitchen inventory depletion and smart restock logistics",
+  "test_cases": [
+    {
+      "id": "TC-001-01",
+      "req": "REQ-001",
+      "title": "Log in with the 4-digit code sent to e-mail",
+      "precondition": "none",
+      "steps": [
+        "Open the application at index.html",
+        "Enter chef@kitchenops.internal in the email field and tap Send code",
+        "On the code screen, enter 1234 and tap Log in"
+      ],
+      "expected": "The KitchenOps dashboard screen opens successfully with no password requested."
+    },
+    {
+      "id": "TC-001-02",
+      "req": "REQ-001",
+      "title": "A wrong login code is refused with an error message",
+      "precondition": "A 4-digit code has been requested for chef@kitchenops.internal",
+      "steps": [
+        "On the code verification screen, enter 0000 in the code field",
+        "Tap Log in"
+      ],
+      "expected": "The error message 'Wrong code. Check the e-mail and try again.' appears and the user remains on the code screen."
+    },
+    {
+      "id": "TC-002-01",
+      "req": "REQ-002",
+      "title": "Log 10 portions of Rigatoni Pomodoro to deplete raw ingredients",
+      "precondition": "Logged into KitchenOps on home.html",
+      "steps": [
+        "Tap 'Log Prepared Dishes' on the dashboard",
+        "Select 'Rigatoni Pomodoro (120g pasta, 80g sauce)' as the recipe",
+        "Enter 10 in the completed portions field",
+        "Tap 'Confirm & Deplete Stock'"
+      ],
+      "expected": "The confirmation screen opens displaying Audit Log #TX-9042 with 1.2 kg pasta and 0.8 kg tomato sauce deducted from stock."
+    },
+    {
+      "id": "TC-002-02",
+      "req": "REQ-002",
+      "title": "Submitting invalid portion count of zero is prevented",
+      "precondition": "On the prep.html screen",
+      "steps": [
+        "Select 'Rigatoni Pomodoro' as the recipe",
+        "Enter 0 in the completed portions field",
+        "Tap 'Confirm & Deplete Stock'"
+      ],
+      "expected": "The form prevents submission and displays 'Please enter at least 1 portion' without depleting stock."
+    },
+    {
+      "id": "TC-003-01",
+      "req": "REQ-003",
+      "title": "Stock dropping below safety threshold generates automated supplier PO",
+      "precondition": "Cooking cream stock is at 3.5 L, which is below the 5.0 L safety threshold",
+      "steps": [
+        "Open 'Orders' from the navigation tabs or dashboard alert",
+        "Inspect pending purchase order PO-2026-041",
+        "Tap 'Dispatch Purchase Order'"
+      ],
+      "expected": "The order screen displays a 20.0-liter replenishment entry for cooking cream and dispatches PO-2026-041 to Wholesale Dairy."
+    },
+    {
+      "id": "TC-003-02",
+      "req": "REQ-003",
+      "title": "Stock above safety threshold does not trigger unneeded purchase order",
+      "precondition": "Pasta inventory is healthy at 13.3 kg with safety threshold set to 5.0 kg",
+      "steps": [
+        "Open 'Live Inventory' from the navigation tabs",
+        "Verify pasta stock level and active status badge"
+      ],
+      "expected": "Pasta is tagged with green 'In Stock' badge and no pending replenishment draft appears for pasta."
+    },
+    {
+      "id": "TC-004-01",
+      "req": "REQ-004",
+      "title": "Perishable batch expiring within 48 hours displays amber alert banner",
+      "precondition": "Cooking Cream batch #B-104 expires in 36 hours",
+      "steps": [
+        "Open 'Live Inventory' from the navigation tabs"
+      ],
+      "expected": "An amber alert box displays 'FIFO Alert (48h Spoilage Window): Lot #B-104 expires on Oct 14' with priority rotation label."
+    },
+    {
+      "id": "TC-004-02",
+      "req": "REQ-004",
+      "title": "Oldest unexpired batch is prioritized for recipe depletion over newer batch",
+      "precondition": "Pasta has two batches in storage: Lot #P-201 (arrived Oct 01) and Lot #P-208 (arrived Oct 10)",
+      "steps": [
+        "Open 'Log Prep Dish' and view the FIFO lot source preview card for Rigatoni Pomodoro"
+      ],
+      "expected": "The preview explicitly attributes depletion to the older Lot #P-201 in accordance with FIFO rules."
+    },
+    {
+      "id": "TC-005-01",
+      "req": "REQ-005",
+      "title": "Record inbound wholesale delivery of 25kg flour into inventory",
+      "precondition": "Logged into KitchenOps",
+      "steps": [
+        "Tap 'Receive Inbound Deliveries' from dashboard or inventory",
+        "Select 'All-Purpose Flour (25 kg bag)' as the delivered ingredient",
+        "Verify quantity 25, batch LOT-FL-20261013, and expiry date 2027-04-15",
+        "Tap 'Verify & Increment Stock'"
+      ],
+      "expected": "The inventory screen opens confirming the newly received flour batch is added to active stock."
+    },
+    {
+      "id": "TC-006-01",
+      "req": "REQ-006",
+      "title": "Every screen fits a mobile phone viewport 390 px wide",
+      "precondition": "Browser phone simulation view is set to 390 px width",
+      "steps": [
+        "Navigate sequentially through index.html, code.html, home.html, prep.html, prep_success.html, inventory.html, order.html, order_success.html, and receiving.html"
+      ],
+      "expected": "No screen displays horizontal scrollbars, text is fully legible, and interactive buttons are comfortably accessible."
+    }
+  ]
+}

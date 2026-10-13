@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Purchase Orders</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-003, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Purchase Orders</h1>
+    <span class="badge warning">1 Auto-Draft</span>
+  </div>
+  <p>Automated replenishment orders generated when ingredient stocks drop below safety thresholds.</p>
+
+  <div class="card" style="border-left: 4px solid #dd6b20;">
+    <div class="row">
+      <strong>PO-2026-041 (Wholesale Dairy)</strong>
+      <span class="badge danger">Urgent</span>
+    </div>
+    <p class="meta" style="margin-top: 4px;">Triggered by: Cooking Cream dropping below 5.0 L threshold</p>
+
+    <div class="list" style="margin-top: 10px;">
+      <div class="item-row">
+        <span>Cooking Cream 35%</span>
+        <strong>20.0 Liters</strong>
+      </div>
+      <div class="item-row">
+        <span>Current Stock Level</span>
+        <span class="meta">3.5 L (Deficit: -1.5 L)</span>
+      </div>
+      <div class="item-row">
+        <span>Recommended Batch</span>
+        <span class="meta">4 crates × 5L container</span>
+      </div>
+      <div class="item-row">
+        <span>Estimated Cost</span>
+        <span>€76.00</span>
+      </div>
+    </div>
+  </div>
+
+  <form action="order_success.html">
+    <button class="button" type="submit">Dispatch Purchase Order</button>
+  </form>
+
+  <a class="button secondary" href="inventory.html">Back to Inventory</a>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="prep.html">Prep</a>
+    <a class="active" href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>

@@ -204,8 +204,7 @@ You write one file per week, inside that week's folder, so Week 1 has
 week folder, and you fill it in. You write which assistant you used, what it got right,
 what you had to correct, and what you learned. **You write it yourself, in your own
 words**: outside the Evidence block no assistant is used, not even to correct the
-language. Your English or Turkish is not graded; a log written by an assistant earns at
-most 1 of the 2 points, however polished it is.
+language. Your English or Turkish is not graded; a log written by an assistant earns 0 points from Week 4 on, however polished it is (in Weeks 1–3 it earned at most 1 of the 2).
 
 **The Evidence block is required.** Paste the actual exchange under your claim, inside
 the code fence (the block between two lines of three backticks): the prompt you sent and
@@ -249,26 +248,28 @@ after that, only its details change. A requirement
 that is silently abandoned costs the mark; a requirement that is dropped with a one-line
 justification in `ai_log_NN.md` costs nothing. That is what engineering looks like.
 
-**Human involvement — 2 points.** This is proof that people, and not only models, did
-this week's work. Your own part is shown in `weekNN/ai_log_NN.md`: a concrete AI error,
-the pasted evidence, and what you changed by hand; these two points are paid for that
-log. From Week 2, up to two classmates may help you each week in the role that the
-assignment names (for example as stakeholder, as design reviewer or as tester), and you
-record them in `weekNN/contributors_NN.json` with one sentence each on what they did,
-plus evidence of that work; the evidence can be their notes, their bug list, or a dated
-paragraph in your log. In Week 2 contributors are optional: none, one or two, and
-working alone costs you nothing. From Week 3 they are not optional: your three
-reviewers in the lecture, and from Week 4 the three members of your group, must appear
-in the file every week. Whatever you list must be real; names and nothing behind them
-is a list, not evidence, and without evidence the contributors' bonus is not paid.
+**Human involvement — 2 points.** This is proof that people, and not only models, did this
+week's work. Your own part is shown in `weekNN/ai_log_NN.md`: a concrete AI error, the
+pasted evidence, and what you changed by hand; these two points are paid for that log. The
+classmates who help you are recorded too, each with one sentence on what they did, plus
+evidence of that work; the evidence can be their notes, their bug list, or a dated
+paragraph in your log. In Week 2, up to two classmates may help you as stakeholders,
+recorded in `week02/contributors_02.json`; they are optional, and working alone costs you
+nothing. In Week 3 your three reviewers in the lecture are recorded in
+`week03/contributors_03.json`. From Week 4 the people who help you are your group,
+recorded every week in `weekNN/group_NN.json` in the role that the assignment names (for
+example as tester or as design reviewer). Whatever you list must be real; names and
+nothing behind them is a list, not evidence, and without evidence the contributors' bonus
+is not paid.
 
-**From Week 4 your contributors are your group.** In Week 3 you form a group of four
-yourselves, and that group stays together for the term. Every week, between the lecture and
-Saturday, the four of you meet **online for one hour**: each person presents what changed
-in their project that week, and the other three say what they think. Your three entries
-in `weekNN/contributors_NN.json` are those three people; for each one, you write what
-they said, as a quotation, and what you did about it. Nobody can write those entries for
-someone who was not there.
+**From Week 4 your group is in `weekNN/group_NN.json`.** In Week 3 you form a group of
+four yourselves (five when the class does not divide by four), and that group stays
+together for the term. Every week, between the lecture and Saturday, your group meets
+**online for one hour**: each person presents what changed in their project that week, and
+the others say what they think. Every week, `weekNN/group_NN.json` has one entry for every
+other member of your group; for each one, you write what they said, as a quotation, and
+what you did about it. Your group is you and these members, and every member's file must
+show the same group. Nobody can write those entries for someone who was not there.
 
 **Contributors earn a bonus.** A classmate who helps you earns 10% of your mark for that
 week, for at most three contributions a week; the same applies to you when you help
@@ -356,7 +357,7 @@ about.
 ```bash
 # while working
 python .github/check_deliverables.py     # show me what is missing
-AIASD_WEEK=2 python .github/check_deliverables.py   # just one week, if you want
+python .github/check_deliverables.py 2   # another week, if you want
 ruff check . --fix                       # clean the code
 git add . && git commit -m "weekNN: ..." && git push
 

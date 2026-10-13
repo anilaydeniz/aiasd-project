@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-002, REQ-004, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>KitchenOps</h1>
+    <span class="badge success">Station Online</span>
+  </div>
+  <p class="meta">Central Prep Kitchen · Shift: Lunch Prep</p>
+
+  <div class="alert-box danger">
+    <strong>Attention Required:</strong> Cooking cream (3.5L) is below the 5L safety threshold. Fresh dairy lot #B-104 expires in 36 hours.
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <strong>Active Pantry Summary</strong>
+      <a href="inventory.html" class="meta">View all</a>
+    </div>
+    <div class="list" style="margin-top: 10px;">
+      <div class="item-row">
+        <span>Pasta (Rigatoni)</span>
+        <strong>14.5 kg</strong>
+      </div>
+      <div class="item-row">
+        <span>Tomato Sauce Base</span>
+        <strong>8.2 kg</strong>
+      </div>
+      <div class="item-row">
+        <span>Cooking Cream</span>
+        <span class="badge danger">3.5 L (Low)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list">
+    <a class="button" href="prep.html">Log Prepared Dishes</a>
+    <a class="button secondary" href="inventory.html">Live Inventory &amp; FIFO Alerts</a>
+    <a class="button secondary" href="order.html">Review Purchase Orders (1 pending)</a>
+    <a class="button secondary" href="receiving.html">Receive Inbound Deliveries</a>
+  </div>
+
+  <nav class="tabs">
+    <a class="active" href="home.html">Dashboard</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>

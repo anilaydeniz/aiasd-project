@@ -58,7 +58,7 @@ The techniques operate inside the weekly routine you already know: the checker b
 every push; the pushes at 10:00, 11:00 and at the end of the lecture (11:45), and the freeze that follows; the Saturday
 23:59 deadline; the ids in your `requirements.json`; the Change log at the end of
 `PROPOSAL.md`; your group of four and its one-hour online meeting between the lecture and
-Saturday; and `weekNN/contributors_NN.json`. None of the techniques asks for a new file or
+Saturday; and `weekNN/group_NN.json` (`contributors_NN.json` in Weeks 2–3). None of the techniques asks for a new file or
 a new habit. They specify what should go into the files you already push.
 
 ### Where the assistant sits in the twelve weeks
@@ -166,9 +166,9 @@ check into §9."*
 and which one you refuted and with what evidence.
 
 **In this course.** You have two hostile reviewers every week, and their comments go into
-different files. The three people in your group of four hear you in the weekly online
+different files. The other members of your group hear you in the weekly online
 meeting; their sentences, quoted, together with your `accepted: true/false` and `why`, go
-into `weekNN/contributors_NN.json`. The assistant's objections go into `ai_log_NN.md`. Put
+into `weekNN/group_NN.json`. The assistant's objections go into `ai_log_NN.md`. Put
 the two side by side. Where the assistant and your group disagree, the people are usually
 right about *your* users and the assistant is usually right about the market or the
 technology; say which is the case, and why, in the `why` field. In Week 3 the reviewers
@@ -289,7 +289,7 @@ you found it.
 
 **In this course.** Week 8 is the week in which the project's own core feature runs on all
 three tiers (server, web and mobile), and the end-of-session check reads all three. Bring
-the mismatch you found to the group meeting: the other three members have the same three
+the mismatch you found to the group meeting: the other members have the same three
 tiers and usually the same class of mistake.
 
 ---
@@ -340,11 +340,11 @@ that matter, and it shows the error rather than describing it. A log with no evi
 nothing, however long it is.
 
 **The people in the loop.** The assistant is not your only reviewer, and it must not become
-the only one. Every week, between the lecture and Saturday, your group of four meets
-online for one hour: each member shows what has changed, and the other three say what they
+the only one. Every week, between the lecture and Saturday, your group meets
+online for one hour: each member shows what has changed, and the others say what they
 think. Bring that week's assistant error to the meeting; the question "Did it fool you
-too?" is the fastest cross-check available. The three entries in
-`weekNN/contributors_NN.json` are those three people, quoted; the assistant has no entry
+too?" is the fastest cross-check available. The entries in
+`weekNN/group_NN.json` are those people, quoted; the assistant has no entry
 there. One student, one computer, one GitHub account: a log written on a classmate's
 machine is not yours. Questions to me are sent as an issue in your own repository, which I
 read on Sundays.
@@ -364,7 +364,7 @@ Read generated code for what it *sends* and what it *stores*, not only for what 
 returns.
 
 **Personal data.** The five people on slide 3, your testers' names and e-mail addresses in
-Week 9, and the student numbers in `contributors_NN.json` must never be placed in a prompt
+Week 9, and the student numbers in `contributors_NN.json` and `group_NN.json` must never be placed in a prompt
 to a hosted assistant. Describe the person ("a second-year classmate who works in the
 evenings"); do not paste the person. Ollama on your own laptop (Week 6) is the one place
 such data may go, because it does not leave the machine. The rule you already follow for
@@ -400,7 +400,7 @@ The log also carries two further rules:
   `ai_log_NN.md` outside the Evidence block is written by you, in your own words, and
   the assistant is not used even to improve the language. Your English or Turkish is
   not graded; a log in plain, imperfect sentences earns full marks, a log written by an
-  assistant about itself earns at most 1. The Evidence block is the one place where the
+  assistant earns 0 from Week 4 on (at most 1 in Weeks 1–3). The Evidence block is the one place where the
   assistant's words belong, pasted exactly as it wrote them.
 
 ---
@@ -425,7 +425,7 @@ Any other technique is welcome in any week in addition to the compulsory one. Th
 `ai_log_NN.md` scaffold names its technique at the top, and the week's `ASSIGNMENT_NN`
 refers to this document. The two human-marked points of every week, the AI log, are read
 against this table: the technique of the week, applied, with the evidence pasted. The
-group meeting and the contributors file are read alongside it.
+group meeting and `group_NN.json` are read alongside it.
 
 ---
 

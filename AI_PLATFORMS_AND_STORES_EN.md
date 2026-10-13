@@ -103,7 +103,7 @@ Two consequences follow:
 
 - **Google Play's test-track rule is a gift if you plan for it.** Twelve testers for
   fourteen days is exactly the beta week (Week 9) with your classmates as testers, and
-  those testers are your `contributors_09.json`. It is a disaster if you first hear of
+  you list those testers in your Week 9 test report. It is a disaster if you first hear of
   the rule in Week 10. The rule applies to new *personal* accounts only.
 - **Do not depend on Google services.** Your login is by e-mail code or OTP from *your*
   server; keep it that way, and your app runs on every store. If you need maps or push

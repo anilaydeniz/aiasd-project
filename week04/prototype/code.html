@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enter the code</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-001, REQ-006 -->
+<main class="phone">
+  <h1>Enter the code</h1>
+  <p>We sent a 4-digit code to your e-mail address. It is valid for 10 minutes.</p>
+  <p class="note">Prototype: the code is always 1234.</p>
+  <form id="code-form">
+    <label for="code">Code</label>
+    <input id="code" inputmode="numeric" maxlength="4" required>
+    <p id="wrong" class="error hidden">Wrong code. Check the e-mail and try again.</p>
+    <button class="button" type="submit">Log in</button>
+  </form>
+  <a class="button secondary" href="index.html">Send a new code</a>
+</main>
+<script>
+  // A prototype has no server, so the right code is fixed: a tester can try both paths.
+  document.getElementById("code-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    if (document.getElementById("code").value === "1234") {
+      window.location.href = "home.html";
+    } else {
+      document.getElementById("wrong").classList.remove("hidden");
+    }
+  });
+</script>
+</body>
+</html>

@@ -9,8 +9,8 @@ sayfadadır.
 
 ## Bir kez, 1. Hafta'dan önce
 
-**1 · Deponuzu oluşturun.** Ders şablonunda (GitHub'ın sizin için kopyaladığı hazır bir
-depo) **Use this template → Create a new repository** düğmesine tıklayın. Adını
+**1 · Reponuzu oluşturun.** Ders şablonunda (GitHub'ın sizin için kopyaladığı hazır bir
+repo) **Use this template → Create a new repository** düğmesine tıklayın. Adını
 `aiasd-project` koyun. **Private** yapın, çünkü form Public seçili açılır. Sonra
 **Settings → Collaborators → Add people** bölümüne gidin ve `VedatCOSKUN` ekleyin.
 
@@ -85,17 +85,17 @@ olduğunuzda kullanacağınız elle yapma yolunu anlatır.
 
 ## İki remote, birbirinden çok farklı iki komut
 
-Deponuzda `origin` adlı bir remote vardır (remote, deponuzun başka bir bilgisayardaki
+Reponuzda `origin` adlı bir remote vardır (remote, reponuzun başka bir bilgisayardaki
 kopyasının adresidir) ve `origin`, GitHub'daki kendi kopyanızdır. Bazı haftalar ders
 şablonundan size bir başlangıç klasörü de verilir; bunun için `template` adlı ikinci bir
 remote eklersiniz. Bu iki remote birbirinin yerine geçmez.
 
 | | |
 |---|---|
-| `git pull` | Bu komut `origin`'den, yani kendi deponuzdan çeker; örneğin başka bir makinede çalıştıktan ya da tarayıcıda bir dosyayı düzenledikten sonra. Normal, günlük ve güvenlidir. |
+| `git pull` | Bu komut `origin`'den, yani kendi reponuzdan çeker; örneğin başka bir makinede çalıştıktan ya da tarayıcıda bir dosyayı düzenledikten sonra. Normal, günlük ve güvenlidir. |
 | `git pull template main` | **Bu komutu asla çalıştırmayın.** |
 
-Şablon, sizinkiyle ortak geçmişi olmayan ayrı bir depodur, çünkü kopyanız ondan
+Şablon, sizinkiyle ortak geçmişi olmayan ayrı bir repodur, çünkü kopyanız ondan
 oluşturuldu, klonlanmadı. İkisini birleştirmek (birleştirmek, git'ten iki geçmişi tek
 geçmişte toplamasını istemektir) git'in her dosyayı aynı anda uzlaştırmaya kalkmasına yol
 açar: doldurduğunuz `student.json` boş olanla, bitirdiğiniz `hello.py` iskeletle ve
@@ -123,7 +123,7 @@ yazarlar.
 
 | Gördüğünüz | Anlamı |
 |---|---|
-| `Authentication failed`<br>`could not read Username for 'https://github.com'` | GitHub kim olduğunuzu bilmiyor. `gh auth login` çalıştırın. Hâlâ olmuyorsa `gh auth status` çalıştırın, çünkü yanlış hesapla girmiş olabilirsiniz. |
+| `Authentication failed`<br>`could not read Username for 'https://github.com'` | GitHub kim olduğunuzu bilmiyor. `gh auth login` çalıştırın. Hala olmuyorsa `gh auth status` çalıştırın, çünkü yanlış hesapla girmiş olabilirsiniz. |
 | `Support for password authentication was removed` | Bunun nedeni aynıdır. GitHub şifreniz burada kullanılamaz ve yeniden yazmak işe yaramaz. |
 | `! [rejected] main -> main (fetch first)` | GitHub'da sizde olmayan bir commit var; genellikle tarayıcıda bir dosyayı düzenlediğiniz için. `git pull --rebase` çalıştırın, sonra yeniden push edin. |
 | `nothing to commit, working tree clean` | Git bir değişiklik görmüyor. Ya editör kaydetmedi ya da yanlış klasördesiniz. `pwd` çalıştırın ve yazdığı klasöre bakın. |
@@ -135,9 +135,9 @@ yazarlar.
 
 ---
 
-**Hâlâ takıldınız mı?** Bir yapay zekâ asistanına sorun, ama özellikle git kimlik
+**Hala takıldınız mı?** Bir yapay zeka asistanına sorun, ama özellikle git kimlik
 doğrulaması konusunda kuşkucu olun. Kimlik doğrulama 2021'de değişti ve internetin çoğu
-hâlâ eski yolu anlatıyor. Size GitHub şifrenizi kullanmanız ya da `git config credential.helper store` çalıştırmanız söyleniyorsa o tavsiye eskimiştir. Görmezden gelin
+hala eski yolu anlatıyor. Size GitHub şifrenizi kullanmanız ya da `git config credential.helper store` çalıştırmanız söyleniyorsa o tavsiye eskimiştir. Görmezden gelin
 ve bu karta dönün.
 
 Haftalık rutinin tamamı

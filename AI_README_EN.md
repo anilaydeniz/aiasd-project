@@ -158,14 +158,15 @@ week is still open, because they are not due yet. Nothing in the first group is
 something that you should be doing at home. (Week 1 is the exception: nothing is read
 at the end of the first lecture, and all five of its points are read on Saturday.)
 
-Weeks are checked cumulatively, which means that Week 3 also re-checks Weeks 1 and 2.
-If a later change breaks something earlier, you want to hear about it from CI (the
-automatic checks that GitHub runs on every push), not in December.
+The checker shows one week: the current one. Under the list, one line tells you how many
+checks of earlier weeks still fail, so a later change that breaks something earlier does
+not stay unnoticed until December. (CI, the automatic checks that GitHub runs on every
+push, runs the same checker and also looks at the current week.)
 
-To look at one week on its own, for example to confirm that Week 2 still passes, run:
+To look at another week, for example to confirm that Week 2 still passes, add its number:
 
 ```bash
-AIASD_WEEK=2 python .github/check_deliverables.py
+python .github/check_deliverables.py 2
 ```
 
 Run the checks locally (on your own computer) before you push:

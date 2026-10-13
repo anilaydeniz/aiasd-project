@@ -1,0 +1,16 @@
+{
+  "_how_to_fill_this_in": [
+    "This week the file holds ONE entry: your collaborator, one classmate of your choice from your own lecture (any group), who runs your test cases on your prototype. The file keeps its name from Week 3. The list below is called 'members' only because the checker and the course tools read it under that name.",
+    "role: 'collaborator'.",
+    "student_id: their 9-digit student number, the same as in the 'tester' field of every run in week04/walkthrough_04.json. Not yours. They do not have to name you back, and no point is taken if they do not.",
+    "what: the most useful thing they found or said while running your test cases, quoted as one full sentence, in their words. It is the evidence that the walk-through happened.",
+    "accepted: true if you changed the prototype, a test case or a requirement because of it (say what in the Change log of PROPOSAL.md); false if you did not. You have until Saturday to decide.",
+    "why: one full sentence either way: what you changed, or why you changed nothing.",
+    "You write all of this yourself, by hand, in your own words. No assistant writes, translates or corrects it, not even for the grammar. Your English or Turkish is not graded; a person reads it.",
+    "You may delete this block once you have read it; the checker ignores it."
+  ],
+  "week": 4,
+  "members": [
+    { "student_id": "", "role": "collaborator", "what": "", "accepted": null, "why": "" }
+  ]
+}

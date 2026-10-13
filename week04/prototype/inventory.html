@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Live Inventory</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-004, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Live Inventory</h1>
+    <a href="home.html" class="meta">Dashboard</a>
+  </div>
+  <p>Real-time pantry stock with First-In First-Out (FIFO) batch expiration tracking.</p>
+
+  <div class="alert-box">
+    <strong>FIFO Alert (48h Spoilage Window):</strong> Lot #B-104 (Cooking Cream) expires on Oct 14 at 23:59 (36h remaining). Deplete this batch first.
+  </div>
+
+  <div class="list">
+    <div class="card" style="border-left: 4px solid #e53e3e;">
+      <div class="row">
+        <strong>Cooking Cream (Dairy)</strong>
+        <span class="badge danger">Low Stock</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Current: 3.5 L · Safety Threshold: 5.0 L</p>
+      <div class="item-row">
+        <span>Active FIFO Lot</span>
+        <span>#B-104 (Exp: 36h) <span class="badge warning">Priority</span></span>
+      </div>
+      <a class="button secondary" href="order.html" style="margin-top: 8px; padding: 8px;">Order Restock via PO</a>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <strong>Pasta (Rigatoni)</strong>
+        <span class="badge success">In Stock</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Current: 13.3 kg · Safety Threshold: 5.0 kg</p>
+      <div class="item-row">
+        <span>Active FIFO Lot</span>
+        <span>#P-201 (Exp: Nov 28)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <strong>Tomato Sauce Base</strong>
+        <span class="badge success">In Stock</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Current: 7.4 kg · Safety Threshold: 4.0 kg</p>
+      <div class="item-row">
+        <span>Active FIFO Lot</span>
+        <span>#S-108 (Exp: Oct 29)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list">
+    <a class="button" href="prep.html">Log Prepared Dishes</a>
+    <a class="button secondary" href="receiving.html">Receive Inbound Crates</a>
+  </div>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a class="active" href="inventory.html">Inventory</a>
+    <a href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>
