@@ -24,6 +24,8 @@ A clickable mobile-first prototype demonstrating the core workflows of KitchenOp
 7. **`order.html`** (REQ-003, REQ-006) — Automated supplier purchase order triggered by stock falling below safety threshold.
 8. **`order_success.html`** (REQ-003, REQ-006) — Confirmation screen for dispatched wholesale purchase order.
 9. **`receiving.html`** (REQ-005, REQ-006) — Inbound goods receiving screen for newly delivered crates with batch lot dates.
+10. **`prep_cancel.html`** (REQ-002, REQ-006) — Revert & cancellation screen for accidental prep portions (#TX-9042) to restore depleted ingredient stocks.
+11. **`batch_expiry.html`** (REQ-004, REQ-006) — Physical shelf location and FIFO batch tracking screen with 48h spoilage alerts.
 
 ---
 
@@ -34,9 +36,15 @@ A clickable mobile-first prototype demonstrating the core workflows of KitchenOp
 - **Invalid Login Code:** `0000` (triggers "Wrong code" error)
 - **Active Prep Recipe:** `Rigatoni Pomodoro` (BOM portion formula: 120g pasta, 80g tomato sauce per portion)
 - **Standard Prep Batch:** `10 portions` (deducts exactly `1.2 kg` pasta and `0.8 kg` tomato sauce from active batches #P-201 and #S-108)
+- **Prep Cancellation:** `#TX-9042` reversible action reinstating `+1.2 kg` pasta and `+0.8 kg` tomato sauce
 - **Low-Stock Trigger Item:** Cooking Cream at `3.5 L` (safety threshold: `5.0 L`, deficit: `-1.5 L`)
 - **Automated Purchase Order:** `PO-2026-041` for `20.0 L` Cooking Cream (4 crates × 5L) to Wholesale Dairy & Produce Logistics Ltd.
 - **Expiring FIFO Batch:** Cooking Cream `Lot #B-104` expiring in `36 hours` (amber alert banner displayed)
+- **Physical Storage Shelf Locations:**
+  - *Walk-in Chiller #1 — Shelf B-03:* Cooking Cream Lot #B-104 (3.5 L)
+  - *Walk-in Chiller #1 — Shelf A-01:* Mozzarella Cheese Lot #M-409 (4.0 kg)
+  - *Dry Pantry Kiosk — Shelf D-12:* Rigatoni Pasta Lot #P-201 (13.3 kg)
+  - *Dry Pantry Kiosk — Shelf D-08:* Tomato Sauce Base Lot #S-108 (7.4 kg)
 - **Inbound Goods Delivery:** `25 kg` All-Purpose Flour bag, Batch `LOT-FL-20261013`, expiry date `2027-04-15`
 
 ---
@@ -50,16 +58,18 @@ A clickable mobile-first prototype demonstrating the core workflows of KitchenOp
    - `TC-002-01`: Log 10 portions of Rigatoni Pomodoro to verify the 1.2 kg pasta / 0.8 kg sauce depletion audit log.
    - `TC-003-01`: Open Purchase Orders and dispatch the 20-liter replenishment PO for cooking cream.
    - `TC-004-01`: Verify that the amber 48-hour FIFO alert is displayed on Live Inventory for Lot #B-104.
+   - `TC-002-02 (Round 2)`: From `prep_success.html`, tap "Undo / Cancel This Entry" to verify `prep_cancel.html` successfully reverts the stock deduction.
 
 ---
 
-## In-Class Session Summary (Round 1 Walk-Through)
+## Session & Walk-Through Testing Summary
 
-- **Date:** October 13, 2026 (In-Class Laboratory Session)
+- **In-Class Date:** October 13, 2026
 - **Collaborator Tester:** Student ID `220504023`
 - **Executed Test Cases:**
   - `TC-001-01` (OTP login flow): **PASS**
   - `TC-002-01` (Log 10 portions Rigatoni Pomodoro): **PASS**
   - `TC-003-01` (Low cream stock auto-generates PO): **PASS**
-  - `TC-002-02` (Accidental portion input & cancellation check): **FAIL** *(Collaborator noted missing cancel/undo button; scheduled for Saturday Round 2 resolution)*
-- **Session Verification:** All 18/18 in-class deliverables confirmed PASS before repository freeze.
+  - `TC-002-02 (Round 1)`: **FAIL** *(Collaborator noted missing cancel/undo button)*
+  - `TC-002-02 (Round 2)`: **PASS** *(Resolved via prep_cancel.html screen and confirmed by collaborator)*
+- **Deliverables Status:** All in-class (18/18) and weekend round 2 verification tests confirmed.

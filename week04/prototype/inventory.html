@@ -16,7 +16,10 @@
   <p>Real-time pantry stock with First-In First-Out (FIFO) batch expiration tracking.</p>
 
   <div class="alert-box">
-    <strong>FIFO Alert (48h Spoilage Window):</strong> Lot #B-104 (Cooking Cream) expires on Oct 14 at 23:59 (36h remaining). Deplete this batch first.
+    <strong>FIFO Alert (48h Spoilage Window):</strong> Lot #B-104 (Cooking Cream) expires in 36h at Shelf B-03.
+    <div style="margin-top: 6px;">
+      <a href="batch_expiry.html" style="color: #975a16; font-weight: 600; text-decoration: underline;">View All Expiring Batches &amp; Shelf Locations →</a>
+    </div>
   </div>
 
   <div class="list">
@@ -25,7 +28,7 @@
         <strong>Cooking Cream (Dairy)</strong>
         <span class="badge danger">Low Stock</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Current: 3.5 L · Safety Threshold: 5.0 L</p>
+      <p class="meta" style="margin-top: 4px;">Current: 3.5 L · Safety Threshold: 5.0 L · <span class="badge" style="background: #edf2f7; color: #4a5568;">Chiller Shelf B-03</span></p>
       <div class="item-row">
         <span>Active FIFO Lot</span>
         <span>#B-104 (Exp: 36h) <span class="badge warning">Priority</span></span>
@@ -38,7 +41,7 @@
         <strong>Pasta (Rigatoni)</strong>
         <span class="badge success">In Stock</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Current: 13.3 kg · Safety Threshold: 5.0 kg</p>
+      <p class="meta" style="margin-top: 4px;">Current: 13.3 kg · Safety Threshold: 5.0 kg · <span class="badge" style="background: #edf2f7; color: #4a5568;">Pantry Shelf D-12</span></p>
       <div class="item-row">
         <span>Active FIFO Lot</span>
         <span>#P-201 (Exp: Nov 28)</span>
@@ -50,7 +53,7 @@
         <strong>Tomato Sauce Base</strong>
         <span class="badge success">In Stock</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Current: 7.4 kg · Safety Threshold: 4.0 kg</p>
+      <p class="meta" style="margin-top: 4px;">Current: 7.4 kg · Safety Threshold: 4.0 kg · <span class="badge" style="background: #edf2f7; color: #4a5568;">Pantry Shelf D-08</span></p>
       <div class="item-row">
         <span>Active FIFO Lot</span>
         <span>#S-108 (Exp: Oct 29)</span>
@@ -59,7 +62,8 @@
   </div>
 
   <div class="list">
-    <a class="button" href="prep.html">Log Prepared Dishes</a>
+    <a class="button" href="batch_expiry.html">Inspect Batches &amp; Storage Shelves</a>
+    <a class="button secondary" href="prep.html">Log Prepared Dishes</a>
     <a class="button secondary" href="receiving.html">Receive Inbound Crates</a>
   </div>
 

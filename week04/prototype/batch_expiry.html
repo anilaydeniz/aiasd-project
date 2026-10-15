@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Batch Expiry &amp; Shelf Locations</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-004, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Batch &amp; Shelf Tracker</h1>
+    <span class="badge warning">FIFO Focus</span>
+  </div>
+  <p>Track perishable ingredient batch shelf-life and physical kitchen storage locations to prevent food waste.</p>
+
+  <div class="alert-box" style="margin-bottom: 14px;">
+    <strong>48h Spoilage Alert:</strong> 2 batches have less than 48 hours remaining before expiration. Deplete these immediately or trigger preparation rush.
+  </div>
+
+  <div class="list">
+    <div class="card" style="border-left: 4px solid #dd6b20;">
+      <div class="row">
+        <strong>Cooking Cream (1L Brick)</strong>
+        <span class="badge warning">36h Left</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Lot #B-104 · Exp: Oct 17, 23:59 · Quantity: 3.5 L</p>
+      <div class="item-row" style="margin-top: 6px;">
+        <span>Storage Unit</span>
+        <strong>Walk-in Chiller #1</strong>
+      </div>
+      <div class="item-row">
+        <span>Shelf / Bin Location</span>
+        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Shelf B-03 (Dairy Tier)</span>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #dd6b20;">
+      <div class="row">
+        <strong>Mozzarella Cheese (Block)</strong>
+        <span class="badge warning">44h Left</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Lot #M-409 · Exp: Oct 18, 08:00 · Quantity: 4.0 kg</p>
+      <div class="item-row" style="margin-top: 6px;">
+        <span>Storage Unit</span>
+        <strong>Walk-in Chiller #1</strong>
+      </div>
+      <div class="item-row">
+        <span>Shelf / Bin Location</span>
+        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Shelf A-01 (Top Cheese Rack)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <strong>Rigatoni Pasta (Dry Grain)</strong>
+        <span class="badge success">Safe (&gt;30d)</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Lot #P-201 · Exp: Nov 28 · Quantity: 13.3 kg</p>
+      <div class="item-row" style="margin-top: 6px;">
+        <span>Storage Unit</span>
+        <strong>Dry Pantry Kiosk</strong>
+      </div>
+      <div class="item-row">
+        <span>Shelf / Bin Location</span>
+        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Pantry Shelf D-12 (Grains)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <strong>Tomato Sauce Base (Canned)</strong>
+        <span class="badge success">Safe (&gt;30d)</span>
+      </div>
+      <p class="meta" style="margin-top: 4px;">Lot #S-108 · Exp: Oct 29 · Quantity: 7.4 kg</p>
+      <div class="item-row" style="margin-top: 6px;">
+        <span>Storage Unit</span>
+        <strong>Dry Pantry Kiosk</strong>
+      </div>
+      <div class="item-row">
+        <span>Shelf / Bin Location</span>
+        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Pantry Shelf D-08 (Sauces)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="list" style="margin-top: 14px;">
+    <a class="button" href="inventory.html">Back to Live Inventory</a>
+    <a class="button secondary" href="prep.html">Log Prepared Dishes</a>
+    <a class="button secondary" href="home.html">Return to Dashboard</a>
+  </div>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a class="active" href="inventory.html">Inventory</a>
+    <a href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>
