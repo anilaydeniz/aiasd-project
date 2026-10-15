@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Cancel &amp; Revert Prep</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-002, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <h1>Revert Prep Entry</h1>
+    <span class="badge" style="background: #fed7d7; color: #9b2c2c;">Correction</span>
+  </div>
+  <p>Undo an incorrect portion count or cancel an accidental dish preparation log to reinstate raw ingredient balances.</p>
+
+  <div class="card" style="border-color: #feb2b2; background: #fff5f5;">
+    <strong>Target Audit Log: #TX-9042</strong>
+    <p class="meta" style="margin-top: 4px;">Recipe: Rigatoni Pomodoro · Accidental Entry</p>
+    <div class="list" style="margin-top: 10px;">
+      <div class="item-row">
+        <span>Pasta (Rigatoni)</span>
+        <span style="color: #276749; font-weight: 600;">+1.2 kg Restored</span>
+      </div>
+      <div class="item-row">
+        <span>Tomato Sauce Base</span>
+        <span style="color: #276749; font-weight: 600;">+0.8 kg Restored</span>
+      </div>
+      <div class="item-row">
+        <span>Inventory Status</span>
+        <span>Reinstated to Central Walk-In</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <strong>Reason for Cancellation:</strong>
+    <p class="meta" style="margin-top: 4px;">Chef over-portioning entry error (accidentally logged 100 instead of 10 portions during lunch rush).</p>
+  </div>
+
+  <div class="list">
+    <a class="button" href="inventory.html" style="background: #e53e3e;">Confirm Cancellation &amp; Restore Stock</a>
+    <a class="button secondary" href="prep.html">Back to Dish Prep</a>
+    <a class="button secondary" href="home.html">Return to Dashboard</a>
+  </div>
+
+  <nav class="tabs">
+    <a href="home.html">Dashboard</a>
+    <a href="inventory.html">Inventory</a>
+    <a class="active" href="prep.html">Prep</a>
+    <a href="order.html">Orders</a>
+    <a href="index.html">Log out</a>
+  </nav>
+</main>
+</body>
+</html>

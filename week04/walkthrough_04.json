@@ -28,6 +28,13 @@
       "round": 1,
       "result": "fail",
       "note": "Porsiyon hatali girilirse veya vazgecilirse islemi geri alacak bir iptal veya duzenleme butonu bulunamadi."
+    },
+    {
+      "tc": "TC-002-02",
+      "tester": "220504023",
+      "round": 2,
+      "result": "pass",
+      "note": "prep_cancel.html ekrani uzerinden hatali girilen porsiyon basariyla iptal edildi ve stok iadesi dogrulandi."
     }
   ]
 }

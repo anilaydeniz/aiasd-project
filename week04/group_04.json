@@ -5,8 +5,8 @@
       "student_id": "220504023",
       "role": "collaborator",
       "what": "Yemek porsiyonunu girip onaylayınca stoktan hemen düşüyor ama aşçı yanlışlıkla 10 yerine 100 yazarsa bunu iptal edip geri alacak hiçbir buton göremedim.",
-      "accepted": null,
-      "why": ""
+      "accepted": true,
+      "why": "Aşçının hatalı porsiyon girişinde stoğu düzeltebilmesi için iptal ekranı (prep_cancel.html) ve geri alma akışı eklendi."
     }
   ]
 }
