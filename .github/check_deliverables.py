@@ -743,10 +743,13 @@ def check_collaborator(week: int, role: str, slot: str = SESSION) -> list[str]:
           f"{path} must name your collaborator: exactly one entry, with a valid 9-digit student number. "
           f"Found: {pl(len(items), 'entry', 'entries')}, {len(good)} with a valid number.", slot)
     me = my_number()
-    check(week, f"{path} does not list you", me == "" or me not in [g.split("-")[0] for g in good],
-          f"{path} must not list you. Your own student number is in it: remove that entry.", slot)
-    check(week, f"{path} gives everyone the role '{role}'", bool(items) and all(str(i.get("role", "")).strip() == role for i in items),
-          f"{path} must give everyone the role '{role}'. Found: a wrong or empty role.", slot)
+    # VC, 13 Oct 2026: these two are checked only once a collaborator is named. On the untouched file (role
+    # already filled in, no number) they passed and gave two free ticks to a file nobody had written.
+    if good:
+        check(week, f"{path} does not list you", me == "" or me not in [g.split("-")[0] for g in good],
+              f"{path} must not list you. Your own student number is in it: remove that entry.", slot)
+        check(week, f"{path} gives everyone the role '{role}'", bool(items) and all(str(i.get("role", "")).strip() == role for i in items),
+              f"{path} must give everyone the role '{role}'. Found: a wrong or empty role.", slot)
     thin = [i for i in items if len(str(i.get("what", "")).strip()) < 25]
     check(week, f"{path} quotes what your collaborator found or said", bool(items) and not thin,
           f"{path} must quote a real sentence that your collaborator found or said. Found: {pl(len(thin), 'entry', 'entries')} without one.", slot)
