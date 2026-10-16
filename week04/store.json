@@ -10,6 +10,11 @@
     "Never write a password, a card number or an ID number in this file or anywhere else in the repository.",
     "You may delete this block once you have read it; the checker ignores it."
   ],
-  "store": "",
-  "S1": { "date": "", "developer_name": "", "status": "", "evidence": "" }
+  "store": "Google Play",
+  "S1": {
+    "date": "2026-10-14",
+    "developer_name": "Anil Aydeniz",
+    "status": "applied",
+    "evidence": "store_s1.png"
+  }
 }

@@ -84,3 +84,4 @@ Free core tier for single-station kitchens (up to 30 inventory items and 10 dail
 ## Change log
 - 2026-10-06 — §4: added aggregate prep batch depletion mode and manager approval workflow based on peer review from 220504024 and 220504031.
 - 2026-10-10 — §4, §10, §12: automated oldest-batch FIFO consumption by default to prevent kitchen staff manual selection friction during peak hours, prompted by investor AI objection.
+- 2026-10-15 — REQ-002, TC-002-02: Collaborator geri bildirimi doğrultusunda hatalı porsiyon girişlerini geri almayı sağlayan prep_cancel.html akışı eklendi; ikinci tur yürütmesi başarıyla doğrulandı.
