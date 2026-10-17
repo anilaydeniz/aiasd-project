@@ -10,12 +10,15 @@
 <!-- serves: REQ-003, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Order Dispatched</h1>
+    <div>
+      <span class="meta">PROCUREMENT CONFIRMED</span>
+      <h1 style="margin: 0;">Order Dispatched</h1>
+    </div>
     <span class="badge success">Sent</span>
   </div>
   <p>Wholesale replenishment purchase order has been generated and dispatched to the supplier.</p>
 
-  <div class="card" style="border-color: #38a169; background: #f0fff4;">
+  <div class="card" style="border-left: 4px solid #38a169; background: #f0fff4;">
     <strong>PO-2026-041 Confirmed</strong>
     <p class="meta" style="margin-top: 4px;">Supplier: Wholesale Dairy &amp; Produce Logistics</p>
     <div class="list" style="margin-top: 10px;">
@@ -39,12 +42,13 @@
     <a class="button secondary" href="home.html">Return to Dashboard</a>
   </div>
 
+  <!-- Fixed Bottom Tabs -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a href="inventory.html">Inventory</a>
+    <a href="inventory.html">Stock</a>
     <a href="prep.html">Prep</a>
     <a class="active" href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
 </body>

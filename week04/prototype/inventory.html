@@ -3,18 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KitchenOps - Live Inventory</title>
+<title>KitchenOps - Live Inventory &amp; Restock</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- serves: REQ-004, REQ-006 -->
+<!-- serves: REQ-003, REQ-004, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Live Inventory</h1>
+    <div>
+      <span class="meta">CENTRAL PANTRY</span>
+      <h1 style="margin: 0;">Live Inventory</h1>
+    </div>
     <a href="home.html" class="meta">Dashboard</a>
   </div>
+
   <p>Real-time pantry stock with First-In First-Out (FIFO) batch expiration tracking.</p>
 
+  <!-- Category Filter Chips -->
+  <div class="chips-row" id="category-chips">
+    <button type="button" class="chip active" data-cat="all">All Items</button>
+    <button type="button" class="chip" data-cat="dairy">Dairy</button>
+    <button type="button" class="chip" data-cat="dry">Dry Goods</button>
+    <button type="button" class="chip" data-cat="meat">Meat &amp; Poultry</button>
+    <button type="button" class="chip" data-cat="produce">Produce</button>
+  </div>
+
+  <!-- Search & Barcode Button -->
+  <div class="row" style="gap: 8px;">
+    <input type="search" id="inventory-search" placeholder="Search ingredient or lot #..." style="flex: 1; min-height: 44px; padding: 10px;">
+    <a href="batch_expiry.html" class="button secondary" style="width: auto; min-width: 48px; min-height: 44px; padding: 10px;" title="Barcode Scanner">
+      📷
+    </a>
+  </div>
+
+  <!-- FIFO Urgent Expiry Alert -->
   <div class="alert-box">
     <strong>FIFO Alert (48h Spoilage Window):</strong> Lot #B-104 (Cooking Cream) expires in 36h at Shelf B-03.
     <div style="margin-top: 6px;">
@@ -22,38 +44,76 @@
     </div>
   </div>
 
-  <div class="list">
-    <div class="card" style="border-left: 4px solid #e53e3e;">
+  <!-- Stock Item Cards -->
+  <div class="list" id="inventory-list">
+    <!-- Item 1: Cooking Cream (Critical) -->
+    <div class="card" style="border-left: 4px solid #e53e3e;" data-category="dairy">
       <div class="row">
-        <strong>Cooking Cream (Dairy)</strong>
+        <strong>Cooking Cream 35% (Dairy)</strong>
         <span class="badge danger">Low Stock</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Current: 3.5 L · Safety Threshold: 5.0 L · <span class="badge" style="background: #edf2f7; color: #4a5568;">Chiller Shelf B-03</span></p>
+      <p class="meta" style="margin-top: 2px;">Chiller Shelf B-03 · Threshold: 5.0 L</p>
+      
+      <div class="progress-track">
+        <div class="progress-fill danger" style="width: 35%;"></div>
+      </div>
+      
+      <div class="item-row">
+        <span>Current Stock Level</span>
+        <strong style="color: #c53030;">3.5 Liters</strong>
+      </div>
       <div class="item-row">
         <span>Active FIFO Lot</span>
         <span>#B-104 (Exp: 36h) <span class="badge warning">Priority</span></span>
       </div>
-      <a class="button secondary" href="order.html" style="margin-top: 8px; padding: 8px;">Order Restock via PO</a>
+      <div class="row" style="margin-top: 6px;">
+        <button type="button" class="button btn-add-order" id="btn-add-cream" style="min-height: 40px; padding: 8px; font-size: 0.88rem;">
+          + Add to Restock PO
+        </button>
+        <a href="order.html" class="button secondary" style="min-height: 40px; padding: 8px; font-size: 0.88rem; width: auto;">
+          Order Page
+        </a>
+      </div>
     </div>
 
-    <div class="card">
+    <!-- Item 2: Rigatoni Pasta -->
+    <div class="card" data-category="dry">
       <div class="row">
         <strong>Pasta (Rigatoni)</strong>
         <span class="badge success">In Stock</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Current: 13.3 kg · Safety Threshold: 5.0 kg · <span class="badge" style="background: #edf2f7; color: #4a5568;">Pantry Shelf D-12</span></p>
+      <p class="meta" style="margin-top: 2px;">Pantry Shelf D-12 · Threshold: 5.0 kg</p>
+      
+      <div class="progress-track">
+        <div class="progress-fill success" style="width: 88%;"></div>
+      </div>
+      
+      <div class="item-row">
+        <span>Current Stock Level</span>
+        <strong>13.3 kg</strong>
+      </div>
       <div class="item-row">
         <span>Active FIFO Lot</span>
         <span>#P-201 (Exp: Nov 28)</span>
       </div>
     </div>
 
-    <div class="card">
+    <!-- Item 3: Tomato Sauce Base -->
+    <div class="card" data-category="dry">
       <div class="row">
         <strong>Tomato Sauce Base</strong>
         <span class="badge success">In Stock</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Current: 7.4 kg · Safety Threshold: 4.0 kg · <span class="badge" style="background: #edf2f7; color: #4a5568;">Pantry Shelf D-08</span></p>
+      <p class="meta" style="margin-top: 2px;">Pantry Shelf D-08 · Threshold: 4.0 kg</p>
+      
+      <div class="progress-track">
+        <div class="progress-fill success" style="width: 74%;"></div>
+      </div>
+      
+      <div class="item-row">
+        <span>Current Stock Level</span>
+        <strong>7.4 kg</strong>
+      </div>
       <div class="item-row">
         <span>Active FIFO Lot</span>
         <span>#S-108 (Exp: Oct 29)</span>
@@ -61,19 +121,173 @@
     </div>
   </div>
 
-  <div class="list">
-    <a class="button" href="batch_expiry.html">Inspect Batches &amp; Storage Shelves</a>
+  <!-- Direct Links -->
+  <div class="list" style="margin-top: 6px; margin-bottom: 24px;">
+    <a class="button secondary" href="batch_expiry.html">Inspect Batches &amp; Storage Shelves</a>
     <a class="button secondary" href="prep.html">Log Prepared Dishes</a>
     <a class="button secondary" href="receiving.html">Receive Inbound Crates</a>
   </div>
 
+  <!-- Floating Action Bar: Triggers order_sheet Bottom Sheet -->
+  <div class="floating-action-bar" id="floating-order-bar">
+    <div>
+      <span style="font-size: 1.1rem; vertical-align: middle;">📋</span>
+      <strong id="bar-text" style="margin-left: 6px;">1 Restock Item Pending</strong>
+    </div>
+    <span style="font-weight: 700; font-size: 0.9rem;">View PO Sheet →</span>
+  </div>
+
+  <!-- Bottom Sheet Backdrop & Container (order_sheet) -->
+  <div class="sheet-backdrop" id="sheet-backdrop">
+    <div class="bottom-sheet" id="order-sheet">
+      <div class="sheet-handle"></div>
+
+      <!-- State 1: PO Draft Details -->
+      <div id="sheet-draft-state">
+        <div class="row">
+          <div>
+            <span class="meta">PURCHASE ORDER</span>
+            <h2 style="margin: 0;">PO-2026-041 Draft</h2>
+          </div>
+          <button type="button" class="badge" id="btn-close-x" style="background: #edf2f7; color: #4a5568; border: none; cursor: pointer;">✕</button>
+        </div>
+
+        <p class="meta" style="margin-top: 4px;">Supplier: <strong>Metro Food Wholesale Ltd.</strong></p>
+
+        <div class="card" style="margin-top: 10px; background: #f8fafc;">
+          <div class="row">
+            <strong>Cooking Cream 35%</strong>
+            <span class="badge danger">Threshold Breach</span>
+          </div>
+          <p class="meta" style="margin-top: 2px;">Deficit: -1.5 L (Current: 3.5 L / Min: 5.0 L)</p>
+          <div class="item-row" style="margin-top: 6px;">
+            <label for="po-cream-qty" style="font-size: 0.8rem; margin: 0;">Replenish Quantity</label>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="number" id="po-cream-qty" value="20" min="5" step="5" style="width: 70px; min-height: 38px; padding: 6px; text-align: center; font-weight: 700;">
+              <span>Liters</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="item-row" style="margin-top: 8px;">
+          <span>Estimated Total Cost</span>
+          <strong style="font-size: 1.1rem; color: #2b6cb0;">€76.00 / 2,650 TL</strong>
+        </div>
+
+        <button type="button" class="button" id="btn-send-po" style="margin-top: 10px;">
+          Dispatch Purchase Order
+        </button>
+
+        <div style="text-align: center; margin-top: 6px;">
+          <a href="order.html" class="meta" style="text-decoration: underline;">Open Full Page Order Screen →</a>
+        </div>
+      </div>
+
+      <!-- State 2: Dispatched Confirmation State (Same Sheet) -->
+      <div id="sheet-success-state" class="hidden">
+        <div style="text-align: center; padding: 12px 0;">
+          <div style="font-size: 2.2rem; color: #38a169; margin-bottom: 6px;">✓</div>
+          <h2 style="color: #22543d;">Purchase Order Dispatched</h2>
+          <p class="meta" style="margin-top: 4px;">PO-2026-041 successfully transmitted to Metro Food Wholesale.</p>
+        </div>
+
+        <div class="card" style="background: #f0fff4; border-color: #9ae6b4;">
+          <div class="item-row">
+            <span>Supplier</span>
+            <strong>Metro Food Wholesale Ltd.</strong>
+          </div>
+          <div class="item-row">
+            <span>Dispatched Amount</span>
+            <strong>20.0 Liters (Cooking Cream)</strong>
+          </div>
+          <div class="item-row">
+            <span>Estimated Delivery</span>
+            <strong style="color: #276749;">Tomorrow 08:30</strong>
+          </div>
+        </div>
+
+        <button type="button" class="button secondary" id="btn-share-pdf" onclick="alert('Procurement PDF for PO-2026-041 downloaded.');">
+          📄 Download / Share PO PDF
+        </button>
+        <button type="button" class="button" id="btn-sheet-done" style="margin-top: 6px;">
+          Close Sheet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Tab Bar -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a class="active" href="inventory.html">Inventory</a>
+    <a class="active" href="inventory.html">Stock</a>
     <a href="prep.html">Prep</a>
     <a href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
+
+<script>
+  var floatingBar = document.getElementById("floating-order-bar");
+  var sheetBackdrop = document.getElementById("sheet-backdrop");
+  var btnCloseX = document.getElementById("btn-close-x");
+  var btnSendPo = document.getElementById("btn-send-po");
+  var btnSheetDone = document.getElementById("btn-sheet-done");
+  var draftState = document.getElementById("sheet-draft-state");
+  var successState = document.getElementById("sheet-success-state");
+  var chips = document.querySelectorAll(".chip");
+  var cards = document.querySelectorAll("#inventory-list .card");
+  var searchInput = document.getElementById("inventory-search");
+
+  // Open Bottom Sheet
+  floatingBar.addEventListener("click", function() {
+    sheetBackdrop.classList.add("active");
+  });
+
+  // Close Bottom Sheet
+  function closeSheet() {
+    sheetBackdrop.classList.remove("active");
+  }
+  btnCloseX.addEventListener("click", closeSheet);
+  btnSheetDone.addEventListener("click", closeSheet);
+
+  sheetBackdrop.addEventListener("click", function(e) {
+    if (e.target === sheetBackdrop) closeSheet();
+  });
+
+  // Dispatch PO in Sheet (Transition to State 2)
+  btnSendPo.addEventListener("click", function() {
+    draftState.classList.add("hidden");
+    successState.classList.remove("hidden");
+  });
+
+  // Filter Chips Logic
+  chips.forEach(function(chip) {
+    chip.addEventListener("click", function() {
+      chips.forEach(function(c) { c.classList.remove("active"); });
+      chip.classList.add("active");
+      var cat = chip.getAttribute("data-cat");
+      cards.forEach(function(card) {
+        if (cat === "all" || card.getAttribute("data-category") === cat) {
+          card.classList.remove("hidden");
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+    });
+  });
+
+  // Search filter
+  searchInput.addEventListener("input", function() {
+    var query = searchInput.value.toLowerCase();
+    cards.forEach(function(card) {
+      var text = card.textContent.toLowerCase();
+      if (text.indexOf(query) !== -1) {
+        card.classList.remove("hidden");
+      } else {
+        card.classList.add("hidden");
+      }
+    });
+  });
+</script>
 </body>
 </html>

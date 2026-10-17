@@ -10,7 +10,10 @@
 <!-- serves: REQ-003, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Purchase Orders</h1>
+    <div>
+      <span class="meta">PROCUREMENT</span>
+      <h1 style="margin: 0;">Purchase Orders</h1>
+    </div>
     <span class="badge warning">1 Auto-Draft</span>
   </div>
   <p>Automated replenishment orders generated when ingredient stocks drop below safety thresholds.</p>
@@ -37,7 +40,7 @@
       </div>
       <div class="item-row">
         <span>Estimated Cost</span>
-        <span>€76.00</span>
+        <strong style="color: #2b6cb0;">€76.00 / 2,650 TL</strong>
       </div>
     </div>
   </div>
@@ -48,12 +51,13 @@
 
   <a class="button secondary" href="inventory.html">Back to Inventory</a>
 
+  <!-- Fixed Bottom Tabs -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a href="inventory.html">Inventory</a>
+    <a href="inventory.html">Stock</a>
     <a href="prep.html">Prep</a>
     <a class="active" href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
 </body>

@@ -117,3 +117,25 @@ nav.tabs a.active, nav.tab-bar a.active { color: #1a365d; font-weight: 700; bord
                           display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .swipe-slider-text { font-size: .85rem; font-weight: 600; color: #4a5568; }
 .swipe-slider-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; margin: 0; }
+
+/* Filter Chips */
+.chips-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.chips-row::-webkit-scrollbar { display: none; }
+.chip { padding: 8px 14px; font-size: 0.82rem; font-weight: 600; border-radius: 20px;
+        background: #edf2f7; color: #4a5568; border: 1px solid #cbd5e0; white-space: nowrap; cursor: pointer; }
+.chip.active { background: #2b6cb0; color: #fff; border-color: #2b6cb0; }
+
+/* Progress Bar for Stock Fill */
+.progress-track { width: 100%; height: 6px; background: #edf2f7; border-radius: 3px; overflow: hidden; margin: 6px 0; }
+.progress-fill { height: 100%; border-radius: 3px; }
+.progress-fill.danger { background: #e53e3e; }
+.progress-fill.success { background: #38a169; }
+.progress-fill.warning { background: #d69e2e; }
+
+/* Floating Action Bar */
+.floating-action-bar { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+                       width: calc(100% - 32px); max-width: 358px; background: #1a365d; color: #fff;
+                       border-radius: 8px; padding: 12px 16px; box-shadow: 0 6px 20px rgba(26, 54, 93, 0.35);
+                       display: flex; justify-content: space-between; align-items: center; z-index: 85; cursor: pointer; }
+.floating-action-bar:active { filter: brightness(0.92); }
+
