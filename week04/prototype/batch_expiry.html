@@ -3,101 +3,218 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KitchenOps - Batch Expiry &amp; Shelf Locations</title>
+<title>KitchenOps - FIFO Expiry &amp; Waste Management</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <!-- serves: REQ-004, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Batch &amp; Shelf Tracker</h1>
-    <span class="badge warning">FIFO Focus</span>
-  </div>
-  <p>Track perishable ingredient batch shelf-life and physical kitchen storage locations to prevent food waste.</p>
-
-  <div class="alert-box" style="margin-bottom: 14px;">
-    <strong>48h Spoilage Alert:</strong> 2 batches have less than 48 hours remaining before expiration. Deplete these immediately or trigger preparation rush.
+    <div>
+      <span class="meta">STORAGE AUDIT</span>
+      <h1 style="margin: 0;">FIFO &amp; Shelf Tracker</h1>
+    </div>
+    <a href="inventory.html" class="meta">Inventory</a>
   </div>
 
-  <div class="list">
+  <p>Track perishable ingredient batch shelf-life, walk-in shelf locations, and record kitchen spoilage waste.</p>
+
+  <!-- 48-Hour Spoilage Banner -->
+  <div class="alert-box danger">
+    <strong>FIFO Urgent Window (&lt;48h):</strong> Lot #LOT-8821 (Cooking Cream) expires in 36 hours. Prioritize immediately.
+  </div>
+
+  <div class="list" id="batch-list">
+    <!-- Active Critical Lot Card -->
     <div class="card" style="border-left: 4px solid #dd6b20;">
       <div class="row">
-        <strong>Cooking Cream (1L Brick)</strong>
-        <span class="badge warning">36h Left</span>
+        <strong>Cooking Cream 35% (1L Brick)</strong>
+        <span class="badge warning">FIFO Priority #1</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Lot #B-104 · Exp: Oct 17, 23:59 · Quantity: 3.5 L</p>
+      <p class="meta" style="margin-top: 2px;">Lot #LOT-8821 · Exp: Tomorrow 23:59 · Stock: 3.5 L</p>
+      
       <div class="item-row" style="margin-top: 6px;">
-        <span>Storage Unit</span>
-        <strong>Walk-in Chiller #1</strong>
+        <span>Physical Storage</span>
+        <span class="badge" style="background: #edf2f7; color: #2d3748;">Walk-in Chiller A · Shelf B-03</span>
       </div>
       <div class="item-row">
-        <span>Shelf / Bin Location</span>
-        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Shelf B-03 (Dairy Tier)</span>
+        <span>Rotation Status</span>
+        <strong style="color: #c53030;">Consume First (Oldest Crate)</strong>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="row" style="margin-top: 8px; gap: 8px;">
+        <button type="button" class="button secondary" style="min-height: 44px; padding: 8px; font-size: 0.86rem; flex: 1;" onclick="alert('Batch #LOT-8821 inspected and verified intact.');">
+          ✓ Verify Sound
+        </button>
+        <button type="button" class="button danger" id="btn-open-waste" style="min-height: 44px; padding: 8px; font-size: 0.86rem; flex: 1;">
+          ⚠️ Log Waste / Fire
+        </button>
       </div>
     </div>
 
-    <div class="card" style="border-left: 4px solid #dd6b20;">
+    <!-- Secondary Safe Lot Card -->
+    <div class="card">
       <div class="row">
         <strong>Mozzarella Cheese (Block)</strong>
-        <span class="badge warning">44h Left</span>
+        <span class="badge warning">44h Remaining</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Lot #M-409 · Exp: Oct 18, 08:00 · Quantity: 4.0 kg</p>
+      <p class="meta" style="margin-top: 2px;">Lot #M-409 · Exp: Oct 18, 08:00 · Stock: 4.0 kg</p>
       <div class="item-row" style="margin-top: 6px;">
-        <span>Storage Unit</span>
-        <strong>Walk-in Chiller #1</strong>
-      </div>
-      <div class="item-row">
-        <span>Shelf / Bin Location</span>
-        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Shelf A-01 (Top Cheese Rack)</span>
+        <span>Physical Storage</span>
+        <span class="badge" style="background: #edf2f7; color: #2d3748;">Walk-in Chiller A · Shelf A-01</span>
       </div>
     </div>
 
+    <!-- Safe Lot Card -->
     <div class="card">
       <div class="row">
         <strong>Rigatoni Pasta (Dry Grain)</strong>
         <span class="badge success">Safe (&gt;30d)</span>
       </div>
-      <p class="meta" style="margin-top: 4px;">Lot #P-201 · Exp: Nov 28 · Quantity: 13.3 kg</p>
+      <p class="meta" style="margin-top: 2px;">Lot #P-201 · Exp: Nov 28 · Stock: 13.3 kg</p>
       <div class="item-row" style="margin-top: 6px;">
-        <span>Storage Unit</span>
-        <strong>Dry Pantry Kiosk</strong>
-      </div>
-      <div class="item-row">
-        <span>Shelf / Bin Location</span>
-        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Pantry Shelf D-12 (Grains)</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="row">
-        <strong>Tomato Sauce Base (Canned)</strong>
-        <span class="badge success">Safe (&gt;30d)</span>
-      </div>
-      <p class="meta" style="margin-top: 4px;">Lot #S-108 · Exp: Oct 29 · Quantity: 7.4 kg</p>
-      <div class="item-row" style="margin-top: 6px;">
-        <span>Storage Unit</span>
-        <strong>Dry Pantry Kiosk</strong>
-      </div>
-      <div class="item-row">
-        <span>Shelf / Bin Location</span>
-        <span class="badge" style="background: #e2e8f0; color: #2d3748;">Pantry Shelf D-08 (Sauces)</span>
+        <span>Physical Storage</span>
+        <span class="badge" style="background: #edf2f7; color: #2d3748;">Dry Pantry · Shelf D-12</span>
       </div>
     </div>
   </div>
 
-  <div class="list" style="margin-top: 14px;">
+  <div class="list" style="margin-top: 10px; margin-bottom: 24px;">
     <a class="button" href="inventory.html">Back to Live Inventory</a>
     <a class="button secondary" href="prep.html">Log Prepared Dishes</a>
     <a class="button secondary" href="home.html">Return to Dashboard</a>
   </div>
 
+  <!-- Bottom Sheet 2: waste_sheet (Zayi & Fire Girişi) -->
+  <div class="sheet-backdrop" id="waste-sheet-backdrop">
+    <div class="bottom-sheet" id="waste-sheet">
+      <div class="sheet-handle"></div>
+
+      <div class="row">
+        <div>
+          <span class="meta">INVENTORY SPOILAGE</span>
+          <h2 style="margin: 0;">Log Waste / Fire Entry</h2>
+        </div>
+        <button type="button" class="badge" id="btn-close-waste" style="background: #edf2f7; color: #4a5568; border: none; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="card" style="background: #fff5f5; border-color: #feb2b2; margin-top: 6px;">
+        <div class="row">
+          <strong>Cooking Cream 35%</strong>
+          <span class="badge danger">Lot #LOT-8821</span>
+        </div>
+        <p class="meta" style="margin-top: 2px;">Available in Walk-in: 3.5 Liters</p>
+      </div>
+
+      <!-- Quantity Stepper & Quick Chips -->
+      <div>
+        <label for="waste-qty">Waste Quantity</label>
+        <div class="stepper-row" style="margin-top: 4px;">
+          <button type="button" class="btn-step" id="btn-waste-dec">−</button>
+          <input type="number" id="waste-qty" class="input-portion" value="1.0" min="0.5" step="0.5" max="3.5">
+          <button type="button" class="btn-step" id="btn-waste-inc">+</button>
+        </div>
+        <div class="chips-row" style="margin-top: 8px;">
+          <button type="button" class="chip" onclick="document.getElementById('waste-qty').value='0.5';">0.5 L</button>
+          <button type="button" class="chip active" onclick="document.getElementById('waste-qty').value='1.0';">1.0 L</button>
+          <button type="button" class="chip" onclick="document.getElementById('waste-qty').value='3.5';">All 3.5 L (Spoiled)</button>
+        </div>
+      </div>
+
+      <!-- Waste Reason Selection -->
+      <div>
+        <label>Reason for Waste</label>
+        <div class="chips-row" id="waste-reason-chips" style="margin-top: 4px;">
+          <button type="button" class="chip active">SKT / Expired</button>
+          <button type="button" class="chip">Burnt / Ruined</button>
+          <button type="button" class="chip">Spilled / Dropped</button>
+          <button type="button" class="chip">Prep Trimming</button>
+        </div>
+      </div>
+
+      <!-- Critical Swipe to Confirm Slider -->
+      <div style="margin-top: 10px;">
+        <label>Critical Confirmation</label>
+        <div class="swipe-slider-container" style="margin-top: 4px;">
+          <span class="swipe-slider-text" id="swipe-label">Slide Right to Confirm Waste →</span>
+          <input type="range" id="swipe-waste-confirm" class="swipe-slider-input" min="0" max="100" value="0">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Tab Bar -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a class="active" href="inventory.html">Inventory</a>
+    <a class="active" href="inventory.html">Stock</a>
     <a href="prep.html">Prep</a>
     <a href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
+
+<script>
+  var openWasteBtn = document.getElementById("btn-open-waste");
+  var wasteBackdrop = document.getElementById("waste-sheet-backdrop");
+  var closeWasteBtn = document.getElementById("btn-close-waste");
+  var wasteQtyInput = document.getElementById("waste-qty");
+  var wasteDecBtn = document.getElementById("btn-waste-dec");
+  var wasteIncBtn = document.getElementById("btn-waste-inc");
+  var swipeConfirm = document.getElementById("swipe-waste-confirm");
+  var swipeLabel = document.getElementById("swipe-label");
+
+  // Open & Close Waste Sheet
+  openWasteBtn.addEventListener("click", function() {
+    wasteBackdrop.classList.add("active");
+  });
+
+  function closeWaste() {
+    wasteBackdrop.classList.remove("active");
+    swipeConfirm.value = 0;
+    swipeLabel.textContent = "Slide Right to Confirm Waste →";
+  }
+  closeWasteBtn.addEventListener("click", closeWaste);
+  wasteBackdrop.addEventListener("click", function(e) {
+    if (e.target === wasteBackdrop) closeWaste();
+  });
+
+  // Stepper handlers
+  wasteDecBtn.addEventListener("click", function() {
+    var val = parseFloat(wasteQtyInput.value) || 1.0;
+    if (val > 0.5) {
+      wasteQtyInput.value = (val - 0.5).toFixed(1);
+    }
+  });
+
+  wasteIncBtn.addEventListener("click", function() {
+    var val = parseFloat(wasteQtyInput.value) || 1.0;
+    if (val < 3.5) {
+      wasteQtyInput.value = (val + 0.5).toFixed(1);
+    }
+  });
+
+  // Reason Chips Click
+  var reasonChips = document.querySelectorAll("#waste-reason-chips .chip");
+  reasonChips.forEach(function(chip) {
+    chip.addEventListener("click", function() {
+      reasonChips.forEach(function(c) { c.classList.remove("active"); });
+      chip.classList.add("active");
+    });
+  });
+
+  // Swipe slider logic
+  swipeConfirm.addEventListener("input", function() {
+    if (parseInt(swipeConfirm.value, 10) >= 95) {
+      swipeConfirm.value = 100;
+      swipeLabel.textContent = "✓ Waste Recorded!";
+      var qty = wasteQtyInput.value;
+      setTimeout(function() {
+        alert("Waste Confirmed: " + qty + " Liters deducted from Lot #LOT-8821 as Spoilage. Logged to Audit History.");
+        closeWaste();
+      }, 250);
+    }
+  });
+</script>
 </body>
 </html>

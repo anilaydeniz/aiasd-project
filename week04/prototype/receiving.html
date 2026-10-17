@@ -3,47 +3,197 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KitchenOps - Goods Receiving</title>
+<title>KitchenOps - Goods Receiving &amp; Barcode Intake</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <!-- serves: REQ-005, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Receive Delivery</h1>
+    <div>
+      <span class="meta">INBOUND DELIVERY</span>
+      <h1 style="margin: 0;">Goods Receiving</h1>
+    </div>
     <a href="home.html" class="meta">Dashboard</a>
   </div>
-  <p>Record newly arrived wholesale ingredient crates with batch numbers and expiration dates for FIFO intake.</p>
 
-  <form action="inventory.html">
-    <label for="ing-select">Delivered Ingredient</label>
-    <select id="ing-select" required>
-      <option value="flour" selected>All-Purpose Flour (25 kg bag)</option>
-      <option value="cream">Cooking Cream 35% (4 × 5 L crate)</option>
-      <option value="pasta">Rigatoni Pasta (10 kg box)</option>
-    </select>
+  <p>Record wholesale deliveries, check waybills, and scan barcode crate labels for FIFO lot intake.</p>
 
-    <label for="quantity">Received Quantity</label>
-    <input id="quantity" type="number" min="1" value="25" required>
+  <!-- Delivery Information Form -->
+  <form id="receiving-form" action="inventory.html">
+    <div class="card">
+      <div>
+        <label for="supplier">Supplier Name</label>
+        <input id="supplier" type="text" placeholder="Supplier Name" value="Metro Food Wholesale Ltd." required>
+      </div>
 
-    <label for="batch-id">Batch / Lot Number</label>
-    <input id="batch-id" type="text" value="LOT-FL-20261013" required>
+      <div style="margin-top: 6px;">
+        <label for="invoice-no">Invoice / Waybill #</label>
+        <input id="invoice-no" type="text" placeholder="Waybill Number" value="INV-2026-881" required>
+      </div>
+    </div>
 
-    <label for="exp-date">Lot Expiry Date</label>
-    <input id="exp-date" type="date" value="2027-04-15" required>
+    <!-- Crate / Barcode Scanner Trigger Button -->
+    <button type="button" class="button secondary" id="btn-scan-receiving" style="border-color: #2b6cb0;">
+      <span>📷</span> Scan Crate Barcode / QR (Camera Viewfinder)
+    </button>
 
-    <button class="button" type="submit">Verify &amp; Increment Stock</button>
+    <!-- Dynamic Received Items List -->
+    <div>
+      <div class="row" style="margin-bottom: 6px;">
+        <label style="margin: 0;">Delivered Line Items</label>
+        <span class="meta" id="items-count">1 Item Ready</span>
+      </div>
+
+      <div class="list" id="receiving-items-list">
+        <!-- Default Item Row (25kg Flour for TC-005-01) -->
+        <div class="card item-card-row">
+          <div class="row">
+            <strong style="color: #2b6cb0;" class="item-name-title">All-Purpose Flour (25 kg bag)</strong>
+            <button type="button" class="badge" style="background: #fed7d7; color: #9b2c2c; border: none; cursor: pointer;" onclick="this.closest('.item-card-row').remove();">✕</button>
+          </div>
+          <div class="row" style="margin-top: 6px; gap: 8px;">
+            <div style="flex: 1;">
+              <span class="meta">Qty (kg / units)</span>
+              <input type="number" class="item-qty" min="1" value="25" style="min-height: 40px; padding: 6px;" required>
+            </div>
+            <div style="flex: 1.2;">
+              <span class="meta">Lot / Batch #</span>
+              <input type="text" class="item-lot" value="LOT-FL-20261013" style="min-height: 40px; padding: 6px;" required>
+            </div>
+          </div>
+          <div style="margin-top: 6px;">
+            <span class="meta">Lot Expiry Date</span>
+            <input type="date" class="item-exp" value="2027-04-15" style="min-height: 40px; padding: 6px;" required>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="button secondary" id="btn-add-item-row" style="margin-top: 8px; min-height: 44px; font-size: 0.88rem;">
+        + Add Another Item Row
+      </button>
+    </div>
+
+    <!-- Main Submit CTA Button -->
+    <button class="button" id="btn-save-receiving" type="submit" style="margin-top: 6px;">
+      ✓ Verify &amp; Add to Active Stock
+    </button>
   </form>
 
-  <a class="button secondary" href="home.html">Cancel</a>
+  <a class="button secondary" href="home.html">Cancel &amp; Return to Dashboard</a>
 
+  <!-- Barcode / QR Camera Modal Component (#scanner_modal) -->
+  <div class="scanner-modal hidden" id="scanner-modal">
+    <div style="text-align: center;">
+      <h2 style="color: #fff; margin: 0;">Align Crate Barcode</h2>
+      <p class="meta" style="color: #cbd5e0; margin-top: 4px;">Point phone camera at wholesale shipping barcode</p>
+    </div>
+
+    <div class="scanner-viewfinder" id="reader">
+      <div class="scanner-laser"></div>
+      <div style="font-size: 3rem; opacity: 0.3;">📦</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 260px;">
+      <button type="button" class="button" id="btn-simulate-scan" style="background: #38a169;">
+        ⚡ Tap to Simulate Scan
+      </button>
+      <button type="button" class="button secondary" id="btn-close-scanner" style="color: #fff; border-color: #cbd5e0; background: transparent;">
+        ✕ Close Scanner
+      </button>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Tab Bar -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a href="inventory.html">Inventory</a>
+    <a href="inventory.html">Stock</a>
     <a href="prep.html">Prep</a>
     <a href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
+
+<script>
+  var scanBtn = document.getElementById("btn-scan-receiving");
+  var scannerModal = document.getElementById("scanner-modal");
+  var closeScannerBtn = document.getElementById("btn-close-scanner");
+  var simulateScanBtn = document.getElementById("btn-simulate-scan");
+  var addRowBtn = document.getElementById("btn-add-item-row");
+  var itemsList = document.getElementById("receiving-items-list");
+
+  // Open & Close Camera Scanner Modal
+  scanBtn.addEventListener("click", function() {
+    scannerModal.classList.remove("hidden");
+  });
+
+  function closeScanner() {
+    scannerModal.classList.add("hidden");
+  }
+  closeScannerBtn.addEventListener("click", closeScanner);
+
+  // Barcode Scan Success Simulation
+  simulateScanBtn.addEventListener("click", function() {
+    // Haptic vibration simulation if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(100);
+    }
+    
+    // Add scanned crate directly to items list
+    var newCard = document.createElement("div");
+    newCard.className = "card item-card-row";
+    newCard.style.borderLeft = "4px solid #38a169";
+    newCard.innerHTML = `
+      <div class="row">
+        <strong style="color: #276749;">Cooking Cream 35% (4 × 5L crate)</strong>
+        <span class="badge success">Scanned ✓</span>
+      </div>
+      <div class="row" style="margin-top: 6px; gap: 8px;">
+        <div style="flex: 1;">
+          <span class="meta">Qty (Liters)</span>
+          <input type="number" class="item-qty" min="1" value="20" style="min-height: 40px; padding: 6px;" required>
+        </div>
+        <div style="flex: 1.2;">
+          <span class="meta">Lot / Batch #</span>
+          <input type="text" class="item-lot" value="LOT-CR-` + Date.now().toString().slice(-6) + `" style="min-height: 40px; padding: 6px;" required>
+        </div>
+      </div>
+      <div style="margin-top: 6px;">
+        <span class="meta">Lot Expiry Date</span>
+        <input type="date" class="item-exp" value="2026-12-15" style="min-height: 40px; padding: 6px;" required>
+      </div>
+    `;
+    itemsList.appendChild(newCard);
+    closeScanner();
+    alert("Barcode scanned successfully! Added Cooking Cream 35% (20L) crate to delivery sheet.");
+  });
+
+  // Add Item Row Manually
+  addRowBtn.addEventListener("click", function() {
+    var newCard = document.createElement("div");
+    newCard.className = "card item-card-row";
+    newCard.innerHTML = `
+      <div class="row">
+        <strong style="color: #2b6cb0;">Rigatoni Pasta (10 kg box)</strong>
+        <button type="button" class="badge" style="background: #fed7d7; color: #9b2c2c; border: none; cursor: pointer;" onclick="this.closest('.item-card-row').remove();">✕</button>
+      </div>
+      <div class="row" style="margin-top: 6px; gap: 8px;">
+        <div style="flex: 1;">
+          <span class="meta">Qty (kg)</span>
+          <input type="number" class="item-qty" min="1" value="10" style="min-height: 40px; padding: 6px;" required>
+        </div>
+        <div style="flex: 1.2;">
+          <span class="meta">Lot / Batch #</span>
+          <input type="text" class="item-lot" value="LOT-PA-` + Date.now().toString().slice(-4) + `" style="min-height: 40px; padding: 6px;" required>
+        </div>
+      </div>
+      <div style="margin-top: 6px;">
+        <span class="meta">Lot Expiry Date</span>
+        <input type="date" class="item-exp" value="2027-02-28" style="min-height: 40px; padding: 6px;" required>
+      </div>
+    `;
+    itemsList.appendChild(newCard);
+  });
+</script>
 </body>
 </html>
