@@ -4,7 +4,7 @@
 body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
        background: #e9ecef; color: #1d2329; }
 .phone { max-width: 390px; min-height: 100vh; margin: 0 auto; background: #fff;
-         padding: 24px 20px 80px 20px; display: flex; flex-direction: column; gap: 16px;
+         padding: 20px 20px 96px 20px; display: flex; flex-direction: column; gap: 16px;
          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); position: relative; }
 h1 { font-size: 1.5rem; margin: 8px 0 0; }
 h2 { font-size: 1.2rem; margin: 0; }
@@ -69,6 +69,29 @@ nav.tabs a.active, nav.tab-bar a.active { color: #1a365d; font-weight: 700; bord
 .alert-box { background: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px; border-radius: 6px; font-size: .9rem; }
 .alert-box.danger { background: #fff5f5; border-left-color: #e53e3e; }
 .alert-box.eighty-six { background: #fff5f5; border: 1px dashed #e53e3e; border-left: 4px solid #e53e3e; }
+
+/* Unified Kitchen Status Alert Card */
+.status-alert-card { background: #fff; border: 1px solid #fed7d7; border-left: 4px solid #e53e3e;
+                     border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.status-alert-header { display: flex; align-items: center; justify-content: space-between; }
+.status-alert-title { font-weight: 700; font-size: .88rem; color: #9b2c2c; display: flex; align-items: center; gap: 6px; }
+.status-alert-item { font-size: .85rem; line-height: 1.4; color: #2d3748; padding-top: 6px; border-top: 1px solid #edf2f7; }
+
+/* Modern Menu Card & List Items */
+.menu-card { background: #fff; border: 1px solid #dee2e6; border-radius: 10px;
+             overflow: hidden; display: flex; flex-direction: column; }
+.menu-item { display: flex; align-items: center; justify-content: space-between;
+             padding: 12px 14px; text-decoration: none; color: #2d3748;
+             border-bottom: 1px solid #edf2f7; transition: background .15s ease; }
+.menu-item:last-child { border-bottom: none; }
+.menu-item:hover, .menu-item:active { background: #f7fafc; }
+.menu-item-left { display: flex; align-items: center; gap: 10px; }
+.menu-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+.menu-text { display: flex; flex-direction: column; }
+.menu-title { font-weight: 600; font-size: .92rem; color: #1a202c; }
+.menu-desc { font-size: .78rem; color: #718096; }
+.menu-chevron { color: #a0aec0; font-weight: 600; font-size: 1rem; }
+
 .list { display: flex; flex-direction: column; gap: 8px; }
 .item-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #edf2f7; font-size: .9rem; }
 .item-row:last-child { border-bottom: none; }

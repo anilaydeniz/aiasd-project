@@ -28,34 +28,36 @@
 
   <p class="meta">Chef Ahmet · Shift: Lunch Prep Service</p>
 
-  <!-- High-Priority Alerts -->
-  <div class="alert-box danger">
-    <strong>Critical Safety Threshold:</strong> Cooking cream (3.5L) is below the 5.0L safety buffer.
-  </div>
-
-  <div class="alert-box">
-    <strong>FIFO 48h Spoilage Warning:</strong> Lot #LOT-8821 (Cooking Cream 35%) expires in 36 hours. Priority rotation required.
-  </div>
-
-  <!-- 86 List Smart Alert Card -->
-  <div class="alert-box eighty-six">
-    <div>
-      <strong>86 List (Dishes Closed for Service):</strong>
-      <p style="margin-top: 4px; color: #9b2c2c;">Tomato Sauce depleted → 🚫 <strong>Rigatoni Pomodoro</strong> marked 86. Line cooks notified.</p>
+  <!-- Unified Kitchen Status & Active Alerts Card -->
+  <div class="status-alert-card">
+    <div class="status-alert-header">
+      <div class="status-alert-title">
+        <span>⚠️</span> Kitchen Operational Alerts (3 Active)
+      </div>
+      <span class="badge danger">Attention Required</span>
+    </div>
+    <div class="status-alert-item" style="color: #9b2c2c; font-weight: 600;">
+      🚫 <strong>86 List:</strong> Tomato Sauce depleted → <em>Rigatoni Pomodoro</em> marked 86. Line cooks notified.
+    </div>
+    <div class="status-alert-item">
+      📉 <strong>Safety Buffer Breach:</strong> Cooking Cream 35% is at 3.5L (Below 5.0L threshold).
+    </div>
+    <div class="status-alert-item" style="color: #975a16;">
+      ⏳ <strong>FIFO 48h Spoilage:</strong> Lot #LOT-8821 (Cooking Cream) expires in 36h. Priority rotation required.
     </div>
   </div>
 
   <!-- Quick Action Buttons -->
   <div class="list">
-    <a class="button" id="btn-go-prep" href="prep.html">Log Prepared Dishes (Auto BOM Deplete)</a>
-    <a class="button secondary" id="btn-go-receiving" href="receiving.html">Receive Inbound Delivery (Barcode Intake)</a>
+    <a class="button" id="btn-go-prep" href="prep.html">🍳 Log Prepared Dishes (Auto Deplete)</a>
+    <a class="button secondary" id="btn-go-receiving" href="receiving.html">📦 Receive Inbound Delivery (Barcode Intake)</a>
   </div>
 
   <!-- Live Stock Summary Card -->
   <div class="card">
     <div class="row">
       <strong>Pantry Stock Glance</strong>
-      <a href="inventory.html" class="meta">View All →</a>
+      <a href="inventory.html" class="meta" style="color: #2b6cb0; font-weight: 600;">View All →</a>
     </div>
     <div class="list" style="margin-top: 6px;">
       <div class="item-row">
@@ -73,12 +75,54 @@
     </div>
   </div>
 
-  <!-- Direct Navigation Links -->
-  <div class="list">
-    <a class="button secondary" href="inventory.html">Live Inventory &amp; Order Sheet</a>
-    <a class="button secondary" href="batch_expiry.html">FIFO Shelf Expiry &amp; Waste Sheet</a>
-    <a class="button secondary" href="order.html">Review Purchase Orders (1 pending)</a>
-    <a class="button secondary" href="audit_log.html">Movement History &amp; Audit Log</a>
+  <!-- Operations & Management Navigation Menu Card -->
+  <div>
+    <span class="meta" style="font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Kitchen Management</span>
+    <div class="menu-card" style="margin-top: 6px;">
+      <a class="menu-item" href="inventory.html">
+        <div class="menu-item-left">
+          <span class="menu-icon">📦</span>
+          <div class="menu-text">
+            <span class="menu-title">Live Inventory</span>
+            <span class="menu-desc">Stock levels, category filters &amp; quick PO</span>
+          </div>
+        </div>
+        <span class="menu-chevron">→</span>
+      </a>
+
+      <a class="menu-item" href="batch_expiry.html">
+        <div class="menu-item-left">
+          <span class="menu-icon">⏳</span>
+          <div class="menu-text">
+            <span class="menu-title">FIFO Expiry &amp; Waste</span>
+            <span class="menu-desc">Shelf rotation, lot tracker &amp; spoil log</span>
+          </div>
+        </div>
+        <span class="menu-chevron">→</span>
+      </a>
+
+      <a class="menu-item" href="order.html">
+        <div class="menu-item-left">
+          <span class="menu-icon">📋</span>
+          <div class="menu-text">
+            <span class="menu-title">Purchase Orders</span>
+            <span class="menu-desc">Review and dispatch wholesale supplier POs</span>
+          </div>
+        </div>
+        <span class="menu-chevron">→</span>
+      </a>
+
+      <a class="menu-item" href="audit_log.html">
+        <div class="menu-item-left">
+          <span class="menu-icon">📜</span>
+          <div class="menu-text">
+            <span class="menu-title">Movement History &amp; Audit</span>
+            <span class="menu-desc">Timestamped depletion &amp; intake logs</span>
+          </div>
+        </div>
+        <span class="menu-chevron">→</span>
+      </a>
+    </div>
   </div>
 
   <!-- Fixed Bottom Tab Bar -->
