@@ -26,6 +26,7 @@ A clickable mobile-first prototype demonstrating the core workflows of KitchenOp
 9. **`receiving.html`** (REQ-005, REQ-006) — Inbound goods receiving screen for newly delivered crates with batch lot dates.
 10. **`prep_cancel.html`** (REQ-002, REQ-006) — Revert & cancellation screen for accidental prep portions (#TX-9042) to restore depleted ingredient stocks.
 11. **`batch_expiry.html`** (REQ-004, REQ-006) — Physical shelf location and FIFO batch tracking screen with 48h spoilage alerts.
+12. **`audit_log.html`** (REQ-002, REQ-005, REQ-006) — Audit trail and movement history screen tracing all prep depletions, goods receipts, and spoilage waste.
 
 ---
 
