@@ -1,75 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KitchenOps - Verify Code</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KitchenOps - Verify Code</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<!-- serves: REQ-001, REQ-006 -->
-<main class="phone">
-  <h1>Enter the code</h1>
-  <p>We sent a 4-digit code to your e-mail address. It is valid for 10 minutes.</p>
+  <!-- serves: REQ-001, REQ-006 -->
+  <main class="phone">
+    <h1>Enter the code</h1>
+    <p>We sent a 4-digit code to your e-mail address. It is valid for 10 minutes.</p>
 
-  <form id="code-form">
-    <label>4-Digit Passcode</label>
-    
-    <!-- 4 Numeric OTP Boxes for Kitchen Line Ergonomics -->
-    <div class="otp-container">
-      <input type="tel" maxlength="1" class="otp-box" id="otp-1" autofocus required>
-      <input type="tel" maxlength="1" class="otp-box" id="otp-2" required>
-      <input type="tel" maxlength="1" class="otp-box" id="otp-3" required>
-      <input type="tel" maxlength="1" class="otp-box" id="otp-4" required>
-    </div>
+    <form id="code-form">
+      <label>4-Digit Passcode</label>
 
-    <!-- Hidden standard input to preserve existing test case automated selectors if any -->
-    <input type="hidden" id="code" value="">
+      <!-- 4 Numeric OTP Boxes for Kitchen Line Ergonomics -->
+      <div class="otp-container">
+        <input type="tel" maxlength="1" class="otp-box" id="otp-1" autofocus required>
+        <input type="tel" maxlength="1" class="otp-box" id="otp-2" required>
+        <input type="tel" maxlength="1" class="otp-box" id="otp-3" required>
+        <input type="tel" maxlength="1" class="otp-box" id="otp-4" required>
+      </div>
 
-    <p id="wrong" class="error hidden">Wrong code. Check the e-mail and try again.</p>
+      <!-- Hidden standard input to preserve existing test case automated selectors if any -->
+      <input type="hidden" id="code" value="">
 
-    <button class="button" id="btn-verify" type="submit">Log in</button>
-  </form>
+      <p id="wrong" class="error hidden">Wrong code. Check the e-mail and try again.</p>
 
-  <a class="button secondary" href="index.html">Send a new code</a>
-</main>
+      <button class="button" id="btn-verify" type="submit">Log in</button>
+    </form>
 
-<script>
-  var box1 = document.getElementById("otp-1");
-  var box2 = document.getElementById("otp-2");
-  var box3 = document.getElementById("otp-3");
-  var box4 = document.getElementById("otp-4");
-  var codeHidden = document.getElementById("code");
-  var wrongMsg = document.getElementById("wrong");
+    <a class="button secondary" href="index.html">Send a new code</a>
+  </main>
 
-  var boxes = [box1, box2, box3, box4];
+  <script>
+    var box1 = document.getElementById("otp-1");
+    var box2 = document.getElementById("otp-2");
+    var box3 = document.getElementById("otp-3");
+    var box4 = document.getElementById("otp-4");
+    var codeHidden = document.getElementById("code");
+    var wrongMsg = document.getElementById("wrong");
 
-  boxes.forEach(function(box, idx) {
-    box.addEventListener("input", function() {
-      wrongMsg.classList.add("hidden");
-      if (box.value.length === 1 && idx < 3) {
-        boxes[idx + 1].focus();
-      }
-      codeHidden.value = boxes.map(function(b) { return b.value; }).join("");
+    var boxes = [box1, box2, box3, box4];
+
+    boxes.forEach(function (box, idx) {
+      box.addEventListener("input", function () {
+        wrongMsg.classList.add("hidden");
+        if (box.value.length === 1 && idx < 3) {
+          boxes[idx + 1].focus();
+        }
+        codeHidden.value = boxes.map(function (b) { return b.value; }).join("");
+      });
+
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Backspace" && box.value === "" && idx > 0) {
+          boxes[idx - 1].focus();
+        }
+      });
     });
 
-    box.addEventListener("keydown", function(e) {
-      if (e.key === "Backspace" && box.value === "" && idx > 0) {
-        boxes[idx - 1].focus();
+    document.getElementById("code-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var entered = boxes.map(function (b) { return b.value; }).join("");
+      codeHidden.value = entered;
+      if (entered === "1234") {
+        window.location.href = "home.html";
+      } else {
+        wrongMsg.classList.remove("hidden");
       }
     });
-  });
-
-  document.getElementById("code-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var entered = boxes.map(function(b) { return b.value; }).join("");
-    codeHidden.value = entered;
-    if (entered === "1234") {
-      window.location.href = "home.html";
-    } else {
-      wrongMsg.classList.remove("hidden");
-    }
-  });
-</script>
+  </script>
 </body>
+
 </html>

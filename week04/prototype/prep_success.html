@@ -9,43 +9,67 @@
 <body>
 <!-- serves: REQ-002, REQ-006 -->
 <main class="phone">
-  <div class="row">
-    <div>
-      <span class="meta">BOM CONFIRMATION</span>
-      <h1 style="margin: 0;">Stock Depleted</h1>
-    </div>
-    <span class="badge success">Success</span>
+  <div class="hero-box success">
+    <div class="hero-icon" style="color: #276749;">✓</div>
+    <h1 class="hero-title" style="color: #22543d;">Stock Depleted Successfully</h1>
+    <p class="hero-desc">Calibrated BOM deduction applied to Walk-In Chiller. Transaction #TX-9042 logged to permanent audit trail.</p>
   </div>
 
-  <p>Raw ingredient quantities have been deducted from central walk-in inventory based on standard recipe portion ratios.</p>
-
-  <div class="card" style="border-left: 4px solid #38a169; background: #f0fff4;">
+  <div class="card" style="border-left: 4px solid #38a169;">
     <div class="row">
-      <strong>Audit Log #TX-9042 Generated</strong>
-      <span class="badge success">Verified</span>
+      <strong>Rigatoni Pomodoro</strong>
+      <span class="badge success">10 Portions</span>
     </div>
-    <p class="meta" style="margin-top: 4px;">Recipe: Rigatoni Pomodoro · 10 portions</p>
     <div class="list" style="margin-top: 10px;">
       <div class="item-row">
         <span>Pasta (Rigatoni)</span>
-        <span>14.5 kg → <strong>13.3 kg</strong> (-1.2 kg)</span>
+        <span>14.5 kg → <strong>13.3 kg</strong> <span style="color: #c53030; font-weight: 700;">(-1.2 kg)</span></span>
       </div>
       <div class="item-row">
         <span>Tomato Sauce Base</span>
-        <span>8.2 kg → <strong>7.4 kg</strong> (-0.8 kg)</span>
+        <span>8.2 kg → <strong>7.4 kg</strong> <span style="color: #c53030; font-weight: 700;">(-0.8 kg)</span></span>
       </div>
       <div class="item-row">
         <span>FIFO Rotation</span>
-        <span>Oldest Lot #P-201 depleted first</span>
+        <span class="meta">Lot #P-201 (Oldest batch prioritized)</span>
       </div>
     </div>
   </div>
 
-  <div class="list">
-    <a class="button" href="inventory.html">View Updated Inventory</a>
-    <a class="button secondary" href="prep.html">Log Another Dish</a>
-    <a class="button secondary" href="prep_cancel.html" style="border-color: #feb2b2; color: #c53030;">Undo / Cancel This Entry</a>
-    <a class="button secondary" href="home.html">Return to Dashboard</a>
+  <a class="button" href="inventory.html">📦 View Updated Stock in Inventory</a>
+
+  <!-- Secondary Actions Menu Card -->
+  <div class="menu-card" style="margin-top: 4px;">
+    <a class="menu-item" href="prep.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">🍳</span>
+        <div class="menu-text">
+          <span class="menu-title">Log Another Dish</span>
+          <span class="menu-desc">Prepare and deplete another recipe</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
+    <a class="menu-item" href="prep_cancel.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">↩</span>
+        <div class="menu-text">
+          <span class="menu-title" style="color: #c53030;">Revert / Undo Prep Entry</span>
+          <span class="menu-desc">Rollback portion count and restore stock</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
+    <a class="menu-item" href="home.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">🏠</span>
+        <div class="menu-text">
+          <span class="menu-title">Return to Dashboard</span>
+          <span class="menu-desc">Back to kitchen operations hub</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
   </div>
 
   <!-- Fixed Bottom Tabs -->

@@ -9,37 +9,51 @@
 <body>
 <!-- serves: REQ-003, REQ-006 -->
 <main class="phone">
-  <div class="row">
-    <div>
-      <span class="meta">PROCUREMENT CONFIRMED</span>
-      <h1 style="margin: 0;">Order Dispatched</h1>
-    </div>
-    <span class="badge success">Sent</span>
+  <div class="hero-box success">
+    <div class="hero-icon" style="color: #276749;">✓</div>
+    <h1 class="hero-title" style="color: #22543d;">Purchase Order Dispatched</h1>
+    <p class="hero-desc">PO-2026-041 successfully transmitted to Metro Food Wholesale. EDI confirmation received.</p>
   </div>
-  <p>Wholesale replenishment purchase order has been generated and dispatched to the supplier.</p>
 
-  <div class="card" style="border-left: 4px solid #38a169; background: #f0fff4;">
-    <strong>PO-2026-041 Confirmed</strong>
-    <p class="meta" style="margin-top: 4px;">Supplier: Wholesale Dairy &amp; Produce Logistics</p>
+  <div class="card" style="border-left: 4px solid #38a169;">
+    <div class="row">
+      <strong>PO-2026-041 Confirmed</strong>
+      <span class="badge success">Dispatched</span>
+    </div>
+    <p class="meta" style="margin-top: 4px;">Supplier: Metro Food Wholesale Ltd.</p>
     <div class="list" style="margin-top: 10px;">
       <div class="item-row">
-        <span>Requested Item</span>
+        <span>Replenish Item</span>
         <strong>20.0 L Cooking Cream (4 × 5L)</strong>
       </div>
       <div class="item-row">
-        <span>Delivery ETA</span>
-        <span>Tomorrow morning (08:30)</span>
+        <span>Delivery Window</span>
+        <span style="color: #276749; font-weight: 700;">Tomorrow morning (08:30)</span>
+      </div>
+      <div class="item-row">
+        <span>Order Amount</span>
+        <strong style="color: #2b6cb0;">€76.00 / 2,650 TL</strong>
       </div>
       <div class="item-row">
         <span>Status</span>
-        <span class="badge success">Awaiting Supplier Shipment</span>
+        <span class="badge success">Awaiting Dock Intake</span>
       </div>
     </div>
   </div>
 
-  <div class="list">
-    <a class="button" href="inventory.html">Back to Inventory</a>
-    <a class="button secondary" href="home.html">Return to Dashboard</a>
+  <a class="button" href="inventory.html">📦 Return to Live Inventory</a>
+
+  <div class="menu-card" style="margin-top: 4px;">
+    <a class="menu-item" href="home.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">🏠</span>
+        <div class="menu-text">
+          <span class="menu-title">Return to Dashboard</span>
+          <span class="menu-desc">Back to kitchen operations hub</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
   </div>
 
   <!-- Fixed Bottom Tabs -->

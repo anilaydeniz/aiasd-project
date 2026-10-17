@@ -9,47 +9,62 @@
 <body>
 <!-- serves: REQ-002, REQ-006 -->
 <main class="phone">
-  <div class="row">
-    <div>
-      <span class="meta">AUDIT CORRECTION</span>
-      <h1 style="margin: 0;">Revert Prep Entry</h1>
-    </div>
-    <span class="badge danger">Correction</span>
+  <div class="hero-box warning">
+    <div class="hero-icon" style="color: #c05621;">↩</div>
+    <h1 class="hero-title" style="color: #9c4221;">Revert Preparation Entry</h1>
+    <p class="hero-desc">Rolling back transaction #TX-9042 will restore deducted quantities directly into active storage.</p>
   </div>
 
-  <p>Undo an incorrect portion count or cancel an accidental dish preparation log to reinstate raw ingredient balances.</p>
-
-  <div class="card" style="border-left: 4px solid #e53e3e; background: #fff5f5;">
+  <div class="card" style="border-left: 4px solid #dd6b20;">
     <div class="row">
-      <strong>Target Audit Log: #TX-9042</strong>
+      <strong>Restoration Target: #TX-9042</strong>
       <span class="badge warning">Pending Rollback</span>
     </div>
-    <p class="meta" style="margin-top: 4px;">Recipe: Rigatoni Pomodoro · Accidental Entry</p>
+    <p class="meta" style="margin-top: 4px;">Recipe: Rigatoni Pomodoro · Correction</p>
     <div class="list" style="margin-top: 10px;">
       <div class="item-row">
         <span>Pasta (Rigatoni)</span>
-        <span style="color: #276749; font-weight: 700;">+1.20 kg Restored</span>
+        <strong style="color: #276749;">+1.20 kg Restored</strong>
       </div>
       <div class="item-row">
         <span>Tomato Sauce Base</span>
-        <span style="color: #276749; font-weight: 700;">+0.80 kg Restored</span>
+        <strong style="color: #276749;">+0.80 kg Restored</strong>
       </div>
       <div class="item-row">
-        <span>Inventory Destination</span>
-        <span>Reinstated to Central Walk-In</span>
+        <span>Destination</span>
+        <span class="meta">Walk-in Chiller (Central Depot)</span>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <strong>Reason for Cancellation:</strong>
-    <p class="meta" style="margin-top: 4px;">Chef over-portioning entry error (accidentally logged 100 instead of 10 portions during peak rush).</p>
+  <div class="card" style="background: #f8fafc;">
+    <strong>Reason for Correction:</strong>
+    <p class="meta" style="margin-top: 4px;">Over-portioning input error during lunch rush (accidentally entered 100 instead of 10).</p>
   </div>
 
-  <div class="list">
-    <a class="button danger" href="inventory.html">Confirm Cancellation &amp; Restore Stock</a>
-    <a class="button secondary" href="prep.html">Back to Dish Prep</a>
-    <a class="button secondary" href="home.html">Return to Dashboard</a>
+  <a class="button danger" href="inventory.html">Confirm Cancellation &amp; Restore Stock</a>
+
+  <div class="menu-card" style="margin-top: 4px;">
+    <a class="menu-item" href="prep.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">🍳</span>
+        <div class="menu-text">
+          <span class="menu-title">Keep Entry &amp; Back to Prep</span>
+          <span class="menu-desc">Discard rollback and return to dish preparation</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
+    <a class="menu-item" href="home.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">🏠</span>
+        <div class="menu-text">
+          <span class="menu-title">Return to Dashboard</span>
+          <span class="menu-desc">Back to kitchen operations hub</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
   </div>
 
   <!-- Fixed Bottom Tabs -->

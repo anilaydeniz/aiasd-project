@@ -20,36 +20,56 @@
 
   <div class="card" style="border-left: 4px solid #dd6b20;">
     <div class="row">
-      <strong>PO-2026-041 (Wholesale Dairy)</strong>
-      <span class="badge danger">Urgent</span>
+      <div>
+        <span class="meta">PO-2026-041 DRAFT</span>
+        <h2 style="margin: 0;">Metro Food Wholesale Ltd.</h2>
+      </div>
+      <span class="badge danger">Urgent Buffer Breach</span>
     </div>
-    <p class="meta" style="margin-top: 4px;">Triggered by: Cooking Cream dropping below 5.0 L threshold</p>
+    <p class="meta" style="margin-top: 4px;">Triggered by: Cooking Cream 35% dropping below 5.0 L safety buffer.</p>
 
     <div class="list" style="margin-top: 10px;">
       <div class="item-row">
-        <span>Cooking Cream 35%</span>
-        <strong>20.0 Liters</strong>
+        <span>Replenish Item</span>
+        <strong>Cooking Cream 35% (Dairy)</strong>
       </div>
       <div class="item-row">
-        <span>Current Stock Level</span>
-        <span class="meta">3.5 L (Deficit: -1.5 L)</span>
+        <span>Current Depot Stock</span>
+        <strong style="color: #c53030;">3.5 L (Deficit: -1.5 L)</strong>
       </div>
       <div class="item-row">
-        <span>Recommended Batch</span>
-        <span class="meta">4 crates × 5L container</span>
+        <span>Order Quantity</span>
+        <span>4 crates × 5L (<strong>20.0 Liters</strong>)</span>
       </div>
       <div class="item-row">
         <span>Estimated Cost</span>
-        <strong style="color: #2b6cb0;">€76.00 / 2,650 TL</strong>
+        <strong style="color: #2b6cb0; font-size: 1.05rem;">€76.00 / 2,650 TL</strong>
+      </div>
+      <div class="item-row">
+        <span>Estimated Delivery</span>
+        <span class="badge success">Tomorrow 08:30 (Prep Shift)</span>
       </div>
     </div>
   </div>
 
   <form action="order_success.html">
-    <button class="button" type="submit">Dispatch Purchase Order</button>
+    <button class="button" type="submit" style="margin-top: 4px;">
+      🚀 Dispatch Purchase Order to Supplier
+    </button>
   </form>
 
-  <a class="button secondary" href="inventory.html">Back to Inventory</a>
+  <div class="menu-card" style="margin-top: 4px;">
+    <a class="menu-item" href="inventory.html">
+      <div class="menu-item-left">
+        <span class="menu-icon">📦</span>
+        <div class="menu-text">
+          <span class="menu-title">Back to Live Inventory</span>
+          <span class="menu-desc">Review central stock levels and FIFO lots</span>
+        </div>
+      </div>
+      <span class="menu-chevron">→</span>
+    </a>
+  </div>
 
   <!-- Fixed Bottom Tabs -->
   <nav class="tabs">
