@@ -18,14 +18,14 @@
     
     <!-- 4 Numeric OTP Boxes for Kitchen Line Ergonomics -->
     <div class="otp-container">
-      <input type="tel" maxlength="1" class="otp-box" id="otp-1" value="1" autofocus required>
-      <input type="tel" maxlength="1" class="otp-box" id="otp-2" value="2" required>
-      <input type="tel" maxlength="1" class="otp-box" id="otp-3" value="3" required>
-      <input type="tel" maxlength="1" class="otp-box" id="otp-4" value="4" required>
+      <input type="tel" maxlength="1" class="otp-box" id="otp-1" autofocus required>
+      <input type="tel" maxlength="1" class="otp-box" id="otp-2" required>
+      <input type="tel" maxlength="1" class="otp-box" id="otp-3" required>
+      <input type="tel" maxlength="1" class="otp-box" id="otp-4" required>
     </div>
 
     <!-- Hidden standard input to preserve existing test case automated selectors if any -->
-    <input type="hidden" id="code" value="1234">
+    <input type="hidden" id="code" value="">
 
     <p id="wrong" class="error hidden">Wrong code. Check the e-mail and try again.</p>
 
