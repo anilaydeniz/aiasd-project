@@ -10,21 +10,54 @@
 <!-- serves: REQ-002, REQ-004, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>KitchenOps</h1>
+    <div>
+      <span class="meta">ACTIVE STATION</span>
+      <h1 style="margin: 0;">KitchenOps</h1>
+    </div>
     <span class="badge success">Station Online</span>
   </div>
-  <p class="meta">Central Prep Kitchen · Shift: Lunch Prep</p>
 
-  <div class="alert-box danger">
-    <strong>Attention Required:</strong> Cooking cream (3.5L) is below the 5L safety threshold. Fresh dairy lot #B-104 expires in 36 hours.
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <label for="depot-select">Current Storage Zone</label>
+    <select id="depot-select">
+      <option value="walkin" selected>Central Kitchen — Walk-in Chiller</option>
+      <option value="line1">Hot Line — Station 1 Prep</option>
+      <option value="dry">Dry Goods &amp; Pantry</option>
+    </select>
   </div>
 
+  <p class="meta">Chef Ahmet · Shift: Lunch Prep Service</p>
+
+  <!-- High-Priority Alerts -->
+  <div class="alert-box danger">
+    <strong>Critical Safety Threshold:</strong> Cooking cream (3.5L) is below the 5.0L safety buffer.
+  </div>
+
+  <div class="alert-box">
+    <strong>FIFO 48h Spoilage Warning:</strong> Lot #LOT-8821 (Cooking Cream 35%) expires in 36 hours. Priority rotation required.
+  </div>
+
+  <!-- 86 List Smart Alert Card -->
+  <div class="alert-box eighty-six">
+    <div>
+      <strong>86 List (Dishes Closed for Service):</strong>
+      <p style="margin-top: 4px; color: #9b2c2c;">Tomato Sauce depleted → 🚫 <strong>Rigatoni Pomodoro</strong> marked 86. Line cooks notified.</p>
+    </div>
+  </div>
+
+  <!-- Quick Action Buttons -->
+  <div class="list">
+    <a class="button" id="btn-go-prep" href="prep.html">Log Prepared Dishes (Auto BOM Deplete)</a>
+    <a class="button secondary" id="btn-go-receiving" href="receiving.html">Receive Inbound Delivery (Barcode Intake)</a>
+  </div>
+
+  <!-- Live Stock Summary Card -->
   <div class="card">
     <div class="row">
-      <strong>Active Pantry Summary</strong>
-      <a href="inventory.html" class="meta">View all</a>
+      <strong>Pantry Stock Glance</strong>
+      <a href="inventory.html" class="meta">View All →</a>
     </div>
-    <div class="list" style="margin-top: 10px;">
+    <div class="list" style="margin-top: 6px;">
       <div class="item-row">
         <span>Pasta (Rigatoni)</span>
         <strong>14.5 kg</strong>
@@ -34,26 +67,26 @@
         <strong>8.2 kg</strong>
       </div>
       <div class="item-row">
-        <span>Cooking Cream</span>
-        <span class="badge danger">3.5 L (Low)</span>
+        <span>Cooking Cream 35%</span>
+        <span class="badge danger">3.5 L (Restock)</span>
       </div>
     </div>
   </div>
 
+  <!-- Direct Navigation Links -->
   <div class="list">
-    <a class="button" href="prep.html">Log Prepared Dishes</a>
-    <a class="button secondary" href="inventory.html">Live Inventory &amp; FIFO Alerts</a>
-    <a class="button secondary" href="batch_expiry.html">Expiring Batches &amp; Storage Shelves</a>
+    <a class="button secondary" href="inventory.html">Live Inventory &amp; Order Sheet</a>
+    <a class="button secondary" href="batch_expiry.html">FIFO Shelf Expiry &amp; Waste Sheet</a>
     <a class="button secondary" href="order.html">Review Purchase Orders (1 pending)</a>
-    <a class="button secondary" href="receiving.html">Receive Inbound Deliveries</a>
   </div>
 
+  <!-- Fixed Bottom Tab Bar -->
   <nav class="tabs">
     <a class="active" href="home.html">Dashboard</a>
-    <a href="inventory.html">Inventory</a>
+    <a href="inventory.html">Stock</a>
     <a href="prep.html">Prep</a>
     <a href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
 </body>

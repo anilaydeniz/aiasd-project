@@ -10,13 +10,20 @@
 <!-- serves: REQ-002, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Stock Depleted</h1>
+    <div>
+      <span class="meta">BOM CONFIRMATION</span>
+      <h1 style="margin: 0;">Stock Depleted</h1>
+    </div>
     <span class="badge success">Success</span>
   </div>
+
   <p>Raw ingredient quantities have been deducted from central walk-in inventory based on standard recipe portion ratios.</p>
 
-  <div class="card" style="border-color: #38a169; background: #f0fff4;">
-    <strong>Audit Log #TX-9042 Generated</strong>
+  <div class="card" style="border-left: 4px solid #38a169; background: #f0fff4;">
+    <div class="row">
+      <strong>Audit Log #TX-9042 Generated</strong>
+      <span class="badge success">Verified</span>
+    </div>
     <p class="meta" style="margin-top: 4px;">Recipe: Rigatoni Pomodoro · 10 portions</p>
     <div class="list" style="margin-top: 10px;">
       <div class="item-row">
@@ -41,12 +48,13 @@
     <a class="button secondary" href="home.html">Return to Dashboard</a>
   </div>
 
+  <!-- Fixed Bottom Tabs -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a href="inventory.html">Inventory</a>
+    <a href="inventory.html">Stock</a>
     <a class="active" href="prep.html">Prep</a>
     <a href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
 </body>

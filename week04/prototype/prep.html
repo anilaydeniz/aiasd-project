@@ -10,62 +10,172 @@
 <!-- serves: REQ-002, REQ-006 -->
 <main class="phone">
   <div class="row">
-    <h1>Log Prep Dish</h1>
+    <div>
+      <span class="meta">RECIPE DELETION</span>
+      <h1 style="margin: 0;">Log Prepared Dishes</h1>
+    </div>
     <a href="home.html" class="meta">Back</a>
   </div>
-  <p>Select completed recipe and portion count to automatically deduct raw stock using calibrated Bill of Materials.</p>
 
-  <form id="prep-form" action="prep_success.html">
-    <label for="recipe">Recipe Selection</label>
-    <select id="recipe" required>
-      <option value="rigatoni" selected>Rigatoni Pomodoro (120g pasta, 80g sauce)</option>
-      <option value="chicken_cream">Creamy Chicken Pasta (140g pasta, 60ml cream)</option>
-      <option value="caesar">Caesar Salad (150g romaine, 40g dressing)</option>
-    </select>
+  <p>Select the prepared recipe and portion count to automatically deduct raw ingredients from stock using calibrated Bill of Materials (BOM).</p>
 
-    <label for="portions">Completed Portions</label>
-    <input id="portions" type="number" min="1" max="100" value="10" required>
-    <p id="portions-error" class="error hidden">Please enter at least 1 portion.</p>
+  <form id="prep-form">
+    <div>
+      <label for="recipe-select">Recipe Selection</label>
+      <select id="recipe-select" required>
+        <option value="rigatoni" selected>Rigatoni Pomodoro (120g pasta, 80g sauce / portion)</option>
+        <option value="cream_chicken">Creamy Chicken Rigatoni (140g pasta, 60ml cream / portion)</option>
+        <option value="caesar">Caesar Salad (150g romaine, 40g dressing / portion)</option>
+      </select>
+    </div>
 
-    <div class="card" id="preview-box">
-      <strong>Calculated Raw Stock Depletion:</strong>
-      <div class="list" style="margin-top: 8px;">
+    <div>
+      <label for="portion-count">Portions Prepared (Touch Stepper)</label>
+      <div class="stepper-row">
+        <button type="button" class="btn-step" id="btn-dec" aria-label="Decrease portions">−</button>
+        <input type="number" id="portion-count" class="input-portion" min="1" max="200" value="10" required>
+        <button type="button" class="btn-step" id="btn-inc" aria-label="Increase portions">+</button>
+      </div>
+      <p id="portion-error" class="error hidden" style="margin-top: 6px;">Please enter at least 1 portion.</p>
+    </div>
+
+    <!-- Dynamic Raw Ingredient Preview Card -->
+    <div class="card highlight" id="ingredient-preview">
+      <div class="row">
+        <strong>Calculated BOM Deduction:</strong>
+        <span class="badge warning" id="portion-badge">10 Portions</span>
+      </div>
+      <div class="list" style="margin-top: 6px;">
         <div class="item-row">
           <span>Pasta (Rigatoni)</span>
-          <span style="color: #c53030; font-weight: 600;">-1.20 kg</span>
+          <span style="color: #c53030; font-weight: 700;" id="deduct-pasta">-1.20 kg</span>
         </div>
         <div class="item-row">
           <span>Tomato Sauce Base</span>
-          <span style="color: #c53030; font-weight: 600;">-0.80 kg</span>
+          <span style="color: #c53030; font-weight: 700;" id="deduct-sauce">-0.80 kg</span>
         </div>
         <div class="item-row">
           <span>FIFO Lot Source</span>
-          <span class="meta">Lot #P-201, Lot #S-108</span>
+          <span class="meta">Lot #P-201 (Oldest Batch)</span>
         </div>
       </div>
+      <p class="note" style="margin-top: 4px;">FIFO Rule: Oldest unexpired batch in storage is automatically prioritized for depletion.</p>
     </div>
 
-    <button class="button" type="submit">Confirm &amp; Deplete Stock</button>
+    <!-- 56px Touch Action Button -->
+    <button class="button" id="btn-confirm-deplete" type="submit">
+      Confirm &amp; Deplete Stock
+    </button>
   </form>
 
-  <a class="button secondary" href="home.html">Cancel</a>
-  <a class="button secondary" href="prep_cancel.html" style="margin-top: 8px; border-color: #feb2b2; color: #c53030;">Undo Recent Prep Entry</a>
+  <div class="list" style="margin-top: 4px;">
+    <a class="button secondary" href="prep_cancel.html" style="border-color: #feb2b2; color: #c53030;">
+      Undo / Revert Recent Prep Entry
+    </a>
+    <a class="button secondary" href="home.html">Back to Dashboard</a>
+  </div>
 
+  <!-- 7-Second Integrated Undo Toast -->
+  <div id="undo-toast" class="undo-toast hidden">
+    <div class="undo-toast-header">
+      <div>
+        <div class="undo-toast-text">Stock Depleted (#TX-9042)</div>
+        <div style="color: #cbd5e1; font-size: 0.78rem;">-1.2 kg pasta, -0.8 kg sauce applied</div>
+      </div>
+      <button type="button" class="btn-undo-action" id="btn-undo">UNDO (7s)</button>
+    </div>
+    <div class="undo-progress-bar">
+      <div class="undo-progress-fill" id="toast-progress"></div>
+    </div>
+    <div class="row" style="margin-top: 2px;">
+      <span class="note" style="color: #cbd5e1;">Mistake? Tap undo to rollback.</span>
+      <a href="prep_cancel.html" style="font-size: 0.78rem; color: #fed7d7; text-decoration: underline;">Full Cancel Details →</a>
+    </div>
+  </div>
+
+  <!-- Fixed Bottom Tab Bar -->
   <nav class="tabs">
     <a href="home.html">Dashboard</a>
-    <a href="inventory.html">Inventory</a>
+    <a href="inventory.html">Stock</a>
     <a class="active" href="prep.html">Prep</a>
     <a href="order.html">Orders</a>
-    <a href="index.html">Log out</a>
+    <a href="index.html">Logout</a>
   </nav>
 </main>
+
 <script>
-  document.getElementById("prep-form").addEventListener("submit", function(e) {
-    var val = parseInt(document.getElementById("portions").value, 10);
-    if (!val || val < 1) {
-      e.preventDefault();
-      document.getElementById("portions-error").classList.remove("hidden");
+  var portionsInput = document.getElementById("portion-count");
+  var btnDec = document.getElementById("btn-dec");
+  var btnInc = document.getElementById("btn-inc");
+  var deductPasta = document.getElementById("deduct-pasta");
+  var deductSauce = document.getElementById("deduct-sauce");
+  var portionBadge = document.getElementById("portion-badge");
+  var portionError = document.getElementById("portion-error");
+  var undoToast = document.getElementById("undo-toast");
+  var btnUndo = document.getElementById("btn-undo");
+  var prepForm = document.getElementById("prep-form");
+  var toastTimer = null;
+
+  function updatePreview() {
+    var val = parseInt(portionsInput.value, 10);
+    if (isNaN(val) || val < 1) {
+      portionBadge.textContent = "0 Portions";
+      deductPasta.textContent = "0.00 kg";
+      deductSauce.textContent = "0.00 kg";
+      return;
     }
+    portionBadge.textContent = val + " Portions";
+    var pastaKg = (val * 0.12).toFixed(2);
+    var sauceKg = (val * 0.08).toFixed(2);
+    deductPasta.textContent = "-" + pastaKg + " kg";
+    deductSauce.textContent = "-" + sauceKg + " kg";
+  }
+
+  btnDec.addEventListener("click", function() {
+    var cur = parseInt(portionsInput.value, 10) || 1;
+    if (cur > 1) {
+      portionsInput.value = cur - 1;
+      portionError.classList.add("hidden");
+      updatePreview();
+    }
+  });
+
+  btnInc.addEventListener("click", function() {
+    var cur = parseInt(portionsInput.value, 10) || 0;
+    portionsInput.value = cur + 1;
+    portionError.classList.add("hidden");
+    updatePreview();
+  });
+
+  portionsInput.addEventListener("input", function() {
+    portionError.classList.add("hidden");
+    updatePreview();
+  });
+
+  prepForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+    var val = parseInt(portionsInput.value, 10);
+    if (!val || val < 1) {
+      portionError.classList.remove("hidden");
+      return;
+    }
+
+    // Trigger 7-Second Undo Toast
+    undoToast.classList.remove("hidden");
+
+    if (toastTimer) clearTimeout(toastTimer);
+
+    // Transition to success after 7 seconds
+    toastTimer = setTimeout(function() {
+      window.location.href = "prep_success.html";
+    }, 7000);
+  });
+
+  // Rollback on Undo button click
+  btnUndo.addEventListener("click", function() {
+    if (toastTimer) clearTimeout(toastTimer);
+    undoToast.classList.add("hidden");
+    alert("Reversal Rollback: Audit Log #TX-9042 cancelled. Stock balances restored.");
   });
 </script>
 </body>
