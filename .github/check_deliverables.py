@@ -930,7 +930,9 @@ def week4() -> None:
         check(4, "store.json S1 is filled in", bool(ok),
               "week04/store.json S1 must have a date like 2026-10-13, your developer name, and a status of 'applied' or "
               "'verified'. Found: one of them missing or wrong.", DEADLINE)
-        ev = str(s1.get("evidence", "")).strip()
+        # a Windows path (week04\\store_s1.png) is the same file: the checker found it on the student's Windows
+        # machine and missed it on the instructor's Mac (Sezgin Coçar, 19 Oct 2026)
+        ev = str(s1.get("evidence", "")).strip().replace("\\", "/")
         ev_ok = (bool(ev) and ".." not in ev and not Path(ev).is_absolute() and ":" not in ev
                  and ((ROOT / ev).is_file() or (ROOT / "week04" / ev).is_file()))
         check(4, "store.json S1 screenshot is saved", ev_ok,
@@ -948,7 +950,274 @@ def week4() -> None:
     check_ai_log(4)
 
 
-CHECKS = {1: week1, 2: week2, 3: week3, 4: week4}
+# ── Week 5: design, API contract, server skeleton, tests first ─────────────────────────────
+# Decided 18 Oct 2026 (VC): FastAPI for everyone; the login rows of api.md written by hand
+# before any code; the server is read without running it (ast), because the instructor's
+# capture must never execute a student's code; the tests are counted by name, not run.
+
+HTTP_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
+REQ_HEADS = {"req", "reqs", "req id", "req ids", "requirement", "requirements", "gereksinim", "gereksinimler"}
+
+
+def _head(cell: str) -> str:
+    return re.sub(r"[`*_]", "", cell).strip().lower()
+
+
+def _col(head: list[str], *starts: str, exact: set[str] | None = None) -> int:
+    """The index of the first column whose header is in `exact` or starts with one of `starts`."""
+    for i, h in enumerate(head):
+        if (exact and h in exact) or (starts and h.startswith(starts)):
+            return i
+    return -1
+
+
+def md_table(text: str | None, *starts: str) -> tuple[list[str], list[list[str]]]:
+    """The first markdown table that has a column starting with one of `starts`: its headers
+    (lower case) and its rows. HTML comments are dropped first."""
+    lines = re.sub(r"<!--.*?-->", "", text or "", flags=re.DOTALL).splitlines()
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if not s.startswith("|"):
+            continue
+        head = [_head(c) for c in s.strip("|").split("|")]
+        if _col(head, *starts) < 0:
+            continue
+        rows = []
+        for ln in lines[i + 1:]:
+            r = ln.strip()
+            if not r.startswith("|"):
+                break
+            cells = [c.strip() for c in r.strip("|").split("|")]
+            if all(re.fullmatch(r":?-{2,}:?", c) for c in cells if c):
+                continue
+            rows.append(cells + [""] * (len(head) - len(cells)))
+        return head, rows
+    return [], []
+
+
+def design_components() -> list[dict]:
+    """The rows of the Components table of week05/DESIGN.md; a [bracketed] row is the scaffold's."""
+    head, rows = md_table(read("week05/DESIGN.md"), "component", "bileşen")
+    c = _col(head, "component", "bileşen")
+    w = _col(head, "what", "does", "ne yapar", "görev")
+    q = _col(head, exact=REQ_HEADS)
+    out = []
+    for r in rows:
+        name = r[c] if c >= 0 else ""
+        if not filled(name) or "[" in name:
+            continue
+        out.append({"name": name, "what": r[w] if w >= 0 else "",
+                    "reqs": re.findall(r"REQ-\d{3}", r[q]) if q >= 0 else []})
+    return out
+
+
+def norm_path(p: str) -> str:
+    """A path as the two sides are compared: no backticks, a changing part is {}, no trailing /."""
+    p = re.sub(r"[`*]", "", p).strip().split("?")[0].strip()
+    p = re.sub(r"\{[^}]*\}|<[^>]*>|:[A-Za-z_]\w*", "{}", p)
+    return p.rstrip("/") if len(p) > 1 else p
+
+
+def api_endpoints() -> list[dict]:
+    """The rows of week05/api.md that name a method and a path; a [bracketed] row is the scaffold's."""
+    head, rows = md_table(read("week05/api.md"), "method", "metot", "metod", "yöntem")
+    m_ = _col(head, "method", "metot", "metod", "yöntem")
+    p_ = _col(head, "path", "yol")
+    cols = {"request": _col(head, "request", "istek"), "response": _col(head, "response", "cevap", "yanıt"),
+            "errors": _col(head, "error", "hata"), "req": _col(head, exact=REQ_HEADS)}
+    out = []
+    for r in rows:
+        method = re.sub(r"[`*]", "", r[m_]).strip().upper() if m_ >= 0 else ""
+        raw = r[p_] if p_ >= 0 else ""
+        if method not in HTTP_METHODS or "[" in raw or not norm_path(raw).startswith("/"):
+            continue
+        get = {k: (r[i] if i >= 0 else "") for k, i in cols.items()}
+        out.append({"key": f"{method} {norm_path(raw)}", "request": get["request"], "response": get["response"],
+                    "errors": get["errors"], "reqs": re.findall(r"REQ-\d{3}", get["req"])})
+    return out
+
+
+def server_routes() -> dict[str, str]:
+    """'METHOD /path' -> file, for every route in server/ (tests excluded). Read with ast:
+    nothing of the student's code is run. Knows @app.get(...), APIRouter(prefix=...) and
+    app.include_router(router, prefix=...)."""
+    folder = ROOT / "server"
+    if not folder.is_dir():
+        return {}
+    trees = {}
+    for p in sorted(folder.rglob("*.py")):
+        rel = p.relative_to(folder).parts
+        if "tests" in rel or ".venv" in rel or "__pycache__" in rel:
+            continue
+        try:
+            trees[p] = ast.parse(p.read_text(encoding="utf-8", errors="replace"))
+        except SyntaxError:
+            continue
+
+    def text(node):
+        return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
+
+    def kw(call, name):
+        return next((text(k.value) for k in call.keywords if k.arg == name), None)
+
+    included: dict[tuple, str] = {}
+    for tree in trees.values():
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "include_router" and node.args):
+                a = node.args[0]
+                if isinstance(a, ast.Attribute) and isinstance(a.value, ast.Name):
+                    included[(a.value.id, a.attr)] = kw(node, "prefix") or ""
+                elif isinstance(a, ast.Name):
+                    included[(None, a.id)] = kw(node, "prefix") or ""
+    out: dict[str, str] = {}
+    for p, tree in trees.items():
+        routers: dict[str, str] = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign) and isinstance(node.value, ast.Call):
+                f = node.value.func
+                if (f.attr if isinstance(f, ast.Attribute) else getattr(f, "id", "")) == "APIRouter":
+                    for target in node.targets:
+                        if isinstance(target, ast.Name):
+                            routers[target.id] = kw(node.value, "prefix") or ""
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            for d in node.decorator_list:
+                if not (isinstance(d, ast.Call) and isinstance(d.func, ast.Attribute)
+                        and d.func.attr.upper() in HTTP_METHODS and isinstance(d.func.value, ast.Name)):
+                    continue
+                route = text(d.args[0]) if d.args else kw(d, "path")
+                if route is None:
+                    continue
+                var = d.func.value.id
+                prefix = ""
+                if var in routers:
+                    prefix = included.get((p.stem, var), included.get((None, var), "")) + routers[var]
+                out[f"{d.func.attr.upper()} {norm_path(prefix + route)}"] = str(p.relative_to(ROOT))
+    return out
+
+
+def tc_test_ids() -> list[str]:
+    """The test case ids in the names of the tests in server/tests/: test_TC_001_02_... -> TC-001-02."""
+    folder = ROOT / "server" / "tests"
+    ids = []
+    for p in sorted(folder.rglob("*.py")) if folder.is_dir() else []:
+        try:
+            tree = ast.parse(p.read_text(encoding="utf-8", errors="replace"))
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                m = re.match(r"test_TC_(\d{3})_(\d{2})(?:_|$)", node.name, re.I)
+                if m:
+                    ids.append(f"TC-{m.group(1)}-{m.group(2)}")
+    return ids
+
+
+def week5() -> None:
+    """The design and the API contract; the server skeleton in server/ with a route for every row
+    of api.md; the login tests written from the test cases before the code (they fail until
+    Week 6). On Saturday the requirements and the test cases become the baseline (no check:
+    the deadline capture is the record)."""
+    reqs = requirement_index()
+    live = {r: it for r, it in reqs.items() if not it.get("dropped")}
+    musts = sorted(r for r, it in live.items()
+                   if str(it.get("priority", "")).strip().lower() == "must" and filled(it.get("description")))
+
+    # --- the design --------------------------------------------------------------------
+    design = read("week05/DESIGN.md")
+    comps = design_components()
+    good = [c for c in comps if c["reqs"] and all(r in reqs for r in c["reqs"]) and len(filled(c["what"])) >= 10]
+    check(5, "week05/DESIGN.md has at least four components, each with what it does and the requirements it serves",
+          len(good) >= 4,
+          "week05/DESIGN.md is missing. Run the checker online to bring it." if design is None else
+          "week05/DESIGN.md must have at least four components in its table, each with what it does and the REQ ids "
+          f"it serves, ids that exist in requirements.json. Found: {pl(len(good), 'complete row')}.")
+    served = {r for c in comps for r in c["reqs"]}
+    missing = [r for r in musts if live[r].get("functional") is True and r not in served]
+    check(5, "every functional must requirement is served by a component in week05/DESIGN.md",
+          bool(musts) and not missing,
+          "Every functional requirement marked 'must' needs a component in week05/DESIGN.md that serves it. "
+          + ("Found: no 'must' requirements in requirements.json." if not musts else f"Found: no component serves {missing[:4]}."),
+          DEADLINE)
+    blocks = re.findall(r"```mermaid[^\n]*\n(.*?)```", design or "", re.DOTALL)
+    arrows = max((len(re.findall(r"-\.->|==+>|--+>", re.sub(r"(?m)^\s*%%.*$", "", b))) for b in blocks), default=0)
+    check(5, "week05/DESIGN.md has the architecture as a Mermaid diagram", arrows >= 2,
+          "week05/DESIGN.md must draw the architecture as a Mermaid diagram: your components, with at least two arrows "
+          f"between them. Found: {pl(arrows, 'arrow')}.", DEADLINE)
+
+    # --- the API contract ----------------------------------------------------------------
+    api = read("week05/api.md")
+    eps = api_endpoints()
+    login = [e for e in eps if "REQ-001" in e["reqs"]]
+    check(5, "week05/api.md has the login endpoints (REQ-001)", len(login) >= 2,
+          "week05/api.md is missing. Run the checker online to bring it." if api is None else
+          "week05/api.md must have at least two endpoints that serve REQ-001, the login: one that asks for a code and "
+          f"one that logs in with it. Found: {len(login)}.")
+    named = sorted({r for e in eps for r in e["reqs"]})
+    unknown = [r for r in named if r not in reqs]
+    check(5, "every REQ id in week05/api.md exists in requirements.json", bool(named) and not unknown,
+          "Every REQ id in week05/api.md must exist in week02/requirements.json. "
+          + ("Found: no REQ ids yet." if not named else f"Found: not there: {unknown[:3]}."))
+    thin = [e["key"] for e in eps if e["reqs"] and not (
+        filled(e["request"]) and re.search(r"\b2\d\d\b", e["response"]) and re.search(r"\b[45]\d\d\b", e["errors"]))]
+    check(5, "every endpoint in week05/api.md gives its request, its response and its errors",
+          any(e["reqs"] for e in eps) and not thin,
+          "Every endpoint in week05/api.md that serves a requirement must give its request, its response with a 2xx "
+          "status code, and at least one error with its 4xx or 5xx code. "
+          + ("Found: no endpoint that serves a requirement." if not any(e["reqs"] for e in eps) else f"Found: incomplete: {thin[:3]}."),
+          DEADLINE)
+
+    # --- the server ------------------------------------------------------------------------
+    src = read("server/main.py")
+    routes = server_routes()
+    # Like the collaborator checks of Week 4: the untouched starter must not earn free ticks, so these two
+    # count once the server has a route of the student's own; a missing or broken file always shows.
+    if src is None or not parses("server/main.py") or set(routes) - {"GET /health"}:
+        check(5, "server/main.py is valid Python", src is not None and parses("server/main.py"),
+              "server/main.py must be there and be valid Python. "
+              + ("Found: no such file. Run the checker online to bring the starter." if src is None else "Found: a syntax error."))
+        check(5, "server/main.py creates the FastAPI app", bool(src) and re.search(r"\bFastAPI\s*\(", src or "") is not None,
+              "server/main.py must create the app with FastAPI(...). Found: no FastAPI( in it.")
+    keys = {e["key"] for e in eps}
+    serving = any(e["reqs"] for e in eps)
+    unbuilt = sorted(keys - set(routes))
+    check(5, "every endpoint in week05/api.md has its route in server/", serving and not unbuilt,
+          "Every endpoint in week05/api.md must have a route in server/ with the same method and path; it may answer 501 "
+          "until it is built. " + ("Found: no endpoint that serves a requirement in week05/api.md yet." if not serving
+                                   else f"Found: no route for {unbuilt[:3]}."))
+    own = set(routes) - {"GET /health"}
+    undocumented = sorted(set(routes) - keys)
+    check(5, "every route in server/ has its row in week05/api.md", bool(own) and not undocumented,
+          "Every route in server/ must be a row of week05/api.md, with the same method and path. "
+          + ("Found: no routes in server/ besides /health." if not own else f"Found: not in api.md: {undocumented[:3]}."), DEADLINE)
+
+    # --- the tests, named by test case ids -------------------------------------------------
+    ids = tc_test_ids()
+    check(5, "server/tests has a test named by a test case id", bool(ids),
+          "server/tests/ must have at least one test whose name begins with a test case id, such as "
+          "test_TC_001_01_a_code_is_sent. Found: none.")
+    distinct = sorted(set(ids))
+    check(5, "server/tests has at least three tests named by different test case ids", len(distinct) >= 3,
+          f"server/tests/ must have at least three tests named by different test case ids. Found: {len(distinct)}.",
+          DEADLINE)
+    known = {str(c.get("id", "")).strip() for c in (test_cases() or [])}
+    strangers = [i for i in distinct if i not in known]
+    check(5, "every test case id in server/tests exists in test_cases.json", bool(distinct) and not strangers,
+          "Every test case id in a test name in server/tests/ must exist in week04/test_cases.json. "
+          + ("Found: no tests named by a test case id." if not distinct else f"Found: not there: {strangers[:3]}."),
+          DEADLINE)
+
+    # --- the log: verify by running ---------------------------------------------------------
+    check(5, "week05/ai_log_05.md holds the output of a test run",
+          bool(re.search(r"\b\d+ (passed|failed)\b", ai_log_evidence(5))),
+          "week05/ai_log_05.md must hold, in the Evidence block, the output of a test run as your terminal showed it, "
+          "down to its last line, such as '1 failed, 1 passed'. Found: no such line.", DEADLINE)
+    check_ai_log(5)
+
+
+CHECKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5}
 
 
 # ── secrets: this one runs for every week ────────────────────────────
@@ -1007,7 +1276,7 @@ def check_secrets() -> bool:
 #   change its entry here; `claude-private/scripts/check_tr_coverage.py` lists the ones that
 #   no longer match. Weeks in TR_WEEKS are fully covered; a later week is shown in English.
 
-TR_WEEKS = frozenset({1, 2, 3, 4})
+TR_WEEKS = frozenset({1, 2, 3, 4, 5})
 
 TR_RULES: list[tuple[str, str]] = [
     # --- every week: the AI log ---------------------------------------------------------------
@@ -1451,6 +1720,104 @@ TR_RULES: list[tuple[str, str]] = [
      "Bulunan: hiç REQ id'si yok."),
     ("week04/ai_log_04.md names the requirements it gave the assistant",
      "week04/ai_log_04.md asistana verilen gereksinimleri anıyor"),
+    # --- Week 5: design, API contract, server skeleton, tests -----------------------------
+    ("week05/DESIGN.md is missing. Run the checker online to bring it.",
+     "week05/DESIGN.md eksik. Dosyayı getirmek için checker'ı internete bağlıyken çalıştır."),
+    ("week05/DESIGN.md must have at least four components in its table, each with what it does and the REQ ids "
+     "it serves, ids that exist in requirements.json. Found: {n} {u}.",
+     "week05/DESIGN.md tablosunda en az dört bileşen olmalı; her birinin ne yaptığı ve hizmet ettiği, "
+     "requirements.json içinde bulunan REQ id'leri yazılı olmalı. Bulunan: {n} tam satır."),
+    ("week05/DESIGN.md has at least four components, each with what it does and the requirements it serves",
+     "week05/DESIGN.md en az dört bileşen içeriyor; her birinin ne yaptığı ve hizmet ettiği gereksinimler yazılı"),
+    ("Every functional requirement marked 'must' needs a component in week05/DESIGN.md that serves it. "
+     "Found: no 'must' requirements in requirements.json.",
+     "'must' işaretli her işlevsel gereksinime week05/DESIGN.md içinde hizmet eden bir bileşen gerekir. "
+     "Bulunan: requirements.json içinde 'must' gereksinim yok."),
+    ("Every functional requirement marked 'must' needs a component in week05/DESIGN.md that serves it. "
+     "Found: no component serves {x}.",
+     "'must' işaretli her işlevsel gereksinime week05/DESIGN.md içinde hizmet eden bir bileşen gerekir. "
+     "Bulunan: {x} gereksinimlerine hiçbir bileşen hizmet etmiyor."),
+    ("every functional must requirement is served by a component in week05/DESIGN.md",
+     "'must' işaretli her işlevsel gereksinime week05/DESIGN.md içinde bir bileşen hizmet ediyor"),
+    ("week05/DESIGN.md must draw the architecture as a Mermaid diagram: your components, with at least two arrows "
+     "between them. Found: {n} {u}.",
+     "week05/DESIGN.md mimariyi bir Mermaid diyagramı olarak çizmeli: bileşenlerin ve aralarında en az iki ok. "
+     "Bulunan: {n} ok."),
+    ("week05/DESIGN.md has the architecture as a Mermaid diagram",
+     "week05/DESIGN.md mimariyi bir Mermaid diyagramı olarak içeriyor"),
+    ("week05/api.md is missing. Run the checker online to bring it.",
+     "week05/api.md eksik. Dosyayı getirmek için checker'ı internete bağlıyken çalıştır."),
+    ("week05/api.md must have at least two endpoints that serve REQ-001, the login: one that asks for a code and "
+     "one that logs in with it. Found: {n}.",
+     "week05/api.md içinde REQ-001'e, yani girişe hizmet eden en az iki endpoint olmalı: biri kod ister, diğeri o "
+     "kodla giriş yapar. Bulunan: {n}."),
+    ("week05/api.md has the login endpoints (REQ-001)", "week05/api.md giriş endpoint'lerini (REQ-001) içeriyor"),
+    ("Every REQ id in week05/api.md must exist in week02/requirements.json. Found: no REQ ids yet.",
+     "week05/api.md içindeki her REQ id'si week02/requirements.json içinde bulunmalı. Bulunan: henüz hiç REQ id'si yok."),
+    ("Every REQ id in week05/api.md must exist in week02/requirements.json. Found: not there: {x}.",
+     "week05/api.md içindeki her REQ id'si week02/requirements.json içinde bulunmalı. Bulunan: orada olmayanlar: {x}."),
+    ("every REQ id in week05/api.md exists in requirements.json",
+     "week05/api.md içindeki her REQ id'si requirements.json içinde var"),
+    ("Every endpoint in week05/api.md that serves a requirement must give its request, its response with a 2xx "
+     "status code, and at least one error with its 4xx or 5xx code. Found: no endpoint that serves a requirement.",
+     "week05/api.md içinde bir gereksinime hizmet eden her endpoint isteğini, 2xx durum koduyla cevabını ve 4xx ya "
+     "da 5xx koduyla en az bir hatasını vermeli. Bulunan: bir gereksinime hizmet eden endpoint yok."),
+    ("Every endpoint in week05/api.md that serves a requirement must give its request, its response with a 2xx "
+     "status code, and at least one error with its 4xx or 5xx code. Found: incomplete: {x}.",
+     "week05/api.md içinde bir gereksinime hizmet eden her endpoint isteğini, 2xx durum koduyla cevabını ve 4xx ya "
+     "da 5xx koduyla en az bir hatasını vermeli. Bulunan: eksik olanlar: {x}."),
+    ("every endpoint in week05/api.md gives its request, its response and its errors",
+     "week05/api.md içindeki her endpoint isteğini, cevabını ve hatalarını veriyor"),
+    ("server/main.py must be there and be valid Python. Found: no such file. Run the checker online to bring the starter.",
+     "server/main.py bulunmalı ve geçerli Python olmalı. Bulunan: böyle bir dosya yok. Başlangıç dosyalarını getirmek "
+     "için checker'ı internete bağlıyken çalıştır."),
+    ("server/main.py must be there and be valid Python. Found: a syntax error.",
+     "server/main.py bulunmalı ve geçerli Python olmalı. Bulunan: bir sözdizimi hatası."),
+    ("server/main.py is valid Python", "server/main.py geçerli Python"),
+    ("server/main.py must create the app with FastAPI(...). Found: no FastAPI( in it.",
+     "server/main.py uygulamayı FastAPI(...) ile oluşturmalı. Bulunan: içinde FastAPI( yok."),
+    ("server/main.py creates the FastAPI app", "server/main.py FastAPI uygulamasını oluşturuyor"),
+    ("Every endpoint in week05/api.md must have a route in server/ with the same method and path; it may answer 501 "
+     "until it is built. Found: no endpoint that serves a requirement in week05/api.md yet.",
+     "week05/api.md içindeki her endpoint'in server/ içinde aynı metot ve yolla bir route'u olmalı; route, yapılana "
+     "kadar 501 ile cevap verebilir. Bulunan: week05/api.md içinde henüz bir gereksinime hizmet eden endpoint yok."),
+    ("Every endpoint in week05/api.md must have a route in server/ with the same method and path; it may answer 501 "
+     "until it is built. Found: no route for {x}.",
+     "week05/api.md içindeki her endpoint'in server/ içinde aynı metot ve yolla bir route'u olmalı; route, yapılana "
+     "kadar 501 ile cevap verebilir. Bulunan: route'u olmayanlar: {x}."),
+    ("every endpoint in week05/api.md has its route in server/",
+     "week05/api.md içindeki her endpoint'in server/ içinde route'u var"),
+    ("Every route in server/ must be a row of week05/api.md, with the same method and path. "
+     "Found: no routes in server/ besides /health.",
+     "server/ içindeki her route, aynı metot ve yolla week05/api.md içinde bir satır olmalı. Bulunan: server/ içinde "
+     "/health dışında route yok."),
+    ("Every route in server/ must be a row of week05/api.md, with the same method and path. Found: not in api.md: {x}.",
+     "server/ içindeki her route, aynı metot ve yolla week05/api.md içinde bir satır olmalı. Bulunan: api.md içinde "
+     "olmayanlar: {x}."),
+    ("every route in server/ has its row in week05/api.md", "server/ içindeki her route'un week05/api.md içinde satırı var"),
+    ("server/tests/ must have at least one test whose name begins with a test case id, such as "
+     "test_TC_001_01_a_code_is_sent. Found: none.",
+     "server/tests/ içinde adı bir test case id'siyle başlayan en az bir test olmalı, örneğin "
+     "test_TC_001_01_a_code_is_sent. Bulunan: hiç yok."),
+    ("server/tests has a test named by a test case id", "server/tests içinde bir test case id'siyle adlandırılmış bir test var"),
+    ("server/tests/ must have at least three tests named by different test case ids. Found: {n}.",
+     "server/tests/ içinde farklı test case id'leriyle adlandırılmış en az üç test olmalı. Bulunan: {n}."),
+    ("server/tests has at least three tests named by different test case ids",
+     "server/tests içinde farklı test case id'leriyle adlandırılmış en az üç test var"),
+    ("Every test case id in a test name in server/tests/ must exist in week04/test_cases.json. "
+     "Found: no tests named by a test case id.",
+     "server/tests/ içindeki test adlarında geçen her test case id'si week04/test_cases.json içinde bulunmalı. "
+     "Bulunan: test case id'siyle adlandırılmış test yok."),
+    ("Every test case id in a test name in server/tests/ must exist in week04/test_cases.json. Found: not there: {x}.",
+     "server/tests/ içindeki test adlarında geçen her test case id'si week04/test_cases.json içinde bulunmalı. "
+     "Bulunan: orada olmayanlar: {x}."),
+    ("every test case id in server/tests exists in test_cases.json",
+     "server/tests içindeki her test case id'si test_cases.json içinde var"),
+    ("week05/ai_log_05.md must hold, in the Evidence block, the output of a test run as your terminal showed it, "
+     "down to its last line, such as '1 failed, 1 passed'. Found: no such line.",
+     "week05/ai_log_05.md, Evidence bloğunda bir test çalıştırmasının çıktısını terminalinin gösterdiği gibi, son "
+     "satırına kadar içermeli; örneğin '1 failed, 1 passed'. Bulunan: böyle bir satır yok."),
+    ("week05/ai_log_05.md holds the output of a test run", "week05/ai_log_05.md bir test çalıştırmasının çıktısını içeriyor"),
 ]
 
 # Messages of the run itself (not of a check), same {name} fields; Turkish only when `tr` was asked for.
@@ -1753,6 +2120,9 @@ MANIFEST_URL = (
 RAW_BASE = "https://raw.githubusercontent.com/vedatcoskun-course/aiasd-template/main/"
 
 
+ROOT_CODE_FROM = {"server": 5}  # code folders at the root of the template, and the week they arrive in
+
+
 def sync_course_files(current: int) -> None:
     """Bring the course's files into this repository, so nobody has to fetch the template.
 
@@ -1761,9 +2131,9 @@ def sync_course_files(current: int) -> None:
 
     - course documents at the root (`AI_*`, `AI_Doc2_media/…`): the course owns them,
       so a missing or changed one is (re)written here;
-    - a week's folder (`weekNN/…`) and the `PROPOSAL.md` scaffold: yours once you have
-      them, so a file is written only if it does not exist yet — never overwritten —
-      and only for weeks the course has published (NN <= current).
+    - a week's folder (`weekNN/…`), the `PROPOSAL.md` scaffold and the `server/` starter
+      (from Week 5): yours once you have them, so a file is written only if it does not
+      exist yet — never overwritten — and only for weeks the course has published.
 
     Whatever arrives is untracked until you `git add .`; the run says so. Offline,
     or under CI, nothing happens. Anything that goes wrong means carrying on.
@@ -1788,6 +2158,9 @@ def sync_course_files(current: int) -> None:
                 continue
         elif rel == "PROPOSAL.md":
             if current < 2 or target.exists():
+                continue
+        elif rel.split("/")[0] in ROOT_CODE_FROM:  # server/ from Week 5: yours once you have it
+            if current < ROOT_CODE_FROM[rel.split("/")[0]] or target.exists():
                 continue
         elif rel.startswith("AI_"):
             if target.exists():

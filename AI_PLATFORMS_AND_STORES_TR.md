@@ -41,9 +41,8 @@ tarihte geçerli olanlardır; bir plana bağlanmadan önce mağazanın kendi say
 | iOS tarafının maliyeti | bir Mac + Apple Developer üyeliği | aynı; hybrid, Apple'ın ücretini kaldırmaz |
 | Ne zaman uygun | dili zaten biliyorsanız ya da tek platform hedefliyorsanız | tek kod tabanından iki platform istiyorsanız ya da Windows bilgisayarınız var ve iOS da istiyorsanız |
 
-Uygulamanızın içindeki sohbet botu (6–7. Haftalar) *sizin sunucunuzla* konuşur; bu yüzden
-hangi mobil çatıyı seçtiğiniz onu ilgilendirmez. Denetleyiciyi de ilgilendirmez. Teslim
-edebileceğinizi seçin.
+Hangi mobil çatıyı seçerseniz seçin sunucunuz aynıdır: mobil istemci yalnızca onu çağırır.
+Seçiminiz denetleyiciyi de ilgilendirmez. Teslim edebileceğinizi seçin.
 
 # 3. Bilgisayarınız + telefonunuz → yollarınız
 

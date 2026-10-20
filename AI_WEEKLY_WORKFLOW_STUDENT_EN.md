@@ -331,12 +331,6 @@ CI are running different versions of `ruff`. Install the version pinned in that 
 `requirements.txt` (the list of the packages, with their exact versions, that the week
 needs), not whichever one you happen to have.
 
-**Ollama will not run / the model will not download.** (Ollama is the program that runs
-an AI model on your own computer.) Drop to a smaller model. If none of them works, use
-the cloud backend (a model that runs on a provider's servers and that you reach over the
-internet) and write down why in `model_notes.md`; that is an acceptable outcome. Do not
-lose the week to it.
-
 **I broke something and cannot undo it.** Do not panic, because git remembers
 everything:
 

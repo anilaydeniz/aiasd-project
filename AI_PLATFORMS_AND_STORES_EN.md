@@ -41,8 +41,8 @@ applied when it was written; check the store's own page before you commit to a p
 | Cost of the iOS side | a Mac + the Apple Developer membership | the same; hybrid does not remove Apple's fee |
 | Best when | you already know the language, or you target one platform only | you want both platforms from one code base, or you have a Windows laptop and want iOS too |
 
-The chatbot inside your app (Weeks 6–7) talks to *your server*, so it does not care which
-mobile framework you chose. The checker does not care either. Choose what you can ship.
+Your server is the same whichever mobile framework you choose: the mobile client only
+calls it. The checker does not care either. Choose what you can ship.
 
 # 3. Your laptop + your phone → your paths
 

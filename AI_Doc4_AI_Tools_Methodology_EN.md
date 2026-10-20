@@ -70,9 +70,9 @@ useful question is which kind you need for the task in front of you.
 | **Cloud development environment with an agent** | A whole IDE (integrated development environment, the editor and its surrounding tools) and web hosting in the browser, with an agent that builds and deploys the application | Replit | Getting a prototype live in an afternoon with nothing installed on your machine | Helping you understand what it built; its costs also scale with your ambition |
 | **Local model runtime** | A program that runs open-weight models (models whose trained weights are published for anyone to download) on your own machine, so that nothing leaves it | Ollama (also LM Studio, llama.cpp) | Privacy, offline work, learning what a model *is*, and embedding pipelines (programs that turn text into numeric vectors for search) | Frontier-level quality, and any model that your laptop's memory cannot hold |
 
-You will use at least three of the four kinds this term. You will use chat applications from
-Week 1, Ollama from Week 3, and a coding agent from the moment your project has more than one
-file.
+You will use at least two of the four kinds this term: chat applications from Week 1, and a
+coding agent from the moment your project has more than one file. A local model runtime is
+optional.
 
 ## 3. The vendors, and the models inside them
 
@@ -170,14 +170,14 @@ The "B" stands for billions of parameters (the individual numbers that make up t
 and it is the figure that decides whether a model runs on your laptop at all. A model
 quantised to 4 bits (stored with its numbers rounded to a coarser precision so that it takes
 less memory; Doc 2 §11 explains quantisation) needs roughly **0.6 GB of memory per billion
-parameters**, plus room to work. The course has one rule about this, and it is the same in
-every document and on every slide: **16 GB of RAM → a 7–8B model; 8 GB → a 3B model; less →
+parameters**, plus room to work. A simple rule of thumb:
+**16 GB of RAM → a 7–8B model; 8 GB → a 3B model; less →
 1.5B.** The same rule as a table:
 
 | Model size | Memory needed | Runs on |
 |---|---|---|
 | 1–3B | 1–3 GB | Anything; it is fast and noticeably limited |
-| 7–8B | 5–6 GB | Any laptop with 16 GB RAM; this is the sweet spot for this course |
+| 7–8B | 5–6 GB | Any laptop with 16 GB RAM; this is the sweet spot for a laptop |
 | 14B | 9–10 GB | A 16 GB machine, uncomfortably; a 24 GB machine, well |
 | 27–32B | 18–22 GB | 32 GB machines, or Apple Silicon with unified memory |
 | 70B | 40+ GB | Not a laptop |
@@ -191,7 +191,7 @@ which is usable for a chatbot and painful for a long generation.
 
 An 8B local model is not a frontier model, and it will not become one. What it is, is yours:
 it is private, it is free, and it is honest about what a language model actually is when
-nobody has wrapped it in a product. Week 3 is built on that.
+nobody has wrapped it in a product.
 
 ## 4. What money buys
 
@@ -284,8 +284,6 @@ You do not need to pay for anything.
   and it does not matter which two you choose.
 - **GitHub Copilot Student**, which is free through the Student Developer Pack. Claim it before
   Week 2.
-- **Ollama** with one 7–8B model, installed before Week 3. If your laptop has 8 GB of RAM,
-  install a 3B model and tell me; we will work around it.
 - **A coding agent** from Week 4 or so. Copilot's agent is included in the student plan. Claude
   Code and Codex need a paid plan or API credits; use them if you have them, not because you
   think you must.
@@ -426,12 +424,11 @@ out. The cost difference is as real as the quality difference.
 
 ## 14. Write down what you keep re-explaining
 
-If you find yourself typing "this is a Streamlit app, Python 3.12, and I am using FAISS for
-retrieval" at the start of every conversation (Streamlit is a Python library for building web
-interfaces, and FAISS is a library for searching through embeddings), put that text in a file
-the assistant reads automatically. Depending on the tool, that file is `CLAUDE.md`, a project
-instruction, or a pinned note. You stop paying for the text in every new thread, and you stop
-forgetting to mention it.
+If you find yourself typing "this is a FastAPI server, Python 3.12, and the login code is
+sent by e-mail" at the start of every conversation (FastAPI is a Python library for
+writing web servers), put that text in a file the assistant reads automatically. Depending
+on the tool, that file is `CLAUDE.md`, a project instruction, or a pinned note. You stop
+paying for the text in every new thread, and you stop forgetting to mention it.
 
 Your `ai_log_NN.md` is doing something related and worth more: it is the record of what went
 wrong and how you caught it. That file is for you and for Week 12, not for the model.

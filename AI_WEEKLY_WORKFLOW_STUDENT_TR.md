@@ -325,12 +325,6 @@ farklı `ruff` sürümleri çalıştırıyordur. Elinizde hangisi varsa onu değ
 `requirements.txt` dosyasında (haftanın ihtiyaç duyduğu paketlerin, tam sürümleriyle
 birlikte listesi) sabitlenmiş sürümü kurun.
 
-**Ollama çalışmıyor / model inmiyor.** (Ollama, bir yapay zeka modelini kendi
-bilgisayarınızda çalıştıran programdır.) Daha küçük bir modele geçin. Hiçbiri
-çalışmıyorsa bulut arka ucunu (bir sağlayıcının sunucularında çalışan ve internet
-üzerinden ulaştığınız bir model) kullanın ve nedenini `model_notes.md` içine yazın; bu
-kabul edilebilir bir sonuçtur. Haftayı buna kaptırmayın.
-
 **Bir şeyi bozdum ve geri alamıyorum.** Panik yapmayın, çünkü git her şeyi hatırlar:
 
 ```bash

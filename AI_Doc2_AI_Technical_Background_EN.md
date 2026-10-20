@@ -16,7 +16,7 @@ This is one of three pre-reading documents. "Development Environment and Tools" 
 
 Modern AI applications are not single algorithms. This is true of ChatGPT, of a coding assistant, of a system that answers questions about documents, and of a tool that helps a developer write software. They are all systems assembled from several specialised components. You do not need to become a deep-learning researcher, but you do need to understand what each component does, why it exists, what goes in, and what comes out. The reason is simple: in this course you will be building exactly these systems.
 
-The figure below shows the conceptual progression this document follows. It starts from the neural network foundation and ends at the full application stack you will build in this course.
+The figure below shows the conceptual progression this document follows. It starts from the neural network foundation and ends at the full application stack that an AI application is built from.
 
 ![](AI_Doc2_media/image1.png)
 
@@ -215,9 +215,11 @@ Generative AI (GenAI) is the broad category of AI systems that can generate new 
 
 - For video, the generators are the video generation models that are now emerging.
 
-In this course you will work with text and code generation, and specifically with Claude, Gemini, and the models hosted by Ollama. Understanding that GenAI is a broader landscape helps you put the tools you are using into context.
+In this course you will work with text and code generation, through the chat and coding assistants that you choose (Doc 4). Understanding that GenAI is a broader landscape helps you put the tools you are using into context.
 
 ## 11. Running Models Locally: Ollama and Qwen
+
+The course does not require a local model. This section explains how one works, and why model size matters.
 
 So far everything described here runs on somebody else's computer. When you call Claude or Gemini, your text travels over the internet to a data centre, a very large model processes it there, and the answer comes back. That is cloud inference. It is powerful, but it needs an API key (a secret string that identifies your account to the service), it costs money per call, and your data leaves your machine.
 
@@ -237,7 +239,7 @@ A model with 3 billion parameters, stored at full precision, would need roughly 
 
 This is why model size matters to you personally. Pick the largest model that your machine can hold in memory. The same rule appears in Doc 4 and on the Week 1 slides:
 
-- If your machine has 16 GB of RAM or more, use qwen2.5:7b, which takes about 4.7 GB on disk. This is the size the course assumes.
+- If your machine has 16 GB of RAM or more, use qwen2.5:7b, which takes about 4.7 GB on disk.
 
 - If your machine has 8 to 16 GB of RAM, use qwen2.5:3b, which takes about 1.9 GB.
 
@@ -245,11 +247,11 @@ This is why model size matters to you personally. Pick the largest model that yo
 
 - If your machine has less than 4 GB of RAM, use qwen2.5:0.5b, which takes about 0.4 GB.
 
-No graphics card is required. On a modern CPU a 3B model produces roughly 5 to 15 tokens per second. That is fast enough for short answers, and slow enough that you will feel it on long ones. In Week 3 you will measure this speed yourself on two different model sizes and write down what you observe.
+No graphics card is required. On a modern CPU a 3B model produces roughly 5 to 15 tokens per second. That is fast enough for short answers, and slow enough that you will feel it on long ones.
 
 ### Which should you use?
 
-Neither option is simply better. A cloud model gives you far more capability; a local model gives you privacy, zero cost, and offline operation. Real applications often use both. They use a local model for routine work and a cloud model for the hard cases. In this course your chatbot will support both behind a single interface, and switching between them will be one line of code.
+Neither option is simply better. A cloud model gives you far more capability; a local model gives you privacy, zero cost, and offline operation. Real applications often use both. They use a local model for routine work and a cloud model for the hard cases.
 
 |                    | Cloud API       | Ollama (local)           |
 | ------------------ | ------------------- | ---------------------------- |
@@ -292,7 +294,7 @@ RAG solves this by adding a retrieval step before generation. This section assum
 
 ### Why does RAG help?
 
-Without RAG, an LLM relies only on its training knowledge. With RAG, you can supply current, private, or domain-specific information at inference time, and you can do so without retraining the entire model. In Week 6 of this course you will build a RAG pipeline from scratch.
+Without RAG, an LLM relies only on its training knowledge. With RAG, you can supply current, private, or domain-specific information at inference time, and you can do so without retraining the entire model. Assistants that search the web or your files before they answer work in this way.
 
 ## 14. The Modern AI Application Stack
 
@@ -337,17 +339,16 @@ After reading this document you should be able to explain each of the following 
 
 ### Where These Concepts Appear in the Course
 
-Nothing in this document is theory for its own sake. Every concept here becomes something you build, measure or debug in a specific week.
+Some of these concepts you use every week; the others are background that explains how the assistants you use work.
 
 | Concept                                      | Week       | Where you meet it                                          |
 | ------------------------------------------------ | -------------- | -------------------------------------------------------------- |
 | **Transformers, attention, tokens**              | **Week 1**     | They are the conceptual foundation, covered in the lecture and in this document. |
-| **System prompts, context window, temperature**  | **Week 3**     | You write them and compare them in your chatbot.               |
-| **Local inference — Ollama, Qwen, quantisation** | **Week 3**     | You install a local model, measure it, and benchmark it on your own machine. |
-| **Embeddings and cosine similarity**             | **Weeks 3, 6** | You first run a similarity experiment, and later you use them for document retrieval. |
-| **LLM API integration**                          | **Week 5**     | It is the core AI feature of your own project.                 |
-| **Retrieval-Augmented Generation**               | **Week 6**     | You build it from scratch: you chunk the documents, index them, retrieve the relevant chunks, and generate the answer. |
-| **Hallucination and verification**               | **Every week** | You record it in ai_log.md every week, and you measure it with Ragas in Week 9. |
+| **System prompts, context window, temperature**  | **Every week** | In every prompt you give your assistants; the context window is why a long conversation forgets its beginning (Doc 4). |
+| **Local inference — Ollama, Qwen, quantisation** | **Background** | It explains why model size matters; the course does not require a local model. |
+| **Embeddings and cosine similarity**             | **Background** | They explain how an assistant finds the passages of your files that it uses. |
+| **Retrieval-Augmented Generation**               | **Background** | It explains how assistants that search the web or your files answer, and why they can still invent a source (Doc 5 §5). |
+| **Hallucination and verification**               | **Every week** | You record it in your AI log every week (Doc 5). |
 | **AI ethics and human-in-the-loop**              | **Week 11**    | You carry out a security audit and a responsible-use review.   |
 
 ### 💬 Before You Come to Class — Reflection Questions
