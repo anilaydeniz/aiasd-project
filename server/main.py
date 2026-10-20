@@ -45,4 +45,3 @@ def ask_for_code(body: CodeRequest) -> dict:
 def verify_code(body: TokenRequest) -> dict:
     """REQ-001: verifies the 4-digit code and issues a bearer token. Built in Week 6."""
     raise HTTPException(status_code=501, detail="Not built yet: Week 6")
-
