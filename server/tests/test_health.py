@@ -12,3 +12,8 @@ def test_health_answers_ok():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_health_rejects_post_method():
+    response = client.post("/health")
+    assert response.status_code == 405

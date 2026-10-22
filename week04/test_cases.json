@@ -36,6 +36,38 @@
       "expected": "The error message 'Expired code. Please request a new code.' appears and the server returns HTTP 401."
     },
     {
+      "id": "TC-001-04",
+      "req": "REQ-001",
+      "title": "An invalid email address format is refused with a 422 error",
+      "precondition": "Application is opened at index.html",
+      "steps": [
+        "Enter 'invalid-email-format' without an @ or domain in the email field",
+        "Tap Send code"
+      ],
+      "expected": "The server rejects the payload with HTTP 422 Unprocessable Entity and highlights the malformed email field."
+    },
+    {
+      "id": "TC-001-05",
+      "req": "REQ-001",
+      "title": "Requesting a second login code within 60 seconds is refused with 429 Too Many Requests",
+      "precondition": "A 4-digit code has just been requested for chef@kitchenops.internal less than 60 seconds ago",
+      "steps": [
+        "On index.html, re-enter chef@kitchenops.internal within 60 seconds",
+        "Tap Send code"
+      ],
+      "expected": "The server refuses the request with HTTP 429 Too Many Requests and shows 'Please wait before requesting another code.'"
+    },
+    {
+      "id": "TC-001-06",
+      "req": "REQ-001",
+      "title": "Querying current authenticated session profile returns user details or 401 when unauthorized",
+      "precondition": "User is authenticated with a valid bearer token",
+      "steps": [
+        "Send GET request to /auth/me with Bearer token header"
+      ],
+      "expected": "Server returns HTTP 200 with user email and kitchen role, or HTTP 401 when token is missing or invalid."
+    },
+    {
       "id": "TC-002-01",
       "req": "REQ-002",
       "title": "Log 10 portions of Rigatoni Pomodoro to deplete raw ingredients",
