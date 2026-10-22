@@ -25,6 +25,17 @@
       "expected": "The error message 'Wrong code. Check the e-mail and try again.' appears and the user remains on the code screen."
     },
     {
+      "id": "TC-001-03",
+      "req": "REQ-001",
+      "title": "An expired login code is refused with an error message",
+      "precondition": "A 4-digit code was sent to chef@kitchenops.internal more than 10 minutes ago",
+      "steps": [
+        "On the code verification screen, enter the expired 4-digit code 1234",
+        "Tap Log in"
+      ],
+      "expected": "The error message 'Expired code. Please request a new code.' appears and the server returns HTTP 401."
+    },
+    {
       "id": "TC-002-01",
       "req": "REQ-002",
       "title": "Log 10 portions of Rigatoni Pomodoro to deplete raw ingredients",
