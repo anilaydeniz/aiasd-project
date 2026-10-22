@@ -29,6 +29,16 @@ class TokenRequest(BaseModel):
     code: str
 
 
+class TokenResponse(BaseModel):
+    token: str
+    token_type: str = "bearer"
+
+
+class UserProfileResponse(BaseModel):
+    email: str
+    role: str
+
+
 @app.get("/health")
 def health() -> dict:
     """The server is running. A technical endpoint: it serves no requirement."""
@@ -44,4 +54,10 @@ def ask_for_code(body: CodeRequest) -> dict:
 @app.post("/auth/token")
 def verify_code(body: TokenRequest) -> dict:
     """REQ-001: verifies the 4-digit code and issues a bearer token. Built in Week 6."""
+    raise HTTPException(status_code=501, detail="Not built yet: Week 6")
+
+
+@app.get("/auth/me")
+def get_current_user() -> dict:
+    """REQ-001: returns the authenticated user profile from session token. Built in Week 6."""
     raise HTTPException(status_code=501, detail="Not built yet: Week 6")
