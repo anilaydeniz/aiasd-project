@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-002, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <div>
+      <span class="meta">ACTIVE STATION</span>
+      <h1 style="margin: 0; font-size: 1.4rem;">KitchenOps</h1>
+    </div>
+    <a href="login.html" id="btn-logout" class="meta" style="cursor: pointer;">Logout</a>
+  </div>
+
+  <p class="meta" id="chef-status" style="margin-top: 6px; font-weight: 600; color: #2d3748;">Loading active chef session...</p>
+
+  <!-- Unified Kitchen Status & Active Alerts Card -->
+  <div class="status-alert-card" style="margin-top: 10px; margin-bottom: 14px;">
+    <div class="status-alert-header">
+      <div class="status-alert-title">
+        <span>⚠️</span> Kitchen Operational Alerts
+      </div>
+      <span class="badge success" id="station-badge">Connected</span>
+    </div>
+    <div class="status-alert-item" style="color: #9b2c2c; font-weight: 600;">
+      🍅 <strong>Recipe Depletion Active:</strong> Ready to log prepared dish portions into live inventory.
+    </div>
+  </div>
+
+  <!-- Quick Action Buttons -->
+  <div class="list" style="margin-bottom: 14px;">
+    <a class="button" id="btn-go-prep" href="prep.html" style="text-align: center; text-decoration: none;">🍳 Log Prepared Dishes (Auto Deplete)</a>
+  </div>
+
+  <!-- Live Stock Summary Card -->
+  <div class="card" style="margin-bottom: 14px;">
+    <div class="row" style="margin-bottom: 8px;">
+      <strong>Live Pantry Stock Levels</strong>
+      <span class="meta" id="stock-status">Live Server Data</span>
+    </div>
+    <div class="list" id="stock-list">
+      <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+        <span>Rigatoni Pasta</span>
+        <strong id="stock-pasta" style="color: #2b6cb0;">50.0 kg</strong>
+      </div>
+      <div class="item-row" style="display: flex; justify-content: space-between;">
+        <span>Tomato Sauce Base</span>
+        <strong id="stock-sauce" style="color: #2b6cb0;">30.0 kg</strong>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const token = sessionStorage.getItem("token");
+if (!token) {
+  window.location.href = "login.html";
+}
+
+const chefStatus = document.querySelector("#chef-status");
+const stockPasta = document.querySelector("#stock-pasta");
+const stockSauce = document.querySelector("#stock-sauce");
+const btnLogout = document.querySelector("#btn-logout");
+
+btnLogout.addEventListener("click", () => {
+  sessionStorage.removeItem("token");
+  window.location.href = "login.html";
+});
+
+async function loadSessionAndStock() {
+  try {
+    const meRes = await fetch("/auth/me", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (meRes.status === 401) {
+      sessionStorage.removeItem("token");
+      window.location.href = "login.html";
+      return;
+    }
+    const meData = await meRes.json().catch(() => ({}));
+    chefStatus.textContent = `Chef: ${meData.email || "Kitchen Staff"} · Station 1 Prep`;
+
+    const stockRes = await fetch("/inventory/levels", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (stockRes.status === 200) {
+      const stockData = await stockRes.json().catch(() => ({}));
+      if (stockData.items) {
+        if (stockData.items.pasta !== undefined) {
+          stockPasta.textContent = `${stockData.items.pasta.toFixed(1)} kg`;
+        }
+        if (stockData.items.tomato_sauce !== undefined) {
+          stockSauce.textContent = `${stockData.items.tomato_sauce.toFixed(1)} kg`;
+        }
+      }
+    }
+  } catch (err) {
+    chefStatus.textContent = "Offline Mode · Kitchen Prep";
+  }
+}
+
+loadSessionAndStock();
+</script>
+</body>
+</html>

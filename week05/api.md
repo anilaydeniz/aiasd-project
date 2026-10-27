@@ -7,4 +7,6 @@
 | POST | /auth/token | {"email": "chef@kitchenops.internal", "code": "1234"} | 200 {"token": "kops_session_token_xyz", "token_type": "bearer"} | 401 wrong or expired code · 422 missing field or invalid format | REQ-001 |
 | GET | /auth/me | Header: Authorization: Bearer <token> | 200 {"email": "chef@kitchenops.internal", "role": "chef"} | 401 missing or invalid session token | REQ-001 |
 | POST | /prep/portions | {"recipe_id": "rigatoni_pomodoro", "portions": 10} | 200 {"success": true, "recipe_id": "rigatoni_pomodoro", "portions": 10, "audit_log_id": "TX-9042"} | 401 missing or invalid session token · 404 recipe not found · 409 insufficient stock · 422 portions must be positive integer | REQ-002 |
+| GET | /inventory/levels | Header: Authorization: Bearer <token> | 200 {"items": {"pasta": 50.0, "tomato_sauce": 30.0}, "total_ingredients": 2} | 401 missing or invalid session token | REQ-002 |
+
 

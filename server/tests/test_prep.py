@@ -92,3 +92,27 @@ def test_TC_002_01_insufficient_stock_is_refused():
         assert response.status_code == 409
     finally:
         app.dependency_overrides.clear()
+
+
+def test_TC_002_01_get_inventory_levels_authenticated():
+    """TC-002-01: Authenticated user can query current pantry stock levels."""
+    app.dependency_overrides[current_user] = lambda: "chef@kitchenops.internal"
+    try:
+        response = client.get(
+            "/inventory/levels",
+            headers={"Authorization": "Bearer test_valid_token"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "items" in data
+        assert "pasta" in data["items"]
+        assert "tomato_sauce" in data["items"]
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_TC_002_01_unauthenticated_inventory_is_refused():
+    """TC-002-01: Unauthorized access to inventory levels is rejected with 401."""
+    app.dependency_overrides.clear()
+    response = client.get("/inventory/levels")
+    assert response.status_code == 401

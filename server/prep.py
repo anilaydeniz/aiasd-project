@@ -60,3 +60,9 @@ def log_prep_portions(body: PrepPortionsRequest, user: str = Depends(current_use
         "depleted": depleted,
         "audit_log_id": "TX-9042",
     }
+
+
+@router.get("/inventory/levels")
+def get_inventory_levels(user: str = Depends(current_user)) -> dict:
+    """REQ-002: returns current raw ingredient inventory stock levels."""
+    return {"items": INVENTORY, "total_ingredients": len(INVENTORY)}

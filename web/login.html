@@ -95,8 +95,8 @@ btnVerifyCode.addEventListener("click", async () => {
     const data = await res.json().catch(() => ({}));
     if (res.status === 200 && data.token) {
       sessionStorage.setItem("token", data.token);
-      showMsg("Success! Redirecting to kitchen prep...");
-      window.location.href = "prep.html";
+      showMsg("Success! Redirecting to kitchen dashboard...");
+      window.location.href = "home.html";
     } else {
       showMsg(data.detail || "Wrong code. Check and try again.", true);
     }
