@@ -6,12 +6,12 @@ AI-Assisted Software Development · Atlas University · Fall 2026–2027
 
 # 1. Installing Python
 
-This course uses Python 3.12. Any version from 3.10 upwards will work, but 3.12 is the version that the automated checks run on, so it is the version you should prefer.
+This course uses Python 3.12. Any version from 3.10 upwards will work. The automated checks run on 3.12, so prefer 3.12.
 
 ## 1.1 Windows
 
 1. Go to python.org/downloads and download the latest 3.12 installer.
-2. Run the installer. On the first screen, tick the box labelled "Add python.exe to PATH" (PATH is the list of folders in which Windows looks for a program when you type its name). This is the step that everyone forgets.
+2. Run the installer. On the first screen, tick the box labelled "Add python.exe to PATH" (PATH is the list of folders in which Windows looks for a program when you type its name). Many people forget this step.
 3. Choose "Install Now".
 4. Open PowerShell and check the installation with the command: python --version
 
@@ -19,7 +19,7 @@ This course uses Python 3.12. Any version from 3.10 upwards will work, but 3.12 
 
 ## 1.2 macOS
 
-macOS ships with a Python that belongs to the operating system. Do not use that one for your own work. Instead, install your own copy:
+macOS comes with a Python that belongs to the operating system. Do not use that one for your own work. Instead, install your own copy:
 
 ```bash
 brew install python@3.12
@@ -59,18 +59,18 @@ mkdir new_folder # create a folder
 cat file.txt # print a file (Windows: type)
 ```
 
-> **✅ Tip:** A path that contains spaces must be written inside quotation marks, for example cd "My Documents". This mistake catches people out constantly on Windows and macOS.
+> **✅ Tip:** A path that contains spaces must be written inside quotation marks, for example cd "My Documents". Many people make this mistake on Windows and macOS.
 
 # 3. The python Command and the -m Flag
 
 You will see commands written as python -m something rather than just something. The -m flag (an option added after the command name) tells Python to run a module from the environment you are currently in, instead of searching for a program on your system PATH.
 
 ```bash
-pip install streamlit # uses whatever pip the system finds first
-python -m pip install streamlit # uses the pip belonging to THIS python
+pip install requests # uses whatever pip the system finds first
+python -m pip install requests # uses the pip belonging to THIS python
 ```
 
-The second form is safer. On a machine with several Python installations, it makes the difference between installing a package where you want it and installing it somewhere you will never find it again. Prefer python -m whenever a command offers both forms.
+The second form is safer. On a machine with several Python installations, the first form may install a package in a place where you never find it again. The second form installs it where you want it. Prefer python -m whenever a command offers both forms.
 
 # 4. Virtual Environments
 
@@ -105,55 +105,55 @@ source .venv/bin/activate
 .venv\Scripts\activate.bat
 ```
 
+> **⚠️ Windows:** If PowerShell says "running scripts is disabled on this system", run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, and then activate again. Or use Command Prompt with `.venv\Scripts\activate.bat`.
+
 Once the environment is active, your prompt changes:
 
 ```
 (.venv) $
 ```
 
-> **📌 Note:** *If "(.venv)" appears at the start of your prompt, the environment is active, and pip install will now put packages only into it.*
+> **📌 Note:** *If "(.venv)" appears at the start of your prompt, the environment is active, and python -m pip install will now put packages only into it.*
 
 ## 4.3 The "externally-managed-environment" error
 
-On macOS and Linux, pip install may refuse to run and show this message:
+On macOS and Linux, python -m pip install may refuse to run and show this message:
 
 ```
 error: externally-managed-environment
 × This environment is externally managed
 ```
 
-This is not a fault; it is a guard. The operating system uses its own Python for its own system tools, and installing packages into that Python can break them. For that reason, the installation is blocked.
+This is not a fault; it is a protection. The operating system uses its own Python for its own system tools, and installing packages into that Python can break them. For that reason, the installation is blocked.
 
 The fix is simple: install into your virtual environment rather than into the system. If you are seeing this error, you have almost certainly forgotten to activate the environment.
 
 ```bash
 source .venv/bin/activate # activate first
-pip install package_name # then install
+python -m pip install package_name # then install
 ```
 
 How do you check? Look at whether your prompt starts with (.venv). If it does not, the environment is not active. Each new terminal window needs to be activated again: you create the environment once, but you activate it every time.
 
-> **⚠️ Warning:** The error message suggests the option --break-system-packages. Do not use it. It pollutes the system Python and causes problems later that are difficult to trace back to their cause. The virtual environment is the correct answer.
+> **⚠️ Warning:** The error message suggests the option --break-system-packages. Do not use it. It damages the system Python, and the problems it causes later are hard to trace. The virtual environment is the correct answer.
 
 ## 4.4 Installing and freezing packages
 
-With the environment active, install the packages:
+With the environment active, install a package:
 
 ```bash
-pip install anthropic python-dotenv
+python -m pip install requests
 ```
 
-Then record what is installed, so that someone else can rebuild it:
+To see what is installed in the active environment, run `pip freeze`. It prints one line for each package, with its exact version. (The test in §8 shows it.)
+
+In this course the requirements files come from the course: `requirements.txt` at the root of your repository, and `weekNN/requirements.txt` in a week that needs new packages. To install from one of them, run:
 
 ```bash
-pip freeze > requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-To rebuild from that record on another machine, run:
-
-```bash
-pip install -r requirements.txt
-```
+Do not run `pip freeze > requirements.txt`: it overwrites the course's file. Add your own packages to the week's requirements file only when the assignment says so.
 
 ## 4.5 Deactivating
 
@@ -179,58 +179,102 @@ deactivate
 > Settings Sync or Copilot). This step is optional, because the course works from the
 > terminal. If you accept, sign in with **the same GitHub account as your course repository**:
 > VS Code then also handles `git push` for you, without asking for a password or token.
-> Signing in with a different account is the way in which pushes end up in the wrong place:
-> a student signs in to VS Code with a personal account, pushes from the editor, and the
-> commits land in a repository that the course never sees.
+> If you sign in with a different account, your pushes can go to the wrong place. For
+> example, a student signs in to VS Code with a personal account and pushes from the editor.
+> The commits then land in a repository that the course never sees.
 
 # 6. The Tools You Will Use
 
-You do not need to install any of these tools now. Each one arrives in the week that uses it, together with that week's assignment. The purpose of this section is that you recognise the toolkit before the term starts, so that you know what each tool is for and where in your project it will appear.
+You do not need to install any of these tools now. Each one arrives in the week that uses it, together with that week's assignment. This section helps you recognise the tools before the term starts: what each tool is for, and where in your project it will appear.
 
 For each tool, four questions are answered: what is it, where is it used in this project, how is it installed, and what is the smallest example that works?
 
-## 6.1 Streamlit
+## 6.1 HTML, CSS and JavaScript
 
-### Weeks 6–12 · the web client
+### Weeks 4–12 · the web client
 
 ### What is it?
 
-Streamlit is a library for writing web interfaces in Python. You do not write any HTML, CSS or JavaScript. You write plain Python, and Streamlit turns it into a page in the browser. When you save the file, the page reloads itself.
+HTML says what is on a page. CSS says how it looks. JavaScript makes the page react: for example, it sends a request to your server when the user taps a button.
 
 ### Where is it used in this project?
 
-It is one way to write the web client of your project, from Week 6. Flutter and Expo can build the web client too (`AI_PLATFORMS_AND_STORES`).
+- In Week 4 you build a clickable prototype: one HTML file for each screen, in `week04/prototype/`.
+- In Week 6 these screens become the real web client, in `web/`. Each page calls your server with `fetch`, and your FastAPI server serves the pages.
+- The mobile client comes in Week 7, with the framework that you choose (`AI_PLATFORMS_AND_STORES`).
 
 ### Installation
 
-```bash
-pip install streamlit
+```
+Nothing to install — a browser and VS Code are enough.
 ```
 
 ### Smallest working example
 
-```python
-import streamlit as st
-st.title("Hello")
-name = st.text_input("Your name:")
-if name:
-    st.write(f"Hello {name}!")
+```html
+<!-- serves: REQ-006 -->
+<button id="check">Check the server</button>
+<p id="result"></p>
+<script>
+  document.getElementById("check").onclick = async () => {
+    const response = await fetch("/health");
+    const data = await response.json();
+    document.getElementById("result").textContent = data.status;
+  };
+</script>
 ```
 
-Run it with:
-
-```bash
-streamlit run app.py
-```
-
-> **✅ Tip:** Streamlit re-runs the whole script on every interaction. Anything that must survive from one interaction to the next goes in st.session_state (a dictionary that Streamlit keeps alive between re-runs), and that is where the chat history lives.
-> **✅ Tip:** Your application must also open on a phone and look right there, because that is a course requirement. The practical rule is this: use layout="centered" in set_page_config, keep the content in one column, and avoid wide fixed-width tables. To test it, narrow your browser window to roughly 390 pixels. If anything is cut off or scrolls sideways, fix it now, because repairing it in Week 10 costs far more.
+> **✅ Tip:** Look at every page 390 px wide: press F12, then the phone icon. If anything is cut off or scrolls sideways, fix it now. Repairing it in Week 10 costs much more.
 
 ### Why this tool?
 
-Why Streamlit? Because this course is not about interface engineering. Streamlit lets you write the interface in pure Python, with no HTML, no CSS, no JavaScript and no build step. Every hour that you do not spend fighting a frontend toolchain is an hour spent on what is actually assessed, which is the chain from requirements to architecture to testable code. Because the whole class works on one stack (one shared set of tools), the Week 10 interface tests and the Week 11 one-command deployment become possible at all, and you can get real help when you are stuck. Engineering teams standardise on one stack for exactly these reasons. If you want to use something else, come and talk to me in Week 2. The door is not closed, but choosing a different stack carries extra responsibility.
+The pages of your prototype become the pages of your web client. You do not learn a new tool for the web, and there is no build step. So your time goes to what is assessed: the chain from a requirement to a working, tested feature.
 
-## 6.2 python-dotenv
+## 6.2 FastAPI and uvicorn
+
+### Weeks 5–12 · the server
+
+### What is it?
+
+FastAPI is a Python library for writing web servers. You write one Python function for each endpoint (a method and a path, for example `GET /health`), and FastAPI turns what the function returns into JSON. uvicorn is the program that runs the server.
+
+### Where is it used in this project?
+
+- In Week 5 you write the server skeleton in `server/main.py`. Each route answers 501 ("not built yet") until its week. `week05/FASTAPI_CARD_EN.md` explains FastAPI on one page.
+- From Week 6 the routes work: the login is the course's module (`server/course_login.py`), and your own feature runs on your server.
+- The web client (§6.1), the mobile client (Week 7) and the chatbot (Week 8) all talk to this server.
+
+### Installation
+
+```bash
+python -m pip install -r week05/requirements.txt
+```
+
+Week 5's requirements file brings FastAPI, uvicorn and pytest. Later weeks have their own file with more packages.
+
+### Smallest working example
+
+```python
+# server/main.py
+from fastapi import FastAPI
+
+app = FastAPI(title="My project")
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok"}
+```
+
+Run it from the root of your repository:
+
+```bash
+uvicorn server.main:app --reload
+```
+
+> **✅ Tip:** Open http://127.0.0.1:8000/docs in your browser. FastAPI lists every route there. A route that is not in the list does not exist, whatever the assistant said.
+
+## 6.3 python-dotenv
 
 ### Weeks 6–12 · security
 
@@ -240,12 +284,12 @@ python-dotenv keeps passwords and API keys out of your code. It reads them from 
 
 ### Where is it used in this project?
 
-It is used from Week 6, when the server needs the password of the e-mail account that sends the login code. The unbreakable rule of this course is that passwords and keys are not written into code.
+It is used from Week 6, when the server needs the password of the e-mail account that sends the login code. In Week 8 the `.env` file also holds the API key of your chatbot. The rule of this course: passwords and keys are never written into code.
 
 ### Installation
 
 ```bash
-pip install python-dotenv
+python -m pip install -r week06/requirements.txt
 ```
 
 ### Smallest working example
@@ -253,136 +297,122 @@ pip install python-dotenv
 ```python
 # .env (NEVER pushed to the repository):
 # SMTP_PASSWORD=abcd efgh ijkl mnop
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
 load_dotenv()
 password = os.getenv("SMTP_PASSWORD")
 ```
 
 > **✅ Tip:** Keep a .env.example file in the repository that contains the variable names and no values, so that anyone who clones your project knows what they need to fill in.
 
-## 6.3 pytest
+## 6.4 pytest
 
-### Week 9 · unit testing
+### Weeks 5–12 · tests
 
 ### What is it?
 
-pytest is the most widely used Python testing library. You write small functions that assert that your code does what you expect; pytest runs them all and reports what passed and what did not.
+pytest is the most widely used Python testing library. You write small functions that check that your code does what you expect. pytest runs them all and reports what passed and what did not.
 
 ### Where is it used in this project?
 
-It is used in Week 9, for testing your project's helper functions. It is the most concrete way to measure whether AI-written code is actually correct.
+- In Week 5 you write your first tests, in `server/tests/`. Each test is named by a test case id, for example `test_TC_001_01_a_code_is_sent`.
+- From Week 6, the course tests (`course_tests/`) and your own tests run on GitHub on every push (§6.5).
+- Tests are the most concrete way to check whether AI-written code is correct.
 
 ### Installation
 
 ```bash
-pip install pytest
+python -m pip install -r week05/requirements.txt
 ```
 
 ### Smallest working example
 
 ```python
-# test_text.py
-from text import shorten
-def test_shorten():
-    assert shorten("hello world", 5) == "hello"
-def test_short_text_unchanged():
-    assert shorten("ok", 10) == "ok"
+# server/tests/test_health.py
+from fastapi.testclient import TestClient
+
+from server.main import app
+
+client = TestClient(app)
+
+
+def test_health_answers_ok():
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 ```
 
 Run it with:
 
 ```bash
-pytest -v
+python -m pytest -v
 ```
 
 > **✅ Tip:** The file name must start with test_, and so must each function, because that is how pytest finds them.
 
-## 6.4 Selenium
-
-### Week 10 · interface testing
-
-### What is it?
-
-Selenium is a tool that drives a browser from a program. It opens the page, clicks buttons, types into boxes and reads the result. In other words, it does automatically what a real user would do by hand.
-
-### Where is it used in this project?
-
-It is used in Week 10, for testing your Streamlit interface. The tests ask whether the app opens, whether a user can type something and get an answer, and whether everything still works at phone width.
-
-### Installation
-
-```bash
-pip install selenium
-```
-
-### Smallest working example
-
-```python
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-driver = webdriver.Chrome()
-driver.set_window_size(390, 844) # phone viewport
-driver.get("http://localhost:8501")
-box = driver.find_element(By.TAG_NAME, "input")
-box.send_keys("hello")
-driver.quit()
-```
-
-> **✅ Tip:** Your Streamlit app must already be running in a separate terminal. Selenium connects to an existing page; it does not start your application for you.
-
 ## 6.5 GitHub Actions
 
-### Week 10 · continuous integration
+### Weeks 1–12 · continuous integration
 
 ### What is it?
 
-GitHub Actions is GitHub's automation system. Every time you push, it runs the commands you specify on GitHub's own servers, and it shows a green tick if your tests pass and a red cross if they do not. There is nothing to install: you put a YAML file (a configuration file in a simple text format) in .github/workflows/.
+GitHub Actions is GitHub's automation system. Every time you push, it runs commands on GitHub's own servers. It shows a green tick when everything passes and a red cross when something fails. The commands are in a YAML file (a configuration file in a simple text format) in `.github/workflows/`.
 
 ### Where is it used in this project?
 
-It is used in Week 10, for running your pytest suite automatically. It can also check that your weekly deliverables are complete, which is exactly what the checker in your repository already does.
+Your repository already has this file: `.github/workflows/check.yml`. Do not change it. On every push it runs two jobs:
+
+- **Weekly deliverables:** the checker. From Week 6 it also runs the tests (§6.4).
+- **Lint and format:** ruff (§6.6).
+
+Open the **Actions** tab of your repository to see the result. From Week 6, your lecture mark reads this run.
 
 ### Installation
 
 ```
-Nothing to install — adding a file to the repository is enough.
+Nothing to install — the file is already in your repository.
 ```
 
 ### Smallest working example
 
 ```yaml
-# .github/workflows/test.yml
-name: tests
-on: [push]
+# .github/workflows/check.yml (a part of it)
 jobs:
-  test:
+  deliverables:
+    name: Weekly deliverables
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install -r requirements.txt
-      - run: pytest
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check this week's deliverables
+        run: python .github/check_deliverables.py
 ```
 
-> **✅ Tip:** Indentation is meaningful in YAML, and tab characters are rejected, so use spaces only.
+> **✅ Tip:** If a run turns red, fix the problem and push a new commit. Never force push.
 
 ## 6.6 ruff
 
-### Week 9 · code quality
+### Weeks 1–12 · code quality
 
 ### What is it?
 
-ruff is a single tool that both inspects Python code (as a linter, a program that looks for mistakes and bad style) and formats it (as a formatter, a program that rearranges the layout of the code). It finds unused imports, undefined names, inconsistent indentation and much else, and it fixes most of these problems for you. It is written in Rust, so it is very fast.
+ruff is one tool that does two jobs. It inspects Python code (a linter: a program that looks for mistakes and bad style), and it formats the code (a formatter: a program that rearranges its layout). It finds unused imports, undefined names, wrong indentation and much more, and it fixes most of these problems for you. It is very fast.
 
 ### Where is it used in this project?
 
-It is part of the Week 9 deliverable: ruff check . must report zero errors. You will also run it inside GitHub Actions, so that every push is checked automatically.
+It runs on GitHub on every push, in the "Lint and format" job (§6.5). Both `ruff check .` and `ruff format --check .` must pass, or the run turns red. Run them on your laptop before you push.
 
 ### Installation
 
 ```bash
-pip install ruff
+python -m pip install ruff==0.15.11
 ```
+
+You need it from Week 1, because it runs on every push. Install this exact version: it is the one that GitHub uses.
 
 ### Smallest working example
 
@@ -393,11 +423,11 @@ ruff format . # format the code
 ruff format --check . # only check whether it is formatted
 ```
 
-> **✅ Tip:** The settings live in ruff.toml at the repository root. AI-generated code frequently leaves unused imports behind, and ruff catches them immediately, which makes it particularly useful in AI-assisted development.
+> **✅ Tip:** The settings live in ruff.toml at the repository root. AI-generated code often leaves unused imports behind, and ruff catches them at once. This makes it very useful in AI-assisted development.
 
 ## 6.7 Mermaid
 
-### Weeks 2, 4, 6, 8, 11 · diagrams
+### Weeks 2, 5, 10 · diagrams
 
 ### What is it?
 
@@ -405,7 +435,14 @@ Mermaid is a syntax for writing diagrams as text instead of drawing them. You wr
 
 ### Where is it used in this project?
 
-It is used in every design document in the course, for the use case, sequence, architecture, data flow, activity and deployment diagrams.
+Every diagram of the course is written in Mermaid. There are four:
+
+- the system context diagram (`PROPOSAL.md` §5, Week 2);
+- the use case diagram (`week02/SRS.md` §3, Week 2);
+- the architecture (`week05/DESIGN.md`, Week 5);
+- the deployment diagram (Week 10).
+
+The course asks for no other diagrams.
 
 ### Installation
 
@@ -416,14 +453,11 @@ Nothing to install — preview at mermaid.live and commit the file.
 ### Smallest working example
 
 ```
-sequenceDiagram
-    actor User
-    participant UI as Streamlit
-    participant LLM
-    User->>UI: types a question
-    UI->>LLM: sends the request
-    LLM-->>UI: returns an answer
-    UI-->>User: displays it
+flowchart LR
+    web[Web client] --> server[Server]
+    mobile[Mobile client] --> server
+    server --> db[(Database)]
+    server --> mail[E-mail service]
 ```
 
 > **✅ Tip:** Because the diagram is text, it is versioned by git, so you can see what changed and when. A diagram drawn in a graphics program gives you none of that.
@@ -432,21 +466,39 @@ sequenceDiagram
 
 Keep this table as a reference for the term.
 
-| Tool                           | What it does        | Weeks      |
-| ---------------------------------- | ----------------------- | -------------- |
-| **Streamlit**                      | Web client (one option) | 6–12           |
-| **python-dotenv**                  | Passwords and keys      | 6–12           |
-| **pytest**                         | Unit testing            | 9              |
-| **ruff**                           | Linting and formatting  | 9              |
-| **Selenium**                       | Interface testing       | 10             |
-| **GitHub Actions**                 | Continuous integration  | 10             |
-| **Mermaid**                        | Diagrams                | 2, 4, 6, 8, 11 |
+| Tool | What it does | Weeks |
+|---|---|---|
+| **HTML, CSS, JavaScript** | The prototype, then the web client | 4–12 |
+| **FastAPI + uvicorn** | The server | 5–12 |
+| **python-dotenv** | Passwords and keys | 6–12 |
+| **pytest** | Tests | 5–12 |
+| **ruff** | Linting and formatting, on every push | 1–12 |
+| **GitHub Actions** | Continuous integration, on every push | 1–12 |
+| **Mermaid** | Diagrams | 2, 5, 10 |
 
 > **✅ Tip:** Do not install all of these now. Each one arrives in its own week, with the assignment that needs it. For now it is enough to know what each one is for.
 
-# 7. Checklist Before the First Session
+# 7. Installing Git
 
-### Each of the following must produce output. If one does not, sort it out before class — otherwise you will spend the session watching other people work.
+Git keeps the history of your project and sends your work to GitHub. Install it once:
+
+- **Windows:** download the installer from git-scm.com and run it. The default choices are fine.
+- **macOS:** run `xcode-select --install` in the terminal (or `brew install git` if you use Homebrew).
+- **Linux (Debian and Ubuntu):** run `sudo apt install git`.
+
+Then run these three commands once. They tell Git who you are and how `git pull` works:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "the e-mail of your GitHub account"
+git config --global pull.rebase false
+```
+
+> **📌 Note:** *Use the e-mail address of your GitHub account, so that GitHub links your commits to you. Without the first two lines, Git may refuse your first commit with "Please tell me who you are". The third line stops `git pull` from failing with "Need to specify how to reconcile divergent branches".*
+
+# 8. Checklist Before the First Session
+
+### Each of the following must produce output. If one does not, fix it before class. Otherwise you will only watch other people work in the session.
 
 ```bash
 python --version # 3.10 or newer, 3.12 preferred
@@ -454,16 +506,19 @@ pip --version
 git --version
 ```
 
-Virtual environment test:
+Virtual environment test. Type one command at a time. Where a comment shows a Windows PowerShell form, use that form on Windows:
 
 ```bash
-mkdir test_env && cd test_env
+mkdir test_env
+cd test_env
 python -m venv .venv
-source .venv/bin/activate # Windows: .venv\Scripts\activate
-pip install requests
+source .venv/bin/activate # Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install requests
 python -c "import requests; print('OK')"
+pip freeze # lists requests and the packages it needs, with their versions
 deactivate
-cd .. && rm -rf test_env
+cd ..
+rm -rf test_env # Windows PowerShell: Remove-Item -Recurse -Force test_env
 ```
 
 > **✅ Tip:** If that prints "OK", your virtual environment and pip are working, and you are ready for Week 1.

@@ -87,4 +87,6 @@ Free core tier for single-station kitchens (up to 30 inventory items and 10 dail
 - 2026-10-15 — REQ-002, TC-002-02: Collaborator geri bildirimi doğrultusunda hatalı porsiyon girişlerini geri almayı sağlayan prep_cancel.html akışı eklendi; ikinci tur yürütmesi başarıyla doğrulandı.
 - 2026-10-22 — REQ-001, TC-001-03: added TC-001-03 expired login code test case, GET /auth/me session profile endpoint to api.md, and comprehensive architecture specifications to DESIGN.md before baseline freeze.
 - 2026-10-23 — REQ-001, TC-001-04, TC-001-05, TC-001-06: added malformed email (422), rate-limit throttle (429), and session profile authorization (401) test cases to test_cases.json; locked requirements.json and test_cases.json as Week 5 baseline.
+- 2026-10-27 — REQ-002: wired course login into main.py via login_contract.json, added POST /prep/portions endpoint to api.md, and implemented dish portion preparation stock depletion with TC-002-01 test suite.
+
 

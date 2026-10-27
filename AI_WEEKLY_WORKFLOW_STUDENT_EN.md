@@ -2,20 +2,36 @@
 
 **AI-Assisted Software Development · Atlas University · Fall 2026–2027**
 
-**Version 1 · 20 September 2026** — this document is revised during the term. It is
-delivered together with the rest of each week's files when you fetch them (to "fetch"
-or "pull" means to ask git to download the newest files from GitHub into the copy on
-your computer), so the copy in your repository (the folder of your project that git
-tracks, both on your computer and on GitHub) is the current one as long as you keep
-pulling.
+**Version 2 · 24 Oct 2026** — this document is revised during the term. When you run the
+checker (`python .github/check_deliverables.py`), it brings the newest copy into your
+repository by itself. So the copy in your repository (the folder of your project that git
+tracks, both on your computer and on GitHub) is the current one. Add it with `git add .`,
+as you do with every file that arrives.
 
 > [!IMPORTANT]
-> **What changed in this version**
+> **What changed in version 2 (24 Oct 2026)**
 >
-> Nothing has changed yet, because this is the first version. When I revise this
-> document, this box lists what moved, and the headings that changed carry a
-> **`↻ changed in v2`** mark beside them. Both disappear in the version after that one,
-> so anything that is marked is new to you.
+> - Commits: in the lecture, commit each piece of work in the middle and again when it works, and
+>   push every commit right away; outside the lecture at least
+>   two commits with new work, pushed at least one hour apart; GitHub's push time counts (§2).
+> - Never force push, and never let an assistant do it (§2, §4).
+> - From the Sunday after Week 5, a change to `requirements.json` or `test_cases.json` is a
+>   `CR-` line in the Change log of `PROPOSAL.md` (§3).
+> - From Week 6, the lecture mark reads the GitHub Actions run (§2).
+> - The roles in `group_NN.json`, week by week (§3).
+> - In the AI log, the assistant's words appear only in **bold**, copied from the Evidence
+>   block. The Evidence block has `ME:`, `AI:` and `TERMINAL:` parts (§3).
+> - The Evidence block: paste the rounds that show the error; every part you keep is pasted
+>   whole (§3).
+> - The green tick shows the lab checks, the secret scan and ruff. The checker's 2 Saturday
+>   points come from the "By Saturday" checks, read at 23:59 (§3).
+> - GitHub also runs `ruff format --check .`, with ruff 0.15.11 (§4).
+> - There is no weekly online group meeting any more. The assignment says when your group
+>   meets (§3).
+> - A small fix commit after a red run never lowers the commit point (§2, §4).
+>
+> The checker brings each new version by itself. This box lists what changed since the
+> version before.
 
 This document describes the routine that does not change. The *content* of each week
 differs, because each week's assignment arrives in that week's folder, but the *rhythm*
@@ -30,7 +46,7 @@ Come back here when you are stuck.
 |------|-------------|--------|
 | Before the lecture | Read `weekNN/ASSIGNMENT_NN_EN.md` | — |
 | During the lecture (3 h) | Work, and push often (a push sends your saved work from your computer to GitHub) | — |
-| End of the lecture | Make one last push; right after it I take a snapshot (a copy of your repository exactly as it is at that moment) | 5 |
+| End of the lecture | Push by 11:45. The lecture mark reads your last commit pushed by the end of the lecture (I take a snapshot: a copy of your repository exactly as it is at that moment) | 5 |
 | After the lecture | Finish the rest and write `ai_log_NN.md` | — |
 | By Saturday 23:59 | **Push again.** I take a second snapshot of your repository | 5 |
 
@@ -71,7 +87,7 @@ mechanics of git and GitHub.
 
 ## 1. Before the lecture of that week
 
-Read `weekNN/ASSIGNMENT_NN_EN.md`. It comes down with the rest of the week's folder and
+Read `weekNN/ASSIGNMENT_NN_EN.md`. It arrives with the rest of the week's folder and
 lists exactly which files that week requires. 
 
 If there is pre-reading, read it before you arrive. 
@@ -99,6 +115,9 @@ By Saturday:     0 of  3 done
 The numbers above are only an example; the real numbers change from week to week. What
 matters is which of the two lines you are reading.
 
+A **NOT YET** line waits for something that it names. It is neither passed nor failed, and
+it does not count in "x of y".
+
 **In the lab** is the line that I read at the end of the lecture, and it is worth half
 the week's mark. These items are worth doing while you are in a room with me and with,
 say, twenty-nine other people who are stuck on the same thing.
@@ -109,7 +128,8 @@ work that you genuinely do alone. It does not make the check fail during the wee
 because it is not due yet; but it is the other half of the mark, and the Saturday
 snapshot does read it.
 
-If you find yourself writing `ai_log_NN.md` during the lab, you have the week backwards.
+If you are writing `ai_log_NN.md` during the lab, you are doing things in the wrong order:
+the log comes after the lab work.
 
 ### Work, and push often
 
@@ -124,15 +144,23 @@ git push
 ```
 
 A message such as "update", "fix" or "asdf" says nothing about what happened, and
-messages like these cost you the commit-hygiene point (the point for commit discipline
-that §3 describes).
+messages like these cost you the commit-discipline point (§3 describes it).
 
-**Push at 10:00, at 11:00 and at the end of the lecture (11:45)**, which means at least three pushes in every lecture,
-whatever state the work is in. At 10:00 and at 11:00 I look at the class board (the
-projected table that shows where every student's repository stands) to see where
-everyone is; the push at the end of the lecture (11:45) is the one that counts for the lecture's points. A push
-costs nothing, and a half-finished section that is pushed is worth more than a finished
-one that is not.
+**The commit and push rule:**
+
+- **In the lecture:** commit each piece of work in the middle, whatever state it is in, commit it
+  again when it works, and push every commit right away. A piece that arrives finished in one
+  commit does not count.
+- **Outside the lecture:** at least two commits with new work, pushed at least one hour
+  apart.
+- GitHub's push time counts, not the date on a commit.
+- A commit made by a coding agent never counts.
+- **Never force push**, and never let an assistant do it (§4).
+
+At 10:00 and at 11:00 I look at the class board (the projected table that shows where
+every student's repository stands) to see where everyone is. Push by 11:45: the lecture
+mark reads your last commit pushed by the end of the lecture. A push costs nothing. A half-finished section that
+is pushed is worth more than a finished one that is not.
 
 ### Run the checks yourself
 
@@ -147,9 +175,9 @@ at a time. It is not a grade; it is a to-do list, and running it costs nothing.
 
 ### Push once more before the lecture ends
 
-The last push is at the end of the lecture (11:45). Right after it, I freeze every repository as it stands (I
-take a snapshot, a copy of the repository exactly as it is at that moment) and I run the
-checks on that snapshot. Work that you have not pushed is invisible: it sits on your
+Push by 11:45. The lecture mark reads your last commit pushed by the end of the lecture (from Week 6,
+also its Actions run). I take a snapshot of that commit (a copy of the repository exactly
+as it is at that moment) and I run the checks on that snapshot. Work that you have not pushed is invisible: it sits on your
 laptop and does not count.
 
 The result is projected as an anonymised table (a table in which nobody's real name
@@ -157,19 +185,27 @@ appears); find your row by the nickname in your `student.json` (the file in your
 repository that holds your details, including the nickname you chose). That table is
 worth **5 points — half the week**.
 
+**From Week 6, the lecture mark reads GitHub Actions.** The test results in your lecture
+mark come from the GitHub Actions run of the last commit you pushed before the end of the
+lecture. A test that passes only on your laptop does not count. Look at the **Actions** tab
+after each push.
+
 One student works on one computer with one GitHub account. Work done on a classmate's
 machine or under a classmate's GitHub session earns nothing for the lecture.
 
-**Commit discipline (1 point a week) is judged every week.** In the lecture I look for
-several pushes at different times (at least three), each with new work in it. Outside the lecture you may work in one sitting; what I
-look for is several commits made as you work, each with some new work in it and a message
-that says what changed. A commit does not need to be a finished part. I ask three questions: did the work grow step by step, is there real
-progress from one commit to the next, and was the text worked on or was it pasted in
-finished? A single
-commit at the end of the week, or text that arrives in one piece, scores nothing. When
-something in a week looks doubtful, I also look back at your earlier weeks before I
-decide. I may also ask you a two-minute question about your project in any lecture.
-Commit as you work, every week, and this takes care of itself.
+**Commit discipline (1 point a week) is judged every week.** I read the rule above: the
+three pushes in the lecture, and two pushes at least one hour apart outside it. I also ask
+three questions:
+
+- Did the work grow step by step?
+- Is there real progress from one commit to the next?
+- Was the text worked on, or was it pasted in finished?
+
+Each commit has a message that says what changed. A commit does not need to be a finished
+part. A single commit at the end of the week, or text that arrives in one piece, scores
+nothing. A small fix commit after a red run never lowers the point. When something in a
+week looks doubtful, I also look back at your earlier weeks before I decide. I may also ask
+you a two-minute question about your project in any lecture.
 
 ### Attendance, and what happens if you are not here
 
@@ -203,14 +239,21 @@ You write one file per week, inside that week's folder, so Week 1 has
 `week01/ai_log_01.md`, and so on. The file arrives with the rest of the documents in the
 week folder, and you fill it in. You write which assistant you used, what it got right,
 what you had to correct, and what you learned. **You write it yourself, in your own
-words**: outside the Evidence block no assistant is used, not even to correct the
-language. Your English or Turkish is not graded; a log written by an assistant earns 0 points from Week 4 on, however polished it is (in Weeks 1–3 it earned at most 1 of the 2).
+words**: outside the Evidence block and the bold quotes no assistant is used, not even to
+correct the language. Your English or Turkish is not graded; a log written by an assistant earns 0 points from Week 4 on, however polished it is (in Weeks 1–3 it earned at most 1 of the 2).
 
-**The Evidence block is required.** Paste the actual exchange under your claim, inside
-the code fence (the block between two lines of three backticks): the prompt you sent and
-the wrong answer you got. Do not paste the whole conversation; paste the lines that show
-the error, which is usually a short extract, call it ten or fifteen lines. A claim with
-an empty Evidence block earns nothing.
+The assistant's words may appear in your log only in **bold**. Each bold phrase is copied
+letter for letter from the Evidence block. Use bold for nothing else. Each week's log also
+names the `AI_Doc5` technique that it uses (the week's AI log file says which one). From
+Week 4 the technique is compulsory.
+
+**The Evidence block is required.** Paste the real exchange inside the code fence (the
+block between two lines of three backticks): under `ME:` the prompt you sent, under `AI:`
+the answer exactly as it came, and, when the week asks for it, under `TERMINAL:` the
+commands and their output, untouched. Paste the rounds of the exchange that show the error;
+you may leave out whole rounds that do not. Every `ME:`, `AI:` or `TERMINAL:` part you keep
+is pasted whole, exactly as it came: from Week 4, nothing removed, nothing corrected, not
+even the grammar. A claim with an empty Evidence block earns nothing.
 
 Why is this required? Anyone can write "the AI made a mistake and I fixed it". A real
 model output is hard to fabricate convincingly, because invented transcripts read too
@@ -218,10 +261,11 @@ cleanly and their errors are conveniently easy to spot. And choosing which part 
 long conversation counts as evidence is itself the skill that is being assessed.
 
 If you would rather keep the whole conversation, save it as `weekNN/transcript.md`. I do
-not read those files by default, but I will read yours when a log entry does not add
-up.
+not read those files by default, but I will read yours when a log entry is not clear to
+me.
 
-This file is worth 2 points.
+The AI log is the main part of the 2 human-involvement points, together with the
+hand-written files the week names (Week 1: 1 point).
 
 ### Keep going until the checks are green
 
@@ -232,9 +276,12 @@ git commit -m "week01: llm_notes written up"
 git push
 ```
 
-The **Actions** tab of your repository on GitHub shows the result of every push: GitHub
-runs the same checks after every push, and this automatic run is called CI (continuous
-integration). A green tick on your Saturday state is worth **2 points**.
+The **Actions** tab of your repository on GitHub shows the result of every push. After
+every push GitHub runs two jobs, and this automatic run is called CI (continuous
+integration): "Weekly deliverables" (the checker) and "Lint and format" (ruff). The green
+tick shows the lab checks, the secret scan and ruff. The "By Saturday" checks do not turn
+it red, because they are not due yet. The checker's **2 Saturday points** come from the
+"By Saturday" checks, read at 23:59. So run the checker and read its "By Saturday" line.
 
 ### The 3 points that are not automated
 
@@ -244,37 +291,59 @@ commit history show the work growing step by step rather than one last-minute du
 changed your plan, did the change get a dated line in the change log of `PROPOSAL.md`?
 Changing your mind is normal and healthy, but the change must be visible. The project
 itself (its problem and its product) is fixed at the end of the Week 3 lecture (11:45);
-after that, only its details change. A requirement
-that is silently abandoned costs the mark; a requirement that is dropped with a one-line
-justification in `ai_log_NN.md` costs nothing. That is what engineering looks like.
+after that, only its details change. A requirement that is silently abandoned costs the
+mark.
+
+From the Sunday after Week 5 (the baseline), every change to `requirements.json` or
+`test_cases.json`, a dropped requirement included, is a **change request**: one line in the
+Change log of `PROPOSAL.md` that begins with `CR-` and the next number, names the change
+and the ids, and lists every file it affects. Example: "2026-10-28 — CR-01: REQ-002 now
+allows 15-minute slots; affects requirements.json, test_cases.json (TC-002-02),
+week05/api.md, server/bookings.py." Other changes (`api.md`, use cases, screens) get an
+ordinary dated Change log line. A logged change costs nothing. That is what engineering
+looks like.
 
 **Human involvement — 2 points.** This is proof that people, and not only models, did this
 week's work. Your own part is shown in `weekNN/ai_log_NN.md`: a concrete AI error, the
-pasted evidence, and what you changed by hand; these two points are paid for that log. The
+pasted evidence, and what you changed by hand. This log is the main part of the two
+points, together with the hand-written files the week names (Week 1: 1 point). The
 classmates who help you are recorded too, each with one sentence on what they did, plus
 evidence of that work; the evidence can be their notes, their bug list, or a dated
 paragraph in your log. In Week 2, up to two classmates may help you as stakeholders,
 recorded in `week02/contributors_02.json`; they are optional, and working alone costs you
 nothing. In Week 3 your three reviewers in the lecture are recorded in
-`week03/contributors_03.json`. From Week 4 the people who help you are your group,
-recorded every week in `weekNN/group_NN.json` in the role that the assignment names (for
-example as tester or as design reviewer). Whatever you list must be real; names and
-nothing behind them is a list, not evidence, and without evidence the contributors' bonus
-is not paid.
+`week03/contributors_03.json`. From Week 4 the people who help you are recorded in
+`weekNN/group_NN.json`, in the role that the week's assignment names (the list is below).
+Whatever you list must be real; names and nothing behind them is a list, not evidence, and
+without evidence the contributors' bonus is not paid.
 
-**From Week 4 your group is in `weekNN/group_NN.json`.** In Week 3 you form a group of
-four yourselves (five when the class does not divide by four), and that group stays
-together for the term. Every week, between the lecture and Saturday, your group meets
-**online for one hour**: each person presents what changed in their project that week, and
-the others say what they think. Every week, `weekNN/group_NN.json` has one entry for every
-other member of your group; for each one, you write what they said, as a quotation, and
-what you did about it. Your group is you and these members, and every member's file must
-show the same group. Nobody can write those entries for someone who was not there.
+**Your group and `weekNN/group_NN.json`.** In Week 3 you form a group of four yourselves
+(five when the class does not divide by four). Your group of Week 3 stays your group; the
+assignment says in which weeks it meets and what for. `weekNN/group_NN.json` holds the
+people that week's assignment names, with that week's role (the exact English word). In
+Weeks 2 and 3 the people who help you are in `contributors_NN.json`.
+
+| Week | Role |
+|---|---|
+| 2 | stakeholder |
+| 3 | reviewer |
+| 4 | collaborator |
+| 5 | nobody (you work alone) |
+| 6 | attacker |
+| 7 | tester |
+| 8 | test-user |
+| 9 | beta-tester |
+| 10 | uat-participant |
+| 11 | release-tester |
+| 12 | poster-reviewer |
+
+For each person, you write what they did or said and what you did about it; the week's
+assignment gives the fields. Nobody can write those entries for someone who was not there.
 
 **Contributors earn a bonus.** A classmate who helps you earns 10% of your mark for that
 week, for at most three contributions a week; the same applies to you when you help
-them. In Week 2 the names are your choice; from Week 3 they are your group. Week 1 has
-no contributors.
+them. In Week 2 the names are your choice; from Week 3 they are the people that the week's
+assignment names. Weeks 1 and 5 have no contributors.
 
 An LLM (a large language model, the kind of model behind AI assistants) can produce
 every file that an assignment asks for. What it cannot do is make those files agree with
@@ -289,7 +358,8 @@ actually being assessed.
 that lets your program use an external service.) The key lives in `.env` (a small file
 of settings that only your own computer reads), and `.env` is listed in `.gitignore`
 (the file that tells git which files must never be committed). If a key reaches the
-repository, the automatic scan catches it and you lose **10 points**. Once a key has
+repository, the automatic secret scan catches it (it finds API keys and tokens, not
+passwords), and you lose **10 points**. Once a key has
 been pushed, deleting it is not enough, because it stays in the git history. You must
 revoke that key and issue a new one.
 
@@ -305,9 +375,25 @@ ruff format .         # format
 AI-generated code frequently leaves unused imports behind (an import line that loads a
 module which the code never uses); `ruff` catches them instantly.
 
+GitHub's "Lint and format" job runs `ruff check .` and `ruff format --check .` on every
+push, from Week 1. Use the same version as GitHub: `ruff==0.15.11`, which is in the root
+`requirements.txt` (`python -m pip install -r requirements.txt`).
+
 **Your app must work on a phone.** Narrow your browser window to about 390 pixels
 (roughly the width of a phone screen) now and then. If something is cut off or scrolls
 sideways, fix it while the window is small, not in Week 10.
+
+**Never force push.** A force push (`git push --force`, or "Force Push" in VS Code)
+deletes commits from your repository's history, and that history is part of the record of
+your work that I read. Do not let an assistant do it for you either. If git refuses your
+push, run `git pull` and then `git push` again (in VS Code: **Sync Changes**).
+If `git pull` stops with "Need to specify how to reconcile divergent branches", run
+`git config pull.rebase false` once, then `git pull` again. If git reports
+a conflict and you are not sure what to do, ask in the lecture instead of forcing the push.
+Your marks are read from GitHub's own record of when each push arrived, not from the dates
+on your commits.
+A small fix commit (a ruff error, a typo) never lowers the commit point: push it as a new
+commit instead of changing an old one.
 
 **Do not break earlier weeks.** The checks are cumulative: in Week 5, Weeks 1 to 4 are
 re-checked. If a change breaks something older, CI (the automatic run of the checks on
@@ -324,12 +410,15 @@ computer).
 
 **The checks pass locally but fail on GitHub.** The usual cause is a file that you did
 not push. Run `git status` (it lists the files that have changed and have not yet been
-committed or pushed).
+committed or pushed). From Week 6 another cause is a course file that you changed
+(`course_tests/`, `server/course_login.py`): GitHub always uses the course's copy. Do not
+edit these files.
 
 **`ruff` is clean locally but not in CI.** This is a version mismatch: your computer and
-CI are running different versions of `ruff`. Install the version pinned in that week's
-`requirements.txt` (the list of the packages, with their exact versions, that the week
-needs), not whichever one you happen to have.
+CI are running different versions of `ruff`. Install the version pinned in the root
+`requirements.txt` (the list of the packages, with their exact versions, that the course
+needs), not whichever one you happen to have: `python -m pip install -r requirements.txt` installs
+`ruff==0.15.11`. Run `ruff format .` too, because GitHub also checks the format.
 
 **I broke something and cannot undo it.** Do not panic, because git remembers
 everything:
@@ -353,9 +442,10 @@ about.
 python .github/check_deliverables.py     # show me what is missing
 python .github/check_deliverables.py 2   # another week, if you want
 ruff check . --fix                       # clean the code
+ruff format .                            # format the code
 git add . && git commit -m "weekNN: ..." && git push
 
 # environment
 source .venv/bin/activate                # Windows: .venv\Scripts\activate
-streamlit run app.py
+uvicorn server.main:app --reload         # start the server (from Week 5)
 ```

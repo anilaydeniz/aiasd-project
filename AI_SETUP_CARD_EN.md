@@ -36,6 +36,7 @@ it in a file, in a chat, or in a commit.
 ```bash
 git clone https://github.com/<your-username>/aiasd-project.git
 cd aiasd-project
+git config pull.rebase false   # once: a pull joins GitHub's commits with yours
 ```
 
 **4 · Say who you are, and push.** Open `student.json` and fill in all five fields. The
@@ -61,16 +62,45 @@ git commit -m "week01: what I did"
 git push
 ```
 
-Nothing else changes for twelve weeks. Only the commit message changes. Run the checker
-(the first command, which looks for the files that the week requires) as often as you
-like. It is a to-do list, not a grade, and running it costs nothing.
+Only the commit message changes. Run the checker (the first command, which looks for the
+files that the week requires) as often as you like. It is a to-do list, not a grade, and
+running it costs nothing.
 
-When a week needs them, you run two more commands:
+**Before you push, from Week 1:** GitHub runs ruff on every push. Run the same checks:
 
 ```bash
-pip install -r weekNN/requirements.txt
-streamlit run app.py
+python -m pip install -r requirements.txt  # once, in .venv: ruff 0.15.11, as on GitHub
+ruff check .                               # list problems
+ruff format --check .                      # check the format
 ```
+
+If a ruff line reports a problem, run `ruff check . --fix` and `ruff format .`, then
+check again.
+
+**When you push:**
+
+- **In the lecture:** commit each piece of work in the middle, commit it again when it works,
+  and push every commit right away.
+- **Outside the lecture:** at least two commits with new work, pushed at least one hour
+  apart.
+- GitHub's push time counts, not the date on a commit. A commit made by a coding agent
+  never counts.
+- **Never force push**, and never let an assistant do it. If git refuses your push, run
+  `git pull`, then `git push`.
+
+## From Week 5: the server and the tests
+
+```bash
+python -m venv .venv                              # once
+source .venv/bin/activate                         # Windows: .venv\Scripts\activate
+python -m pip install -r week06/requirements.txt  # the newest week that has one
+uvicorn server.main:app --reload                  # start the server
+python -m pytest                                  # run the tests
+```
+
+Activate the virtual environment (`.venv`, the folder that holds the course's Python
+packages) each time you open a new terminal. The server keeps its terminal busy, so run
+the tests in a second terminal.
 
 ---
 
@@ -78,17 +108,22 @@ streamlit run app.py
 
 Every time you run `python .github/check_deliverables.py`, it also brings the course's
 files into your repository. It brings a new week's folder when that week is published,
-and it brings any course document (`AI_*`) that changed at the root. It never touches a
-file that you already have in a week folder. What arrives is untracked (git sees the
+and it brings any course document (`AI_*`) that changed at the root. It brings the
+`PROPOSAL.md` scaffold to the root (Week 2) and the `server/` starter (Week 5), only if
+you do not have them yet. It never touches a file that you already have in a week folder. What arrives is untracked (git sees the
 files but does not record them yet) until you run `git add .`, and the checker lists
 these files. The section below describes the manual way, for when you are offline.
+
+From Week 6 the checker also brings `course_tests/` and `server/course_login.py`, and
+`server/login_contract.json` if you do not have it. Do not edit `course_tests/` or
+`course_login.py`: the checker puts the course's copy back, and GitHub always uses it.
 
 ## Two remotes, two very different commands
 
 Your repository has a remote called `origin` (a remote is an address of a copy of your
-repository on another computer), and `origin` is your own copy on GitHub. Some weeks
-also hand you a starter folder from the course template, and for that you add a second
-remote called `template`. These two remotes are not interchangeable.
+repository on another computer), and `origin` is your own copy on GitHub. Only when you
+are offline, you bring a week's files from the course template by hand, and for that you
+add a second remote called `template`. These two remotes are not interchangeable.
 
 | | |
 |---|---|
@@ -100,20 +135,21 @@ because your copy was created from it and not cloned from it. Merging the two (t
 means to ask git to combine the two histories) makes git try to reconcile every file at
 once: your filled-in `student.json` against the blank one, your finished `hello.py`
 against the stub, and your work against the scaffold. You would spend the lecture
-untangling conflicts, and a `git pull` that once succeeded keeps trying to do the same
+fixing conflicts, and a `git pull` that once succeeded keeps trying to do the same
 thing again every time.
 
-Instead, take only the one path that you actually want:
+Instead, only when you are offline, take only the paths that you actually want:
 
 ```bash
 git remote add template https://github.com/vedatcoskun-course/aiasd-template.git   # once, ever
 git fetch template
-git checkout template/main -- week06
+git checkout template/main -- week06 course_tests server/course_login.py
 ```
 
-These commands copy exactly the path that you name, and they touch nothing else. Run
-them **before** you write anything in that folder. If you run them afterwards, they
-overwrite your work.
+These commands copy exactly the paths that you name, and they touch nothing else. Run
+them **before** you write anything in those files. If you run them afterwards, they
+overwrite your work. If you do not have `server/login_contract.json` yet, add it to the
+end of the last line.
 
 ---
 
@@ -126,7 +162,8 @@ overwrite your work.
 |---|---|
 | `Authentication failed`<br>`could not read Username for 'https://github.com'` | GitHub does not know who you are. Run `gh auth login`. If it still fails, run `gh auth status`, because you may be signed in as the wrong account. |
 | `Support for password authentication was removed` | This has the same cause. Your GitHub password is not usable here, and retyping it will not help. |
-| `! [rejected] main -> main (fetch first)` | GitHub has a commit that you do not have, usually because you edited a file in the browser. Run `git pull --rebase`, then push again. |
+| `! [rejected] main -> main (fetch first)` | GitHub has a commit that you do not have, usually because you edited a file in the browser. Run `git pull`, then `git push`. **Never force push.** |
+| `Need to specify how to reconcile divergent branches` | Run `git config pull.rebase false` once, then `git pull` again. |
 | `nothing to commit, working tree clean` | Git sees no change. Either the editor did not save, or you are in the wrong folder. Run `pwd` and look at the folder it prints. |
 | `fatal: not a git repository` | You are outside the project. Run `cd` into `aiasd-project` and try again. |
 | `index.lock ... File exists` | A git command was interrupted. Run `rm -f .git/index.lock` and retry. |

@@ -34,15 +34,19 @@ applied when it was written; check the store's own page before you commit to a p
 
 | | Native | Hybrid |
 |---|---|---|
-| Android | Kotlin + Jetpack Compose (Android Studio) | Flutter (Dart), React Native / Expo (TypeScript), Capacitor (web tech) |
+| Android | Kotlin + Jetpack Compose (Android Studio) | Flutter (Dart), React Native / Expo (TypeScript) |
 | iOS | Swift + SwiftUI (Xcode, **Mac only**) | the same code base as above; the iOS build needs a Mac or a hosted build service (a company that builds the app on its own Macs for you) |
 | Code bases | two, if you want both platforms | one |
-| Web client | you write it separately | Flutter and Expo build for the web too; Capacitor *is* the web client |
+| Web client | plain HTML, CSS and JavaScript in `web/`, served by your FastAPI server | the same: a Flutter or Expo web build is not the course's web client |
 | Cost of the iOS side | a Mac + the Apple Developer membership | the same; hybrid does not remove Apple's fee |
 | Best when | you already know the language, or you target one platform only | you want both platforms from one code base, or you have a Windows laptop and want iOS too |
 
 Your server is the same whichever mobile framework you choose: the mobile client only
 calls it. The checker does not care either. Choose what you can ship.
+
+The web client is plain HTML, CSS and JavaScript pages in `web/`, served by your FastAPI
+server, for everyone (the Week 4 prototype screens become these pages in Week 6). Only the
+mobile framework is your choice (Week 7: Flutter, React Native–Expo, Kotlin or Swift).
 
 # 3. Your laptop + your phone → your paths
 
@@ -96,15 +100,19 @@ Two facts are hidden in the table:
 | Build from | Mac or Windows | Mac or Windows | Mac or Windows | Mac (or a hosted build) |
 | Before release | new personal accounts must run a closed test (a test open only to named testers) with 12 testers for 14 days | review, which takes a few days | review, which takes a few days | review, which typically takes days and can end in a rejection |
 | Reach in this class | almost every Android phone | Huawei phones; other Android users can install the AppGallery app | Samsung phones; other Android users can install Galaxy Store | every iPhone |
-| Watch out for | the closed-test rule above: plan the 12 testers and 14 days into Week 9 instead of discovering the rule in Week 10 | apps that depend on Google services (Firebase, Google Maps, Google Sign-In) do not run on Huawei phones and may be refused | — | the only paid route, and the only one that needs a Mac |
+| Watch out for | the closed-test rule above: enrol the 12 testers at S3, in Week 8, so that the 14 days end before the submission in Week 10 | apps that depend on Google services (Firebase, Google Maps, Google Sign-In) do not run on Huawei phones and may be refused | — | the only paid route, and the only one that needs a Mac |
 | What you pay in total | ≈ 25 $, once | nothing | nothing | ≈ 99 $ every year, with no student discount |
 
 Two consequences follow:
 
-- **Google Play's test-track rule is a gift if you plan for it.** Twelve testers for
-  fourteen days is exactly the beta week (Week 9) with your classmates as testers, and
-  you list those testers in your Week 9 test report. It is a disaster if you first hear of
-  the rule in Week 10. The rule applies to new *personal* accounts only.
-- **Do not depend on Google services.** Your login is by e-mail code or OTP from *your*
-  server; keep it that way, and your app runs on every store. If you need maps or push
+- **Plan for the testers early.** The store decides how many testers you need. A new
+  personal Google Play account needs at least 12 testers who stay in a closed test for 14
+  days in a row before the app can be released. Enrol them at S3, in Week 8, so that the
+  14 days end before the submission in Week 10. Your testers are the five people of your
+  pitch plus classmates and friends (role beta-tester in Week 9), and you list them in
+  your Week 9 test report. The User Acceptance Test (UAT) is in Week 10, with the five
+  people of your pitch. The 12-tester rule applies to new *personal* accounts only.
+- **Do not depend on Google services.** Your users log in with a 4-digit code sent by
+  e-mail from *your* server (the course's login, the same in every project). Keep it that
+  way, and your app runs on every store. If you need maps or push
   notifications, pick a provider that is not tied to one store.

@@ -4,11 +4,12 @@ AI-Assisted Software Development · Atlas Üniversitesi · Güz 2026–2027
 
 *Prof. Dr. Vedat Coşkun · English: [`AI_PLATFORMS_AND_STORES_EN.md`](AI_PLATFORMS_AND_STORES_EN.md)*
 
-Projeniz bir **mobil uygulama, bir web istemcisi ve bir sunucu** olarak teslim edilir ve
-mobil uygulama dönem sonuna kadar **public bir mağazadan yüklenmiş** olmalıdır. Bu el
-kitabı, 2. Hafta'da her birinizin sorduğu sorunun yanıtlarını içermek üzere oluşturulmuştur: *elimdeki bilgisayar ve
-telefonla ne geliştirebilirim ve hangi mağazaya gerçekten ulaşabilirim?* Teklifinizin §6
-(teknoloji yığını) ve §12 (riskler) bölümlerini yazmadan önce bu dokümanı okumanız önemlidir.
+Projenizi bir **mobil uygulama, bir web istemcisi ve bir sunucu** olarak teslim edersiniz
+ve dönem sonuna kadar mobil uygulamanızı **public bir mağazadan yüklenebilir** hale
+getirirsiniz. Bu el kitabı, 2. haftada her birinizin sorduğu soruyu yanıtlar: *elimdeki
+bilgisayar ve telefonla ne geliştirebilirim ve hangi mağazaya gerçekten ulaşabilirim?*
+Teklifinizin §6 (teknoloji yığını) ve §12 (riskler) bölümlerini yazmadan önce bu el
+kitabını okuyun.
 
 Ücretler, süreler ve mağaza politikaları değişir. Bu el kitabındaki rakamlar yazıldığı
 tarihte geçerli olanlardır; bir plana bağlanmadan önce mağazanın kendi sayfasına bakın.
@@ -23,10 +24,10 @@ tarihte geçerli olanlardır; bir plana bağlanmadan önce mağazanın kendi say
   platforma hizmet ettiğiniz anlamına gelir; hybrid (çapraz platform bir çatıda yazılmış tek
   kod tabanı) tek kod tabanından iki platformu da verir. Teslim edebileceğinizi seçin ve
   §6'da gerekçelendirin.
-- **Savunma, mağazadan yüklenmiş build'den yapılır**, o platformun bir telefonunda; bu
+- **Savunmayı mağazadan yüklenmiş build'le yaparsınız**, o platformun bir telefonunda; bu
   telefon ya sizinkidir ya da salonda ödünç aldığınız bir telefondur. Bir mağazada
   yayınlıyorsanız ve kendi telefonunuz diğer platformsa, uygulamayı kendi telefonunuza da
-  getirin; böylece sınav yapan ikisini de görür.
+  getirin; böylece sınav görevlisi ikisini de görür.
 - **"Teslim edildi" sayılan tek şey mağaza yayınıdır.** Kendi telefonunuzdaki geliştirici
   build'i test etmek ve göstermek içindir; yayınlamak için değildir.
 
@@ -34,15 +35,20 @@ tarihte geçerli olanlardır; bir plana bağlanmadan önce mağazanın kendi say
 
 | | Native | Hybrid |
 |---|---|---|
-| Android | Kotlin + Jetpack Compose (Android Studio) | Flutter (Dart), React Native / Expo (TypeScript), Capacitor (web teknolojileri) |
+| Android | Kotlin + Jetpack Compose (Android Studio) | Flutter (Dart), React Native / Expo (TypeScript) |
 | iOS | Swift + SwiftUI (Xcode, **yalnızca Mac**) | yukarıdakiyle aynı kod tabanı; iOS build'i için bir Mac ya da bulut build hizmeti (uygulamayı sizin için kendi Mac'lerinde derleyen bir şirket) gerekir |
 | Kod tabanı | iki platform istiyorsanız iki | bir |
-| Web istemcisi | ayrıca yazarsınız | Flutter ve Expo web için de derler; Capacitor zaten web istemcisidir |
+| Web istemcisi | `web/` içinde düz HTML, CSS ve JavaScript; FastAPI sunucunuz sunar | aynısı: Flutter ya da Expo web build'i dersin web istemcisi değildir |
 | iOS tarafının maliyeti | bir Mac + Apple Developer üyeliği | aynı; hybrid, Apple'ın ücretini kaldırmaz |
 | Ne zaman uygun | dili zaten biliyorsanız ya da tek platform hedefliyorsanız | tek kod tabanından iki platform istiyorsanız ya da Windows bilgisayarınız var ve iOS da istiyorsanız |
 
 Hangi mobil çatıyı seçerseniz seçin sunucunuz aynıdır: mobil istemci yalnızca onu çağırır.
 Seçiminiz denetleyiciyi de ilgilendirmez. Teslim edebileceğinizi seçin.
+
+Web istemcisi herkes için `web/` klasöründeki düz HTML, CSS ve JavaScript sayfalarıdır ve
+FastAPI sunucunuz onları sunar (4. haftanın prototip ekranları 6. haftada bu sayfalara
+dönüşür). Yalnızca mobil çatı sizin seçiminizdir (7. hafta: Flutter, React Native–Expo,
+Kotlin ya da Swift).
 
 # 3. Bilgisayarınız + telefonunuz → yollarınız
 
@@ -67,8 +73,8 @@ Her satır, bu sınıftaki birinin sahip olduğu bir kurulumdur. **X**, o yolun 
 \*\* Telefonunuz diğer platformdur; bu yüzden emülatörde ya da simülatörde (bilgisayarınızda
 telefon gibi davranan bir program) geliştirir ve test edersiniz.
 
-\* Windows'tan iOS binary'si (derlenmiş uygulama dosyası) Expo EAS ya da Codemagic gibi
-bir hizmet tarafından bulutta derlenir ve Apple üyeliği yine gerekir. Windows'tan native
+\* Windows'tan iOS binary'sini (derlenmiş uygulama dosyası) Expo EAS ya da Codemagic gibi
+bir hizmet bulutta derler ve Apple üyeliği yine gerekir. Windows'tan native
 iOS yoktur, çünkü Xcode yalnızca Mac'te çalışır. Her App Store hücresi ayrıca ≈ 99 $/yıl
 üyeliği varsayar (§4).
 
@@ -95,17 +101,21 @@ Tabloda saklı iki gerçek vardır:
 | Geliştirici ücreti | tek seferlik (≈ 25 $) | ücretsiz | ücretsiz | yıllık (≈ 99 $) |
 | Kayıt | bir Google hesabı, kimlik doğrulama ve bir kez gerçek bir Android telefon | bir Huawei ID, kimlik belgesi ve birkaç günlük onay | bir Samsung hesabı ve satıcı onayı | bir Apple ID, kimlik doğrulama ve ödeme |
 | Derleme | Mac ya da Windows | Mac ya da Windows | Mac ya da Windows | Mac (ya da bulut build) |
-| Yayından önce | yeni bireysel hesaplar 14 gün boyunca 12 testçiyle kapalı test (yalnızca adı yazılı testçilere açık bir test) yapmak zorundadır | inceleme; birkaç gün sürer | inceleme; birkaç gün sürer | inceleme; genellikle günler sürer ve retle sonuçlanabilir |
+| Yayından önce | yeni kişisel hesaplar 14 gün boyunca 12 testçiyle kapalı test (yalnızca adı yazılı testçilere açık bir test) yapmak zorundadır | inceleme; birkaç gün sürer | inceleme; birkaç gün sürer | inceleme; genellikle günler sürer ve retle sonuçlanabilir |
 | Bu sınıftaki erişim | neredeyse her Android telefon | Huawei telefonlar; diğer Android kullanıcıları AppGallery uygulamasını kurabilir | Samsung telefonlar; diğer Android kullanıcıları Galaxy Store'u kurabilir | her iPhone |
-| Dikkat | yukarıdaki kapalı test kuralı: 12 testçiyi ve 14 günü 9. Hafta'ya planlayın, kuralı 10. Hafta'da keşfetmeyin | Google servislerine (Firebase, Google Maps, Google Sign-In) bağımlı uygulamalar Huawei telefonlarda çalışmaz ve reddedilebilir | — | tek ücretli yol ve Mac gerektiren tek yol |
+| Dikkat | yukarıdaki kapalı test kuralı: 12 testçiyi S3'te, 8. haftada kaydedin; böylece 14 gün 10. haftadaki gönderimden önce biter | Google servislerine (Firebase, Google Maps, Google Sign-In) bağımlı uygulamalar Huawei telefonlarda çalışmaz ve reddedilebilir | — | tek ücretli yol ve Mac gerektiren tek yol |
 | Toplam ödediğiniz | ≈ 25 $, bir kez | hiç | hiç | her yıl ≈ 99 $; öğrenci indirimi yok |
 
 Bundan iki sonuç çıkar:
 
-- **Google Play'in test kanalı kuralı, planlarsanız bir armağandır.** On dört gün boyunca
-  on iki testçi, tam olarak sınıf arkadaşlarınızın testçi olduğu beta haftasıdır (9. Hafta)
-  ve o testçileri 9. Hafta test raporunuzda listelersiniz. Kuralı ilk kez 10. Hafta'da
-  duyarsanız felakettir. Kural yalnızca yeni *bireysel* hesaplara uygulanır.
-- **Google servislerine bağımlı olmayın.** Girişiniz *kendi* sunucunuzdan e-posta kodu ya
-  da OTP ile yapılır; öyle kalsın, uygulamanız her mağazada çalışır. Harita ya da push
+- **Testçileri erken planlayın.** Kaç testçiye ihtiyacınız olduğunu mağaza belirler. Yeni
+  bir kişisel Google Play hesabı, uygulama yayınlanmadan önce kapalı bir testte 14 gün
+  kesintisiz kalan en az 12 testçi ister. Onları S3'te, 8. haftada kaydedin; böylece 14 gün
+  10. haftadaki gönderimden önce biter. Testçileriniz, sunumunuzdaki beş kişi artı sınıf
+  arkadaşları ve arkadaşlarınızdır (9. haftada beta-tester rolü); onları 9. hafta test
+  raporunuzda listelersiniz. Kullanıcı Kabul Testini (UAT) 10. haftada, sunumunuzdaki beş
+  kişiyle yaparsınız. 12 testçi kuralı yalnızca yeni *kişisel* hesaplar için geçerlidir.
+- **Google servislerine bağımlı olmayın.** Kullanıcılarınız *kendi* sunucunuzdan
+  e-postayla gönderilen 4 haneli bir kodla giriş yapar (dersin girişi, her projede aynı).
+  Öyle kalsın; uygulamanız her mağazada çalışır. Harita ya da push
   bildirimi gerekiyorsa tek mağazaya bağlı olmayan bir sağlayıcı seçin.

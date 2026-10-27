@@ -14,50 +14,16 @@ and the same path, and every row of week05/api.md is an endpoint here. The check
 compares the two.
 """
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from fastapi import FastAPI
+
+from server import course_login, prep
 
 app = FastAPI(title="KitchenOps")
-
-
-class CodeRequest(BaseModel):
-    email: str
-
-
-class TokenRequest(BaseModel):
-    email: str
-    code: str
-
-
-class TokenResponse(BaseModel):
-    token: str
-    token_type: str = "bearer"
-
-
-class UserProfileResponse(BaseModel):
-    email: str
-    role: str
+app.include_router(course_login.router)
+app.include_router(prep.router)
 
 
 @app.get("/health")
 def health() -> dict:
     """The server is running. A technical endpoint: it serves no requirement."""
     return {"status": "ok"}
-
-
-@app.post("/auth/code")
-def ask_for_code(body: CodeRequest) -> dict:
-    """REQ-001: sends a 4-digit code to the e-mail address. Built in Week 6."""
-    raise HTTPException(status_code=501, detail="Not built yet: Week 6")
-
-
-@app.post("/auth/token")
-def verify_code(body: TokenRequest) -> dict:
-    """REQ-001: verifies the 4-digit code and issues a bearer token. Built in Week 6."""
-    raise HTTPException(status_code=501, detail="Not built yet: Week 6")
-
-
-@app.get("/auth/me")
-def get_current_user() -> dict:
-    """REQ-001: returns the authenticated user profile from session token. Built in Week 6."""
-    raise HTTPException(status_code=501, detail="Not built yet: Week 6")

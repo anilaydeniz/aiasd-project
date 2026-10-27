@@ -8,13 +8,22 @@ ANN · CNN · Transformer · Embeddings · LLM · GenAI · Local Inference · RA
 
 ### 📖 How to use this document
 
-Read this document before you attend the first class. The in-class lecture will be a 20-minute summary of exactly this material, so if you arrive having read it once, you will follow the lecture immediately. You are not expected to memorise formulas or to understand every detail on first reading. Your goal is to build a working mental model of how modern AI systems are assembled from components.
+Read this document before you attend the first class. The Week 1 lecture sums up the three readings and the paper in about twenty minutes. If you arrive having read this document once, you will follow the lecture immediately. You are not expected to memorise formulas or to understand every detail on first reading. Your goal is to build a working mental model of how modern AI systems are assembled from components.
 
-This is one of three pre-reading documents. "Development Environment and Tools" (Doc 3) covers the development environment and every tool you will use this term. In that document you will meet the Python language, the VS Code editor, GitHub for storing and sharing code, Streamlit for building a web interface, the Claude and Gemini APIs (an API, or application programming interface, is the channel through which your program sends a request to a service and receives a reply), Ollama for running models on your own machine, FAISS for searching vectors, pytest for testing, Ragas for evaluating answers, Selenium for driving a web browser, and the rest of the tool set. "Working with AI Tools" (Doc 4) covers the same tools as products: it explains what they cost, how they ration you, and the working habits that keep them affordable. Read all three before the first session. This document is about the ideas; Doc 3 is about the setup; Doc 4 is about the money and the habits.
+This is one of three pre-reading documents. "Development Environment and Tools" (Doc 3) covers the development environment and every tool you will use this term. In that document you will meet Python, virtual environments, Git and the VS Code editor. You will also meet the tools of the project:
+
+- HTML, CSS and JavaScript for the web client;
+- FastAPI and uvicorn for the server;
+- python-dotenv for passwords and keys;
+- pytest for tests;
+- GitHub Actions and ruff, which check every push;
+- Mermaid for diagrams.
+
+"Working with AI Tools" (Doc 4) covers the same tools as products: it explains what they cost, how they limit your use, and the working habits that keep them affordable. Read all three before the first session. This document is about the ideas; Doc 3 is about the setup; Doc 4 is about the money and the habits.
 
 ## 1. Why Do You Need This Background?
 
-Modern AI applications are not single algorithms. This is true of ChatGPT, of a coding assistant, of a system that answers questions about documents, and of a tool that helps a developer write software. They are all systems assembled from several specialised components. You do not need to become a deep-learning researcher, but you do need to understand what each component does, why it exists, what goes in, and what comes out. The reason is simple: in this course you will be building exactly these systems.
+Modern AI applications are not single algorithms. This is true of ChatGPT, of a coding assistant, of a system that answers questions about documents, and of a tool that helps a developer write software. They are all systems assembled from several specialised components. You do not need to become a deep-learning researcher, but you do need to understand what each component does, why it exists, what goes in, and what comes out. The reason is simple: in this course you will build an application that calls such a system.
 
 The figure below shows the conceptual progression this document follows. It starts from the neural network foundation and ends at the full application stack that an AI application is built from.
 
@@ -33,7 +42,8 @@ An Artificial Neural Network (ANN) is a computational model that is inspired loo
 ### What does a neuron compute?
 
 ```
-z = Σ wᵢxᵢ + b y = f(z)
+z = Σ wᵢxᵢ + b
+y = f(z)
 ```
 
 In this formula, xᵢ is an input value, wᵢ is a learned weight (a number that says how much that input counts), b is a bias (a constant that shifts the result up or down), and f(·) is an activation function such as ReLU, sigmoid, or GELU (three common choices of activation function; their names are not important for this course). The important point is that the network learns the weights from data. You do not write them by hand.
@@ -177,7 +187,7 @@ Training an LLM means learning its billions of parameters (its weights and biase
 
 ## 9. Context Windows, System Prompts and Sampling
 
-Three practical controls shape what an LLM does with your request. You will use all three every week of this course.
+Three practical controls shape what an LLM does with your request. You will meet all three in this course.
 
 ### The context window
 
@@ -191,7 +201,7 @@ This is the single most important practical constraint in LLM application design
 
 A system prompt is a separate instruction that sets the model's role and rules before the user says anything. Consider the following text: "You are a legal assistant. Answer only from the provided documents. If the answer is not in them, say you do not know." That text is a system prompt, and it changes the model's behaviour far more than politely asking for the same thing in the user message would.
 
-Writing good system prompts is a real engineering skill, and it is the difference between an application that behaves predictably and one that does not. You will write and compare several of them in Week 3.
+Writing good system prompts is a real engineering skill, and it is the difference between an application that behaves predictably and one that does not. You will write system prompts for your chatbot in Week 8.
 
 ### Temperature and sampling
 
@@ -215,29 +225,29 @@ Generative AI (GenAI) is the broad category of AI systems that can generate new 
 
 - For video, the generators are the video generation models that are now emerging.
 
-In this course you will work with text and code generation, through the chat and coding assistants that you choose (Doc 4). Understanding that GenAI is a broader landscape helps you put the tools you are using into context.
+In this course you will work with text and code generation, through the chat and coding assistants that you choose (Doc 4). In Week 8 your product also gets a chatbot: your server calls a hosted LLM API of your choice (a free tier is enough), and the mobile client has the chat screen. The API key lives only in the server's `.env`: never in the app, never in the repository. Understanding that GenAI is a broader landscape helps you put the tools you are using into context.
 
 ## 11. Running Models Locally: Ollama and Qwen
 
 The course does not require a local model. This section explains how one works, and why model size matters.
 
-So far everything described here runs on somebody else's computer. When you call Claude or Gemini, your text travels over the internet to a data centre, a very large model processes it there, and the answer comes back. That is cloud inference. It is powerful, but it needs an API key (a secret string that identifies your account to the service), it costs money per call, and your data leaves your machine.
+So far everything described here runs on somebody else's computer. When you call Claude or Gemini, your text travels over the internet to a data centre, a very large model processes it there, and the answer comes back. That is cloud inference. It is powerful, but it needs an API key (a secret string that identifies your account to the service), it costs money per call beyond a free tier, and your data leaves your machine.
 
 There is another option. A smaller model can run on your own laptop, with no internet connection and no API key. Ollama is the program that makes this practical: you install it once, you download a model, and Ollama exposes a local server at localhost:11434 (an address on your own computer, reachable only from that computer) that your Python code talks to exactly as it would talk to a cloud API.
 
 ![](AI_Doc2_media/image8.png)
 
-*Figure 10 — The same Python code, two very different paths: cloud API versus local inference*
+*Figure 8 — The same Python code, two very different paths: cloud API versus local inference*
 
 ### Qwen
 
-Qwen is a family of open-weight language models developed by Alibaba's Qwen team. "Open-weight" means that the trained parameters are published, so anyone may download and run them. Qwen is not a new architecture; it is a Transformer, exactly as described in §4 and §5 of this document. You will use Qwen models through Ollama.
+Qwen is a family of open-weight language models developed by Alibaba's Qwen team. "Open-weight" means that the trained parameters are published, so anyone may download and run them. Qwen is not a new architecture; it is a Transformer, exactly as described in §4 and §5 of this document. If you try a local model, Ollama can run Qwen models for you.
 
 ### Why a 3-billion-parameter model fits on a laptop
 
 A model with 3 billion parameters, stored at full precision, would need roughly 12 GB of memory. Most laptops cannot spare that much. Quantisation solves the problem: each parameter is stored using fewer bits, typically 4 instead of 32, which shrinks the model to around 2 GB at a small cost in quality. Every model you download through Ollama is quantised by default.
 
-This is why model size matters to you personally. Pick the largest model that your machine can hold in memory. The same rule appears in Doc 4 and on the Week 1 slides:
+This is why model size matters when you run a model yourself. If you try a local model, pick the largest one that your machine can hold in memory. The same rule appears in Doc 4 and on the Week 1 slides:
 
 - If your machine has 16 GB of RAM or more, use qwen2.5:7b, which takes about 4.7 GB on disk.
 
@@ -247,7 +257,7 @@ This is why model size matters to you personally. Pick the largest model that yo
 
 - If your machine has less than 4 GB of RAM, use qwen2.5:0.5b, which takes about 0.4 GB.
 
-No graphics card is required. On a modern CPU a 3B model produces roughly 5 to 15 tokens per second. That is fast enough for short answers, and slow enough that you will feel it on long ones.
+No graphics card is required. On a modern CPU a 3B model produces roughly 5 to 15 tokens per second. That is fast enough for short answers, but long answers take a while.
 
 ### Which should you use?
 
@@ -258,7 +268,7 @@ Neither option is simply better. A cloud model gives you far more capability; a 
 | **Runs on**        | It runs on the provider's servers. | It runs on your laptop.  |
 | **Needs internet** | Yes                 | No                           |
 | **API key**        | An API key is required. | No API key is required.  |
-| **Cost**           | You pay per call.   | It is free after the download. |
+| **Cost**           | You pay per call (free tiers have limits). | It is free after the download. |
 | **Your data**      | Your data leaves your machine. | Your data never leaves your machine. |
 | **Capability**     | Its capability is much higher. | The model is smaller and its quality is lower. |
 
@@ -268,7 +278,7 @@ Neither option is simply better. A cloud model gives you far more capability; a 
 
 The model is not lying, because it does not have intentions. It is generating text according to learned patterns and the current context. It has no mechanism that automatically verifies every claim against an authoritative source.
 
-This has direct consequences for software engineering. Any system that relies on LLM output for decisions must be designed with this limitation in mind. In this course, the ai_log.md that you submit every week asks you to evaluate what the AI got wrong and what you corrected. That evaluation is the professional discipline this course is training you in.
+This has direct consequences for software engineering. Any system that relies on LLM output for decisions must be designed with this limitation in mind. In this course, the AI log that you submit every week (`weekNN/ai_log_NN.md`) asks you to evaluate what the AI got wrong and what you corrected. That evaluation is the professional discipline this course is training you in.
 
 ## 13. Retrieval-Augmented Generation (RAG)
 
@@ -290,7 +300,7 @@ RAG solves this by adding a retrieval step before generation. This section assum
 
 ![](AI_Doc2_media/image9.png)
 
-*Figure 8 — RAG has two phases: indexing (done once) and querying (every user question)*
+*Figure 9 — RAG has two phases: indexing (done once) and querying (every user question)*
 
 ### Why does RAG help?
 
@@ -308,7 +318,7 @@ The model is one component in a larger software system, and designing that syste
 
 ![](AI_Doc2_media/image10.png)
 
-*Figure 9 — A modern AI application is a stack of components; the LLM sits in the middle, not at the top*
+*Figure 10 — A modern AI application is a stack of components; the LLM sits in the middle, not at the top*
 
 | Architecture | Main Strength                              | Typical Use               |
 | ---------------- | ---------------------------------------------- | ----------------------------- |
@@ -333,7 +343,7 @@ After reading this document you should be able to explain each of the following 
 | **RAG**            | Retrieval-Augmented Generation: the system retrieves relevant documents, supplies them as context, and then generates. |
 | **Context window** | The maximum number of tokens one request may contain; the system prompt, the history, the documents and the question all count together. |
 | **System prompt**  | A separate instruction that sets the model's role and rules before the user speaks.                             |
-| **Temperature**    | Controls how adventurously the next token is sampled. A low value gives repeatable output; a high value gives varied output. |
+| **Temperature**    | Controls how much randomness there is when the next token is picked. A low value gives repeatable output; a high value gives varied output. |
 | **Quantisation**   | Storing parameters with fewer bits so that a large model fits in ordinary memory, at a small cost in quality.    |
 | **Ollama**         | A program that runs open-weight models locally on your own machine, with no API key, no internet and no cost.   |
 
@@ -344,12 +354,13 @@ Some of these concepts you use every week; the others are background that explai
 | Concept                                      | Week       | Where you meet it                                          |
 | ------------------------------------------------ | -------------- | -------------------------------------------------------------- |
 | **Transformers, attention, tokens**              | **Week 1**     | They are the conceptual foundation, covered in the lecture and in this document. |
-| **System prompts, context window, temperature**  | **Every week** | In every prompt you give your assistants; the context window is why a long conversation forgets its beginning (Doc 4). |
+| **Context window**                               | **Every week** | In every conversation with your assistants; the context window is why a long conversation forgets its beginning (Doc 4). |
+| **System prompts, temperature**                  | **Week 8**     | Your chatbot: your server sends a system prompt with each call to the LLM API, and it may set the temperature. |
 | **Local inference — Ollama, Qwen, quantisation** | **Background** | It explains why model size matters; the course does not require a local model. |
 | **Embeddings and cosine similarity**             | **Background** | They explain how an assistant finds the passages of your files that it uses. |
 | **Retrieval-Augmented Generation**               | **Background** | It explains how assistants that search the web or your files answer, and why they can still invent a source (Doc 5 §5). |
 | **Hallucination and verification**               | **Every week** | You record it in your AI log every week (Doc 5). |
-| **AI ethics and human-in-the-loop**              | **Week 11**    | You carry out a security audit and a responsible-use review.   |
+| **AI ethics and human-in-the-loop**              | **Week 6**     | The attacker round: groupmates attack your feature and the login, and you decide on each finding. |
 
 ### 💬 Before You Come to Class — Reflection Questions
 

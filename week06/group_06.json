@@ -1,0 +1,17 @@
+{
+  "_how_to_fill_this_in": [
+    "This week the file has one entry for each classmate who attacked your work in the attacker round of the lecture (ASSIGNMENT_06 §6). They attack your own feature first, and the login too. The attacker is a member of your Week 3 group. If nobody from your group is in the lecture, it is any classmate. The file keeps its name from Week 3. The list below is called 'members' only because the checker and the course tools read it with that name.",
+    "Two attackers: copy the entry. Then the list has two { ... } blocks, with a comma between them.",
+    "student_id: the attacker's 9-digit student number. Not yours.",
+    "role: 'attacker'.",
+    "tried: what they tried against your feature or the login. Write one or two full sentences, with the values (the id they changed, the text, the number, how many times).",
+    "happened: what your server or your page did: the status code, the message, and whether the attack worked.",
+    "accepted and why wait until Saturday (ASSIGNMENT_06 §13). accepted: true if you changed something because of it, false if not. why: one full sentence in both cases: what you changed, or why it was not a real problem.",
+    "You write all of this yourself, by hand, in your own words. No assistant writes, translates or corrects it, not even for the grammar. Your English or Turkish is not graded. A person reads it.",
+    "You may delete this block after you read it. The checker ignores it."
+  ],
+  "week": 6,
+  "members": [
+    { "student_id": "", "role": "attacker", "tried": "", "happened": "", "accepted": null, "why": "" }
+  ]
+}

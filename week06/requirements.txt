@@ -1,0 +1,12 @@
+# Week 6: the server (FastAPI), its tests, and the course's login tests.
+#
+#   pip install -r week06/requirements.txt
+
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn==0.54.0
+httpx2==2.13.1
+pytest==9.1.1
+freezegun==1.5.1
+python-dotenv==1.0.1
+ruff==0.15.11

@@ -53,6 +53,7 @@ ROOT = (
 MARKER = "AIASD-CHECKER-v1"  # AIASD-CHECKER-v1
 
 PASS, FAIL = "PASS", "FAIL"
+NOTYET = "NOT YET"   # VC, 21 Oct 2026: a check that has nothing to look at yet is listed, neither passed nor failed
 
 # When a deliverable is due. Work that belongs in the lab, where you can still
 # ask, is SESSION; work that is genuinely done alone afterwards — writing,
@@ -75,6 +76,13 @@ def check(week: int, name: str, ok: bool, detail: str = "", slot: str = SESSION)
     A failure says what is needed, then 'Found: ...' with what is actually there, so a
     student who reads English slowly can still see both halves."""
     results.append((f"W{week}", name, PASS if ok else FAIL, slot, detail or name))
+
+
+def later(week: int, name: str, why: str, slot: str = SESSION) -> None:
+    """A check that cannot be judged yet (VC, 21 Oct 2026): listed with NOT YET and the reason, so the list is the same
+    for everyone, but counted neither as passed nor as failed: the untouched starter earns no free ticks, and a
+    number of checks that grows as the work grows does not confuse anyone."""
+    results.append((f"W{week}", name, NOTYET, slot, why))
 
 
 def pl(n: int, one: str, many: str | None = None) -> str:
@@ -466,15 +474,21 @@ def week2() -> None:
 
     srs = read("week02/SRS.md") or ""
     prose = re.sub(r"<!--.*?-->", "", srs, flags=re.DOTALL)
-    check(2, "week02/SRS.md is filled in", len(re.sub(r"```.*?```", "", prose, flags=re.DOTALL).strip()) > 600,
+    srs_filled = len(re.sub(r"```.*?```", "", prose, flags=re.DOTALL).strip()) > 600
+    check(2, "week02/SRS.md is filled in", srs_filled,
           "week02/SRS.md must be filled in. Found: the file is missing, or it is still the template.", DEADLINE)
     blocks = [b for b in re.findall(r"```mermaid\n(.*?)```", prose, re.DOTALL) if "%% EXAMPLE" not in b]
     usecases = sum(len(re.findall(r"\(\[", b)) for b in blocks)
     check(2, "SRS.md has a use case diagram with at least 3 use cases", usecases >= 3,
           f"SRS.md must have a use case diagram with at least 3 use cases. Found: {usecases}.", DEADLINE)
     in_srs = set(re.findall(r"REQ-\d{3}", prose))
-    check(2, "SRS.md mentions every REQ id from requirements.json", bool(ids) and set(ids) <= in_srs,
-          "SRS.md must mention every REQ id from week02/requirements.json. "
+    # VC, 23 Oct 2026: requirements.json is the only place for the requirements. SRS §4 may be one line that
+    # points to it instead of a copy of the list.
+    s4 = re.search(r"(?ms)^##\s*4\b.*?(?=^##\s|\Z)", prose)
+    # The starter already has the pointer line, so it counts only once the SRS itself is filled in.
+    points = bool(srs_filled and s4 and "requirements.json" in s4.group(0))
+    check(2, "SRS.md §4 points to requirements.json, or lists every REQ id", bool(ids) and (points or set(ids) <= in_srs),
+          "SRS.md §4 must say that the requirements are in week02/requirements.json, or list every REQ id. "
           + ("Found: no requirements filled in yet." if not ids else f"Found: missing {', '.join(sorted(set(ids) - in_srs)[:4])}."), DEADLINE)
     check_ai_log(2)
 
@@ -494,7 +508,8 @@ def week3() -> None:
         check(3, "PITCH_03.md has 7 slides", len(slides) == 7,
               f"PITCH_03.md must have 7 slides: your six and the fixed reviewers' slide. Found: {len(slides)}. "
               "Slides are separated by a line that contains only ---.")
-        holes = sum(len(re.findall(r"\[[^\]\n]{1,80}\]", re.sub(r"```.*?```", "", x, flags=re.DOTALL))) for x in slides[:6])  # not inside a drawing
+        # not inside a drawing; an image ![alt](file) or a link [text](url) is not a hole
+        holes = sum(len(re.findall(r"(?<!!)\[[^\]\n]{1,80}\](?!\()", re.sub(r"```.*?```", "", x, flags=re.DOTALL))) for x in slides[:6])
         check(3, "PITCH_03.md has no [bracketed] text left", holes == 0,
               f"PITCH_03.md still has {pl(holes, 'piece')} of [bracketed] text. Replace each one with your own words and "
               "delete the square brackets too: text left inside [ ] still counts as not filled in.")
@@ -518,11 +533,24 @@ def week3() -> None:
         cited = re.findall(r"^\s*\d\.\s*(REQ-\d{3})\s*[—–-]+\s*(.+)$", slide(3), re.M)
         same = [rid for rid, desc in cited if rid in reqs and reqs[rid] and (
             " ".join(desc.split()).lower().rstrip(".") == reqs[rid].rstrip(".") or reqs[rid].rstrip(".") in " ".join(desc.split()).lower())]
+        # VC, 23 Oct 2026: a requirement whose description changed later (a dated Change log line names
+        # its id, e.g. a change request) still counts, so this Week 3 check does not fail for ever.
+        prop = read("PROPOSAL.md") or ""
+        mlog = re.search(r"^## Change log.*?$", prop, re.M)
+        logtext = re.sub(r"<!--.*?-->", "", prop[mlog.end():], flags=re.DOTALL) if mlog else ""
+        changed = set()
+        for ln in logtext.splitlines():
+            if not re.search(r"20\d\d-\d\d-\d\d", ln):
+                continue
+            changed |= set(re.findall(r"REQ-\d{3}", ln))
+            for a, b in re.findall(r"REQ-(\d{3})\s*(?:to|\.\.|–|-)\s*REQ-(\d{3})", ln):
+                changed |= {f"REQ-{k:03d}" for k in range(int(a), int(b) + 1)}
+        same += [rid for rid, _ in cited if rid in reqs and rid in changed and rid not in same]
         check(3, "slide 4 lists three requirements copied from requirements.json", len(set(same)) >= 3,
               "Slide 4 must list three requirements copied word for word (id and description) from week02/requirements.json. "
               + (f"Found: {len(set(same))} of {len(cited)} listed match. Copy them, do not paraphrase."
                  if cited else "Found: none listed in the form: 1. REQ-001 — description."))
-        dn = re.search(r"(does not|yapmaz)\s*:?\**\s*(.+)$", slide(3), re.I | re.M)
+        dn = re.search(r"(does not|yapmaz)[ \t]*:?\**[ \t]*(.+)$", slide(3), re.I | re.M)  # one line only (24 Oct 2026)
         check(3, "slide 4 says what the app does not do", bool(dn and len(dn.group(2).strip()) > 15 and "[" not in dn.group(2)),
               'Slide 4 must say what the app does NOT do, in one sentence that starts with "It does not:" '
               '(in Turkish: "Yapmaz:"), the sentence from §4 of your proposal. Found: none.')
@@ -565,10 +593,17 @@ def week3() -> None:
             me = str(json.loads(read("student.json") or "{}").get("student_id", "")).strip()
         except json.JSONDecodeError:
             pass
-        check(3, "contributors_03.json does not list you", me == "" or me.split("-")[0] not in [g.split("-")[0] for g in good],
-              "week03/contributors_03.json must not list you. Your own student number is in it: remove that entry.")
-        check(3, "contributors_03.json gives every reviewer the role 'reviewer'", all(str(i.get("role", "")).strip() == "reviewer" for i in items if isinstance(i, dict)),
-              "week03/contributors_03.json must give every reviewer the role 'reviewer'. Found: a wrong or empty role.")
+        # 24 Oct 2026: as in Week 4, these two are checked only once a reviewer is named; on the untouched file
+        # (role already filled in, no number) they gave two free ticks.
+        if good:
+            check(3, "contributors_03.json does not list you", me == "" or me.split("-")[0] not in [g.split("-")[0] for g in good],
+                  "week03/contributors_03.json must not list you. Your own student number is in it: remove that entry.")
+            check(3, "contributors_03.json gives every reviewer the role 'reviewer'", all(str(i.get("role", "")).strip() == "reviewer" for i in items if isinstance(i, dict)),
+                  "week03/contributors_03.json must give every reviewer the role 'reviewer'. Found: a wrong or empty role.")
+        else:
+            why = "It is checked once the file names your reviewers' student numbers."
+            later(3, "contributors_03.json does not list you", why)
+            later(3, "contributors_03.json gives every reviewer the role 'reviewer'", why)
         thin = [i for i in items if isinstance(i, dict) and len(str(i.get("what", "")).strip()) < 25]
         check(3, "contributors_03.json quotes what each reviewer said", not thin,
               f"week03/contributors_03.json must quote, for each reviewer, a real sentence they said. Found: {pl(len(thin), 'entry', 'entries')} without one.")
@@ -750,6 +785,10 @@ def check_collaborator(week: int, role: str, slot: str = SESSION) -> list[str]:
               f"{path} must not list you. Your own student number is in it: remove that entry.", slot)
         check(week, f"{path} gives everyone the role '{role}'", bool(items) and all(str(i.get("role", "")).strip() == role for i in items),
               f"{path} must give everyone the role '{role}'. Found: a wrong or empty role.", slot)
+    else:
+        why = "It is checked once the file names your collaborator's student number."
+        later(week, f"{path} does not list you", why)
+        later(week, f"{path} gives everyone the role '{role}'", why)
     thin = [i for i in items if len(str(i.get("what", "")).strip()) < 25]
     check(week, f"{path} quotes what your collaborator found or said", bool(items) and not thin,
           f"{path} must quote a real sentence that your collaborator found or said. Found: {pl(len(thin), 'entry', 'entries')} without one.", slot)
@@ -956,6 +995,9 @@ def week4() -> None:
 # capture must never execute a student's code; the tests are counted by name, not run.
 
 HTTP_METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
+# Routers of server/ that no include_router call brings in (route_defs fills it): their routes do not count,
+# because the running server would answer 404 (VC, 24 Oct 2026). Shown as "bookings.router" in the messages.
+NOT_INCLUDED: list[str] = []
 REQ_HEADS = {"req", "reqs", "req id", "req ids", "requirement", "requirements", "gereksinim", "gereksinimler"}
 
 
@@ -1038,16 +1080,22 @@ def api_endpoints() -> list[dict]:
 
 
 def server_routes() -> dict[str, str]:
-    """'METHOD /path' -> file, for every route in server/ (tests excluded). Read with ast:
-    nothing of the student's code is run. Knows @app.get(...), APIRouter(prefix=...) and
-    app.include_router(router, prefix=...)."""
+    """'METHOD /path' -> file, for every route in server/ (tests excluded)."""
+    return {k: v[0] for k, v in route_defs().items()}
+
+
+def route_defs() -> dict[str, tuple[str, ast.AST | None]]:
+    """'METHOD /path' -> (file, the function that answers it), for every route in server/ (tests excluded). Read
+    with ast: nothing of the student's code is run. Knows @app.get(...), APIRouter(prefix=...) and
+    app.include_router(router, prefix=...). From Week 6 the course's login (server/course_login.py), once
+    server/main.py brings it in, adds the three endpoints of server/login_contract.json (function: None)."""
     folder = ROOT / "server"
     if not folder.is_dir():
         return {}
     trees = {}
     for p in sorted(folder.rglob("*.py")):
         rel = p.relative_to(folder).parts
-        if "tests" in rel or ".venv" in rel or "__pycache__" in rel:
+        if "tests" in rel or ".venv" in rel or "__pycache__" in rel or rel == ("course_login.py",):
             continue
         try:
             trees[p] = ast.parse(p.read_text(encoding="utf-8", errors="replace"))
@@ -1070,7 +1118,24 @@ def server_routes() -> dict[str, str]:
                     included[(a.value.id, a.attr)] = kw(node, "prefix") or ""
                 elif isinstance(a, ast.Name):
                     included[(None, a.id)] = kw(node, "prefix") or ""
-    out: dict[str, str] = {}
+    # Imported names: "from server.bookings import router as br" + include_router(br) brings in bookings.router;
+    # "import server.bookings as b" + include_router(b.router) the same.
+    for tree in trees.values():
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module:
+                stem = node.module.split(".")[-1]
+                for al in node.names:
+                    if (None, al.asname or al.name) in included:
+                        included.setdefault((stem, al.name), included[(None, al.asname or al.name)])
+            elif isinstance(node, ast.Import):
+                for al in node.names:
+                    if al.asname:
+                        stem = al.name.split(".")[-1]
+                        for (mod, var), pre in list(included.items()):
+                            if mod == al.asname:
+                                included.setdefault((stem, var), pre)
+    NOT_INCLUDED.clear()
+    out: dict[str, tuple[str, ast.AST | None]] = {}
     for p, tree in trees.items():
         routers: dict[str, str] = {}
         for node in ast.walk(tree):
@@ -1093,8 +1158,19 @@ def server_routes() -> dict[str, str]:
                 var = d.func.value.id
                 prefix = ""
                 if var in routers:
+                    if (p.stem, var) not in included and (None, var) not in included:
+                        name = f"{p.stem}.{var}"
+                        if name not in NOT_INCLUDED:
+                            NOT_INCLUDED.append(name)
+                        continue
                     prefix = included.get((p.stem, var), included.get((None, var), "")) + routers[var]
-                out[f"{d.func.attr.upper()} {norm_path(prefix + route)}"] = str(p.relative_to(ROOT))
+                out[f"{d.func.attr.upper()} {norm_path(prefix + route)}"] = (str(p.relative_to(ROOT)), node)
+    if (ROOT / "server" / "course_login.py").is_file() and course_login_included():
+        data, bad = login_contract()
+        if data is not None and not bad:
+            for k in ("request_code", "login", "me"):
+                method, route = data[k].strip().split(None, 1)
+                out.setdefault(f"{method.upper()} {norm_path(route.strip())}", ("server/course_login.py", None))
     return out
 
 
@@ -1180,12 +1256,18 @@ def week5() -> None:
               + ("Found: no such file. Run the checker online to bring the starter." if src is None else "Found: a syntax error."))
         check(5, "server/main.py creates the FastAPI app", bool(src) and re.search(r"\bFastAPI\s*\(", src or "") is not None,
               "server/main.py must create the app with FastAPI(...). Found: no FastAPI( in it.")
+    else:
+        why = "It is checked once server/ has a route of your own besides /health."
+        later(5, "server/main.py is valid Python", why)
+        later(5, "server/main.py creates the FastAPI app", why)
     keys = {e["key"] for e in eps}
     serving = any(e["reqs"] for e in eps)
     unbuilt = sorted(keys - set(routes))
     check(5, "every endpoint in week05/api.md has its route in server/", serving and not unbuilt,
           "Every endpoint in week05/api.md must have a route in server/ with the same method and path; it may answer 501 "
           "until it is built. " + ("Found: no endpoint that serves a requirement in week05/api.md yet." if not serving
+                                   else f"Found: no route for {unbuilt[:3]}; server/main.py does not include "
+                                   f"{', '.join(NOT_INCLUDED)}." if NOT_INCLUDED
                                    else f"Found: no route for {unbuilt[:3]}."))
     own = set(routes) - {"GET /health"}
     undocumented = sorted(set(routes) - keys)
@@ -1217,7 +1299,542 @@ def week5() -> None:
     check_ai_log(5)
 
 
-CHECKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5}
+# ── Week 6: the login comes ready; your own must requirements end to end ─────────────────────────────
+# (VC, 21-22 Oct 2026; claude-private/week06_spec.md, its CHANGE OF COURSE part)
+
+COURSE_LOGIN = "server/course_login.py"  # the course's login module (course-owned from Week 6)
+
+
+def course_login_included() -> bool:
+    """server/main.py brings in the course's login: app.include_router(course_login.router). Read with ast
+    (from server import course_login, import server.course_login as x, from server.course_login import router
+    as y): nothing of the student's code is run."""
+    try:
+        tree = ast.parse(read("server/main.py") or "")
+    except SyntaxError:
+        return False
+    mods: set[str] = set()
+    routers: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            mod = node.module or ""
+            for a in node.names:
+                if a.name == "course_login" and mod in ("server", ""):
+                    mods.add(a.asname or a.name)
+                elif mod.split(".")[-1] == "course_login" and a.name == "router":
+                    routers.add(a.asname or a.name)
+        elif isinstance(node, ast.Import):
+            for a in node.names:
+                if a.name.split(".")[-1] == "course_login":
+                    mods.add(a.asname or a.name)
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "include_router" and node.args):
+            a = node.args[0]
+            if isinstance(a, ast.Name) and a.id in routers:
+                return True
+            if isinstance(a, ast.Attribute) and a.attr == "router" and ast.unparse(a.value) in mods:
+                return True
+    return False
+
+
+def route_unbuilt(node) -> bool:
+    """A route that still answers 501 (HTTPException(501), status_code=501, HTTP_501_NOT_IMPLEMENTED,
+    NotImplementedError) or does nothing (only a docstring, pass or ...). None is the course's login: built."""
+    if node is None:
+        return False
+    body = [s for s in node.body if not (isinstance(s, ast.Expr) and isinstance(s.value, ast.Constant))]
+    if not body or all(isinstance(s, ast.Pass) for s in body):
+        return True
+    for n in ast.walk(ast.Module(body=body, type_ignores=[])):
+        if isinstance(n, ast.Constant) and type(n.value) is int and n.value == 501:
+            return True
+        if isinstance(n, ast.Attribute) and n.attr == "HTTP_501_NOT_IMPLEMENTED":
+            return True
+        if isinstance(n, ast.Name) and n.id == "NotImplementedError":
+            return True
+    return False
+
+
+def web_pages() -> dict[Path, tuple[str, str]]:
+    """Every page in web/: (its HTML, its HTML with the text of the local scripts it loads). Read as text."""
+    web = ROOT / "web"
+    out: dict[Path, tuple[str, str]] = {}
+    if not web.is_dir():
+        return out
+    home = web.resolve()
+    for p in sorted(web.rglob("*.html")):
+        try:
+            html = p.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        text = html
+        for src in re.findall(r"""<script[^>]*\bsrc\s*=\s*["']([^"']+)["']""", html, re.I):
+            src = src.split("?")[0].split("#")[0]
+            if re.match(r"[a-z][a-z0-9+.-]*:|//", src, re.I):
+                continue
+            tries = [web / src[5:]] if src.startswith("/web/") else []
+            tries.append(web / src.lstrip("/") if src.startswith("/") else p.parent / src)
+            for t in tries:
+                try:
+                    t = t.resolve()
+                    if home in t.parents and t.is_file():
+                        text += "\n" + t.read_text(encoding="utf-8", errors="replace")
+                        break
+                except OSError:
+                    continue
+        out[p] = (html, text)
+    return out
+
+
+def calls_fetch(text: str) -> bool:
+    return re.search(r"\bfetch\s*\(", re.sub(r"<!--.*?-->", " ", text, flags=re.DOTALL)) is not None
+
+
+def calls_path(text: str, key: str) -> bool:
+    """A page names an endpoint's path: every fixed part of it (/courses/{}/announcements: /courses and
+    /announcements) is in its text."""
+    pieces = [s.strip("/") for s in key.split(" ", 1)[-1].split("{}") if s.strip("/")]
+    return bool(pieces) and all("/" + s in text for s in pieces)
+
+
+def must_requirements() -> tuple[set[str], set[str]]:
+    """(must, functional must): the ids of week02/requirements.json marked 'must', dropped ones left out."""
+    reqs = requirement_index()
+    musts = {r for r, it in reqs.items() if not it.get("dropped")
+             and str(it.get("priority", "")).strip().lower() == "must" and filled(it.get("description"))}
+    return musts, {r for r in musts if reqs[r].get("functional") is True}
+
+
+LOGIN_TESTS = {  # the course's login tests (course_tests/test_login_contract.py): number -> (what it shows, when due)
+    "01": ("a code is sent to a valid e-mail", SESSION),
+    "02": ("something that is not an e-mail is refused", SESSION),
+    "03": ("the right code gives a token", SESSION),
+    "04": ("a wrong code is refused", SESSION),
+    "05": ("the token opens me", SESSION),
+    "06": ("me is refused without a token or with a wrong one", SESSION),
+    "07": ("a code works only once", DEADLINE),
+    "08": ("a code expires after 10 minutes", DEADLINE),
+    "09": ("a new code within a minute is refused, and allowed after it", DEADLINE),
+    "10": ("three wrong codes lock the login for 15 minutes", DEADLINE),
+}
+CONTRACT_KEYS = ("request_code", "login", "me", "email_field", "code_field", "token_field")
+SMTP_NAMES = ("SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM")
+_TESTS: dict | None = None
+_WORST = {"passed": 0, "skipped": 1, "failed": 2, "error": 3}
+
+
+def _junit(path: Path) -> dict[str, tuple[str, str]]:
+    """{test id: (outcome, message)} from a pytest junit file: LOGIN_NN for the course's tests, TC-NNN-NN for
+    yours (test_TC_001_02_...). Several tests with one id: the worst outcome stands."""
+    import xml.etree.ElementTree as ET
+    out: dict[str, tuple[str, str]] = {}
+    try:
+        root = ET.parse(path).getroot()
+    except (ET.ParseError, OSError):
+        return out
+    for tc in root.iter("testcase"):
+        name = tc.get("name", "")
+        m = re.match(r"test_LOGIN_(\d\d)", name)
+        n = re.match(r"test_TC_(\d{3})_(\d{2})", name, re.I)
+        key = f"LOGIN_{m.group(1)}" if m else (f"TC-{n.group(1)}-{n.group(2)}" if n else None)
+        if not key:
+            continue
+        outcome, msg = "passed", ""
+        for tag, word in (("error", "error"), ("failure", "failed"), ("skipped", "skipped")):
+            el = tc.find(tag)
+            if el is not None:
+                outcome, msg = word, " ".join(str(el.get("message") or "").split())[:160]
+                break
+        if key not in out or _WORST[outcome] > _WORST[out[key][0]]:
+            out[key] = (outcome, msg)
+    return out
+
+
+def _official_course_tests() -> list[str]:
+    """GitHub Actions only: put the course's own course_tests/ and server/course_login.py in place before they
+    run, whatever the repository holds (the files are checked against the manifest's sha256). The test files
+    written, to be run by name so that no other file in the folder joins them; [] if that could not be done."""
+    try:
+        with urllib.request.urlopen(MANIFEST_URL, timeout=10) as response:
+            manifest = response.read().decode("utf-8")
+    except (urllib.error.URLError, OSError, TimeoutError, UnicodeDecodeError):
+        return []
+    done: list[str] = []
+    for line in manifest.splitlines():
+        parts = line.strip().split("  ", 1)
+        if len(parts) != 2 or ".." in parts[1] or not (parts[1].startswith("course_tests/")
+                                                       or parts[1] in COURSE_FILE_FROM):
+            continue
+        try:
+            with urllib.request.urlopen(RAW_BASE + urllib.parse.quote(parts[1]), timeout=10) as response:
+                data = response.read()
+        except (urllib.error.URLError, OSError, TimeoutError):
+            return []
+        if hashlib.sha256(data).hexdigest() != parts[0]:
+            return []
+        try:
+            target = ROOT / parts[1]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(data)
+        except OSError:
+            return []
+        if Path(parts[1]).name.startswith("test_") and parts[1].endswith(".py"):
+            done.append(parts[1])
+    return done
+
+
+def _run_pytest(args: list[str], isolated: bool) -> tuple[dict, str]:
+    """One pytest run; ({test id: (outcome, message)}, why it could not run). The course's tests run isolated:
+    `python -I`, no conftest.py, no pytest settings of the repository and no installed pytest plugins, so
+    nothing in it can change them."""
+    with tempfile.TemporaryDirectory() as tmp:
+        xml = Path(tmp) / "results.xml"
+        cmd = [sys.executable] + (["-I"] if isolated else []) + ["-m", "pytest", *args, "-q", "-p", "no:cacheprovider",
+                                                                f"--junitxml={xml}"]
+        if isolated:
+            ini = Path(tmp) / "pytest.ini"
+            ini.write_text("[pytest]\n", encoding="utf-8")
+            cmd += ["--noconftest", "-c", str(ini), "--rootdir", str(ROOT)]
+        try:
+            p = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, timeout=180,
+                               env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1",
+                                    **({"PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"} if isolated else {})})
+        except (subprocess.TimeoutExpired, OSError):
+            return {}, "the tests did not finish within 3 minutes"
+        if not xml.is_file():
+            tail = [x for x in (p.stdout + p.stderr).splitlines() if x.strip()]
+            return {}, "pytest could not start" + (f": {tail[-1][:120]}" if tail else "")
+        return _junit(xml), ""
+
+
+def _run_tests() -> dict:
+    """Your run and GitHub Actions: run the course's login tests and your tests in server/tests."""
+    ci = bool(os.environ.get("GITHUB_ACTIONS"))
+    official: list[str] = []
+    if ci:
+        week = RUN_WEEK if isinstance(RUN_WEEK, int) and RUN_WEEK > 0 else 6
+        req = next((f"week{w:02d}/requirements.txt" for w in (week, 6, 5)
+                    if (ROOT / f"week{w:02d}/requirements.txt").is_file()), None)
+        if req:
+            try:
+                subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-r", req], cwd=ROOT,
+                               capture_output=True, timeout=600)
+            except (subprocess.TimeoutExpired, OSError):
+                pass
+        official = _official_course_tests()
+    result: dict = {"ran": False, "why": "", "outcomes": {}}
+    try:
+        probe = subprocess.run([sys.executable, "-c", "import pytest, fastapi, freezegun"], cwd=ROOT,
+                               capture_output=True, timeout=60).returncode
+    except (subprocess.TimeoutExpired, OSError):
+        probe = 1
+    if probe != 0:
+        result["why"] = say("pytest, fastapi or freezegun is not installed: run pip install -r week06/requirements.txt "
+                            "in your virtual environment, then run the checker again")
+    else:
+        outcomes: dict = {}
+        whys: list[str] = []
+        for args, isolated in ((official or ["course_tests"], True), (["server/tests"], False)):
+            if (ROOT / args[0]).exists():
+                got, why = _run_pytest(args, isolated)
+                outcomes.update(got)
+                if why:
+                    whys.append(why)
+        result = {"ran": not whys or bool(outcomes), "why": "; ".join(whys), "outcomes": outcomes}
+    if ci:  # machine-readable lines in the GitHub Actions log: the instructor's capture reads these
+        # The tag is made after the tests ran, so nothing they started can print lines that pass for these.
+        tag = hashlib.sha256(os.urandom(16)).hexdigest()[:12]
+        print(f"AIASD-RESULTS {tag} {'official' if official else 'local'}")
+        if result["outcomes"]:
+            for key in sorted(result["outcomes"]):
+                outcome, msg = result["outcomes"][key]
+                print(f"AIASD-TEST {tag} {key} {outcome}" + (f" {msg}" if msg and outcome != "passed" else ""))
+        else:
+            print(f"AIASD-TESTS-NOT-RUN {tag} {result['why'] or 'no tests were found'}")
+        print()
+    return result
+
+
+def _ci_results() -> dict:
+    """The instructor's capture: the results come from the GitHub Actions run of the commit read, never from
+    running a student's code here (AIASD_CI_LOG is that run's log; AIASD_CI_UNTRUSTED says why it cannot be used,
+    AIASD_CI_WHY why there is no log). Only the lines carrying the tag of the run's one AIASD-RESULTS line count."""
+    untrusted = os.environ.get("AIASD_CI_UNTRUSTED", "").strip()
+    if untrusted:
+        return {"ran": False, "why": untrusted, "outcomes": {}}
+    path = os.environ.get("AIASD_CI_LOG", "").strip()
+    if not path or not Path(path).is_file():
+        why = os.environ.get("AIASD_CI_WHY", "").strip() or "no GitHub Actions run for the commit read"
+        return {"ran": False, "why": why, "outcomes": {}}
+    lines = Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+    tags = [m.group(1) for m in (re.search(r"AIASD-RESULTS (\w+) (?:official|local)\s*$", x) for x in lines) if m]
+    if len(tags) > 1:
+        return {"ran": False, "outcomes": {},
+                "why": "the GitHub Actions log of the commit read holds more than one set of test results"}
+    tag = tags[0] if tags else None
+    outcomes: dict[str, tuple[str, str]] = {}
+    not_run = ""
+    for line in lines if tag else []:
+        m = re.search(rf"AIASD-TEST {tag} (\S+) (passed|failed|error|skipped)(?: (.*))?$", line)
+        if m:
+            outcomes[m.group(1)] = (m.group(2), (m.group(3) or "").strip())
+            continue
+        m = re.search(rf"AIASD-TESTS-NOT-RUN {tag} (.*)$", line)
+        if m:
+            not_run = m.group(1).strip()
+    if outcomes:
+        return {"ran": True, "why": "", "outcomes": outcomes}
+    return {"ran": False, "outcomes": {},
+            "why": ("in GitHub Actions, " + not_run) if not_run else "the GitHub Actions run of the commit read holds no test results"}
+
+
+def test_results() -> dict:
+    """{"ran": bool, "why": str, "outcomes": {test id: (outcome, message)}}, worked out once per run."""
+    global _TESTS
+    if _TESTS is None:
+        _TESTS = _ci_results() if os.environ.get("AIASD_SLOT") else _run_tests()
+    return _TESTS
+
+
+def login_contract() -> tuple[dict | None, list[str]]:
+    """server/login_contract.json and the keys still missing or not filled in."""
+    data = load_json("server/login_contract.json")
+    if not isinstance(data, dict):
+        return None, []
+    bad = [k for k in CONTRACT_KEYS if not isinstance(data.get(k), str) or not data[k].strip() or "[" in data[k]]
+    bad += [k for k in ("request_code", "login", "me") if k not in bad
+            and not re.fullmatch(r"(GET|POST|PUT|PATCH|DELETE) /\S*", data[k].strip(), re.I)]
+    return data, bad
+
+
+def check_attackers(week: int) -> None:
+    """weekNN/group_NN.json from Week 6: the groupmates who tried to break your work, your own feature and the
+    login (the hostile reviewer, Doc5 §3), what each tried and what happened, typed by you; by Saturday whether you
+    fix it and why."""
+    path = f"week{week:02d}/group_{week:02d}.json"
+    items = contributors(week)
+    if items is None:
+        check(week, f"{path} is valid JSON", False,
+              f"{path} is missing or is not valid JSON. Run the checker online to fetch it, and check the commas and quotation marks.")
+        why = f"It is checked once {path} is there."
+        later(week, f"{path} names the groupmate who attacked your work", why)
+        later(week, f"{path} does not list you", why)
+        later(week, f"{path} gives everyone the role 'attacker'", why)
+        later(week, f"{path} says what each attacker tried and what happened", why)
+        later(week, f"{path} says for each finding whether you fix it, and why", why, DEADLINE)
+        return
+    items = [i for i in items if isinstance(i, dict)]
+    good = [str(i.get("student_id", "")).strip() for i in items
+            if re.fullmatch(r"\d{9}(-\d+)?", str(i.get("student_id", "")).strip())]
+    check(week, f"{path} names the groupmate who attacked your work", bool(items) and len(good) == len(items),
+          f"{path} must name each groupmate who tried to break your work, with a valid 9-digit student number. "
+          f"Found: {pl(len(items), 'entry', 'entries')}, {len(good)} with a valid number.")
+    me = my_number()
+    if good:
+        check(week, f"{path} does not list you", me == "" or me not in [g.split("-")[0] for g in good],
+              f"{path} must not list you. Your own student number is in it: remove that entry.")
+        check(week, f"{path} gives everyone the role 'attacker'",
+              all(str(i.get("role", "")).strip() == "attacker" for i in items),
+              f"{path} must give everyone the role 'attacker'. Found: a wrong or empty role.")
+    else:
+        why = "It is checked once the file names the student number of the groupmate who attacked your work."
+        later(week, f"{path} does not list you", why)
+        later(week, f"{path} gives everyone the role 'attacker'", why)
+    thin = [i for i in items if len(str(i.get("tried", "")).strip()) < 25 or len(str(i.get("happened", "")).strip()) < 15]
+    check(week, f"{path} says what each attacker tried and what happened", bool(items) and not thin,
+          f"{path} must say, in your own words, what each attacker tried (tried) and what your server or your page did (happened). "
+          f"Found: {pl(len(thin), 'entry', 'entries')} without both.")
+    undecided = [i for i in items if i.get("accepted") not in (True, False) or len(str(i.get("why", "")).strip()) < 15]
+    check(week, f"{path} says for each finding whether you fix it, and why", bool(items) and not undecided,
+          f"{path} must say for each attacker's finding whether you fix it (accepted: true or false) and why. "
+          f"Found: {pl(len(undecided), 'entry', 'entries')} without a decision and a reason.", DEADLINE)
+
+
+def week6() -> None:
+    """The login comes ready (server/course_login.py): fill in server/login_contract.json and bring it in. Then the
+    week is your own functional must requirements, end to end: the api.md row, its route working, its tests named by
+    test case ids passing in GitHub Actions, and its prototype screen turned into a page of web/ that calls the
+    server. By Saturday all of them, real e-mail, S2 and the attackers' findings decided."""
+    musts, fmust = must_requirements()
+    own = fmust - {"REQ-001"}
+    eps = api_endpoints()
+    own_rows = [e for e in eps if set(e["reqs"]) & own]
+    defs = route_defs()
+    res = test_results()
+    tcs = test_cases() or []
+    live_tcs = [c for c in tcs if not c.get("dropped")]
+    pages = web_pages()
+    web = ROOT / "web"
+
+    # --- the login: the course's module, brought in with a few lines ---------------------------------------
+    path = "server/login_contract.json"
+    data, bad = login_contract()
+    check(6, f"{path} is filled in", data is not None and not bad,
+          f"{path} must give, written by hand, request_code, login and me (each a method and a path, such as "
+          "POST /auth/code) and email_field, code_field and token_field. "
+          + ("Found: no such file, or not valid JSON. Run the checker online to bring it." if data is None
+             else f"Found: not filled in: {bad[:3]}."))
+    have = (ROOT / COURSE_LOGIN).is_file()
+    check(6, "server/main.py brings in the course's login (course_login.router)", have and course_login_included(),
+          "server/main.py must bring in the login the course gives, with from server import course_login and "
+          "app.include_router(course_login.router). Found: "
+          + ("no server/course_login.py. Run the checker online to bring it." if not have
+             else "no such line in server/main.py."))
+    if data is not None and not bad:
+        ends = []
+        for k in ("request_code", "login", "me"):
+            method, route = data[k].strip().split(None, 1)
+            ends.append(f"{method.upper()} {norm_path(route.strip())}")
+        keys = {e["key"] for e in eps}
+        not_api = [v for v in ends if v not in keys]
+        check(6, "the three login endpoints of server/login_contract.json are rows of week05/api.md", not not_api,
+              f"Every endpoint in {path} must be a row of week05/api.md with the same method and path. "
+              f"Found: not in week05/api.md: {not_api}.")
+    else:
+        later(6, "the three login endpoints of server/login_contract.json are rows of week05/api.md",
+              "It is checked once server/login_contract.json is filled in.")
+
+    # --- the course's login tests: run in GitHub Actions for the commit that is read ---------------------------
+    for n, (what, slot) in LOGIN_TESTS.items():
+        key = f"LOGIN_{n}"
+        outcome, msg = res["outcomes"].get(key, ("", ""))
+        if not res["ran"]:
+            found = res["why"]
+        elif not outcome:
+            found = say("it did not run (see the tests' own output: python -m pytest course_tests -q)")
+        else:
+            found = outcome + (f": {msg}" if msg else "")
+        check(6, f"course test {key}: {what}", outcome == "passed",
+              f"Course test {key} ({what}) must pass. Found: {found}.", slot)
+
+    # --- in the lab: the first of your own must requirements works --------------------------------------------
+    working = [e["key"] for e in own_rows if e["key"] in defs and not route_unbuilt(defs[e["key"]][1])]
+    check(6, "a route of one of your own must requirements works: it no longer answers 501", bool(working),
+          "At least one row of week05/api.md that serves a functional must requirement of your own (not the login, "
+          "REQ-001) must have its route in server/ working: no longer answering 501. Found: "
+          + ("no functional must requirement besides REQ-001 in week02/requirements.json." if not own
+             else "no row of week05/api.md serves one." if not own_rows
+             else f"no working route; server/main.py does not include {', '.join(NOT_INCLUDED)}." if NOT_INCLUDED
+             else "every such route still answers 501."))
+    own_tc = sorted({str(c.get("id", "")).strip() for c in live_tcs if str(c.get("req", "")).strip() in musts - {"REQ-001"}})
+    if not res["ran"]:
+        ok, found = False, res["why"]
+    elif not own_tc:
+        ok, found = False, "no test case of a must requirement besides REQ-001 in week04/test_cases.json"
+    else:
+        ok = any(res["outcomes"].get(i, ("", ""))[0] == "passed" for i in own_tc)
+        found = "none of their tests passes, or no test is named by one of their ids"
+    check(6, "a test named by a test case of one of your own must requirements passes", ok,
+          "At least one test in server/tests/ named by a test case of a must requirement of your own (not the login, "
+          f"REQ-001), such as test_TC_002_02_..., must pass. Found: {found}.")
+    calling = [p for p, (_, text) in pages.items()
+               if calls_fetch(text) and any(calls_path(text, e["key"]) for e in own_rows)]
+    check(6, "web/ has a page that calls a route of your own must requirements with fetch", bool(calling),
+          "web/ must hold a page of your web client, made from its prototype screen, that calls with fetch a path of "
+          "week05/api.md serving a functional must requirement of your own (not the login). Found: "
+          + ("no web/ folder." if not web.is_dir() else "no page in web/." if not pages
+             else "no row of week05/api.md serves such a requirement." if not own_rows
+             else "no page or script there that calls fetch with one of those paths."))
+    folder = ROOT / "server"
+    src = "\n".join(p.read_text(encoding="utf-8", errors="replace") for p in folder.rglob("*.py")
+                    if "tests" not in p.relative_to(folder).parts) if folder.is_dir() else ""
+    serves_web = bool(re.search(r"StaticFiles\s*\(|HTMLResponse|FileResponse", src)) and "web" in src
+    check(6, "server/ serves the pages of web/", serves_web,
+          "server/ must serve the pages of web/ itself, with StaticFiles (app.mount), an HTMLResponse or a "
+          "FileResponse, so that the web client and the server share one address. Found: neither.")
+
+    # --- by Saturday: every functional must requirement, end to end ----------------------------------------------
+    fm_rows = [e for e in eps if set(e["reqs"]) & fmust]
+    still = [e["key"] for e in fm_rows if e["key"] not in defs or route_unbuilt(defs[e["key"]][1])]
+    check(6, "every row of week05/api.md that serves a functional must requirement has a working route",
+          bool(fm_rows) and not still,
+          "Every row of week05/api.md that serves a functional must requirement must have its route in server/, no "
+          "longer answering 501. Found: "
+          + ("no row of week05/api.md serves a functional must requirement." if not fm_rows
+             else f"missing or still 501: {still[:4]}; server/main.py does not include {', '.join(NOT_INCLUDED)}."
+             if NOT_INCLUDED else f"missing or still 501: {still[:4]}."), DEADLINE)
+    server_tc = sorted({str(c.get("id", "")).strip() for c in live_tcs if str(c.get("req", "")).strip() in musts
+                        and str(c.get("run", "")).strip().lower() == "server"})
+    if not res["ran"]:
+        ok, found = False, res["why"]
+    elif not server_tc:
+        ok, found = False, 'no test case of a must requirement with "run": "server"'
+    else:
+        failing = [i for i in server_tc if res["outcomes"].get(i, ("", ""))[0] != "passed"]
+        ok, found = not failing, f"no passing test for {failing[:4]}"
+    check(6, 'every test case of a must requirement with run "server" has a test that passes', ok,
+          'Every test case of a must requirement with "run": "server" in week04/test_cases.json must have a test in '
+          f"server/tests/ named by its id, such as test_TC_002_02_..., that passes. Found: {found}.", DEADLINE)
+    shown = {r for _, (html, text) in pages.items() if calls_fetch(text) for r in serves(html)}
+    no_page = sorted(fmust - shown)
+    check(6, "every functional must requirement has a page in web/ that calls the server", bool(fmust) and not no_page,
+          "Every functional must requirement needs a page in web/ that names it in a line like <!-- serves: REQ-002 --> "
+          "and calls the server with fetch. Found: "
+          + ("no functional must requirement in week02/requirements.json." if not fmust
+             else f"no such page for {no_page[:4]}."), DEADLINE)
+
+    norun = [str(c.get("id", "?")) for c in live_tcs if str(c.get("run", "")).strip().lower() not in ("server", "web", "manual")]
+    check(6, "every test case in week04/test_cases.json says how it is run", bool(tcs) and not norun,
+          'Every test case in week04/test_cases.json must say how it is run: "run": "server", "web" or "manual". Found: '
+          + (f"missing or wrong in {norun[:4]}." if tcs else "no test cases."), DEADLINE)
+
+    if (ROOT / ".git").exists():
+        try:
+            tracked = bool(subprocess.run(["git", "ls-files", ".env"], cwd=ROOT, capture_output=True, text=True,
+                                          timeout=30).stdout.strip())
+        except (subprocess.TimeoutExpired, OSError):
+            tracked = False
+    else:
+        tracked = bool(os.environ.get("AIASD_SLOT")) and (ROOT / ".env").is_file()
+    ignore = [ln.strip() for ln in (read(".gitignore") or "").splitlines()]
+    listed = any(x in (".env", "/.env", ".env*", "*.env", "**/.env") for x in ignore)
+    check(6, ".env is not in the repository, and .gitignore lists it", not tracked and listed,
+          ".env must never be committed, and .gitignore must list it. Found: "
+          + ("it is in the repository. Remove it with git rm --cached .env and change the password it held."
+             if tracked else ".gitignore does not list .env."), DEADLINE)
+    example = read(".env.example") or ""
+    names = {}
+    for ln in example.splitlines():
+        if ln.strip() and not ln.strip().startswith("#") and "=" in ln:
+            k, v = ln.split("=", 1)
+            names[k.strip()] = v.strip()
+        elif ln.strip() and not ln.strip().startswith("#"):
+            names[ln.strip()] = ""
+    missing = [n for n in SMTP_NAMES if n not in names]
+    pw = names.get("SMTP_PASSWORD", "")
+    pw_value = bool(pw) and not re.fullmatch(r"[<\[(].*[>\])]|your[-_ ].*|changeme|x{3,}|\.\.\.|…", pw, re.I)
+    check(6, ".env.example names the e-mail settings, without the password", not missing and not pw_value,
+          ".env.example must list the names of your e-mail settings, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD "
+          "and SMTP_FROM, with no password after SMTP_PASSWORD=. Found: "
+          + (f"missing: {missing}." if missing else "a value after SMTP_PASSWORD=."), DEADLINE)
+    shots = [p for p in (ROOT / "week06").glob("email_code.*") if p.suffix.lower() in (".png", ".jpg", ".jpeg")] \
+        if (ROOT / "week06").is_dir() else []
+    check(6, "week06/email_code.png shows the e-mail with the code", bool(shots),
+          "week06/ must hold email_code.png (or .jpg): a screenshot of the e-mail with the login code that your "
+          "server sent by real e-mail. Found: no such file.", DEADLINE)
+
+    # --- S2: the app record in the store ------------------------------------------------------------------
+    st = load_json("week04/store.json")
+    s2 = st.get("S2") if isinstance(st, dict) and isinstance(st.get("S2"), dict) else {}
+    ok2 = (re.fullmatch(r"20\d\d-\d\d-\d\d", str(s2.get("date", "")).strip()) and filled(s2.get("app_name"))
+           and re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+", str(s2.get("package", "")).strip()))
+    check(6, "store.json S2 is filled in", bool(ok2),
+          "week04/store.json S2 must have the date the app record was created, like 2026-10-31, the app's name in the "
+          "store (app_name) and its package name or bundle id (package), such as com.example.studyroom. "
+          "Found: one of them missing or wrong.", DEADLINE)
+    ev = str(s2.get("evidence", "")).strip().replace("\\", "/")
+    ev_ok = (bool(ev) and ".." not in ev and not Path(ev).is_absolute() and ":" not in ev
+             and ((ROOT / ev).is_file() or (ROOT / "week04" / ev).is_file()))
+    check(6, "store.json S2 screenshot is saved", ev_ok,
+          "The file named in 'evidence' in week04/store.json S2 must be saved in week04/. Found: no such file.", DEADLINE)
+
+    # --- the group: the hostile reviewer, on your own feature and the login ----------------------------------
+    check_attackers(6)
+    check_ai_log(6)
+
+
+CHECKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5, 6: week6}
 
 
 # ── secrets: this one runs for every week ────────────────────────────
@@ -1250,6 +1867,8 @@ def check_secrets() -> bool:
             continue
         if path.name in {"check_deliverables.py", ".env.example"}:
             continue
+        if path.name == ".env" or path.name.startswith(".env."):
+            continue  # keys belong in .env (git ignores it); only files that can be committed are scanned
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -1276,7 +1895,7 @@ def check_secrets() -> bool:
 #   change its entry here; `claude-private/scripts/check_tr_coverage.py` lists the ones that
 #   no longer match. Weeks in TR_WEEKS are fully covered; a later week is shown in English.
 
-TR_WEEKS = frozenset({1, 2, 3, 4, 5})
+TR_WEEKS = frozenset({1, 2, 3, 4, 5, 6})
 
 TR_RULES: list[tuple[str, str]] = [
     # --- every week: the AI log ---------------------------------------------------------------
@@ -1416,12 +2035,12 @@ TR_RULES: list[tuple[str, str]] = [
      "SRS.md içinde en az 3 use case içeren bir use case diyagramı olmalı. Bulunan: {n}."),
     ("SRS.md has a use case diagram with at least 3 use cases",
      "SRS.md içinde en az 3 use case'li bir use case diyagramı var"),
-    ("SRS.md must mention every REQ id from week02/requirements.json. Found: no requirements filled in yet.",
-     "SRS.md, week02/requirements.json içindeki her REQ id'sini anmalı. Bulunan: henüz dolu gereksinim yok."),
-    ("SRS.md must mention every REQ id from week02/requirements.json. Found: missing {x}.",
-     "SRS.md, week02/requirements.json içindeki her REQ id'sini anmalı. Bulunan: eksik olanlar {x}."),
-    ("SRS.md mentions every REQ id from requirements.json",
-     "SRS.md, requirements.json içindeki her REQ id'sini anıyor"),
+    ("SRS.md §4 must say that the requirements are in week02/requirements.json, or list every REQ id. Found: no requirements filled in yet.",
+     "SRS.md §4, gereksinimlerin week02/requirements.json içinde olduğunu söylemeli ya da her REQ id'sini listelemeli. Bulunan: henüz dolu gereksinim yok."),
+    ("SRS.md §4 must say that the requirements are in week02/requirements.json, or list every REQ id. Found: missing {x}.",
+     "SRS.md §4, gereksinimlerin week02/requirements.json içinde olduğunu söylemeli ya da her REQ id'sini listelemeli. Bulunan: eksik olanlar {x}."),
+    ("SRS.md §4 points to requirements.json, or lists every REQ id",
+     "SRS.md §4 requirements.json'u gösteriyor ya da her REQ id'sini listeliyor"),
     # --- student.json / .env.example in the repository root (Week 1 passes) ---------------------
     ("{p} is in the repository root", "{p} reponun kök klasöründe"),
     # --- Week 3: the pitch ----------------------------------------------------------------------
@@ -1774,6 +2393,12 @@ TR_RULES: list[tuple[str, str]] = [
     ("server/main.py must be there and be valid Python. Found: a syntax error.",
      "server/main.py bulunmalı ve geçerli Python olmalı. Bulunan: bir sözdizimi hatası."),
     ("server/main.py is valid Python", "server/main.py geçerli Python"),
+    ("It is checked once server/ has a route of your own besides /health.",
+     "server/ içinde /health dışında kendi route'un olunca kontrol edilir."),
+    ("It is checked once the file names your collaborator's student number.",
+     "Dosya collaborator'ının öğrenci numarasını verince kontrol edilir."),
+    ("It is checked once the file names your reviewers' student numbers.",
+     "Dosya reviewer'larının öğrenci numaralarını verince kontrol edilir."),
     ("server/main.py must create the app with FastAPI(...). Found: no FastAPI( in it.",
      "server/main.py uygulamayı FastAPI(...) ile oluşturmalı. Bulunan: içinde FastAPI( yok."),
     ("server/main.py creates the FastAPI app", "server/main.py FastAPI uygulamasını oluşturuyor"),
@@ -1781,6 +2406,10 @@ TR_RULES: list[tuple[str, str]] = [
      "until it is built. Found: no endpoint that serves a requirement in week05/api.md yet.",
      "week05/api.md içindeki her endpoint'in server/ içinde aynı metot ve yolla bir route'u olmalı; route, yapılana "
      "kadar 501 ile cevap verebilir. Bulunan: week05/api.md içinde henüz bir gereksinime hizmet eden endpoint yok."),
+    ("Every endpoint in week05/api.md must have a route in server/ with the same method and path; it may answer 501 "
+     "until it is built. Found: no route for {x}; server/main.py does not include {r}.",
+     "week05/api.md içindeki her endpoint'in server/ içinde aynı metot ve yolla bir route'u olmalı; route, yapılana "
+     "kadar 501 ile cevap verebilir. Bulunan: route'u olmayanlar: {x}; server/main.py şunları içermiyor (include_router): {r}."),
     ("Every endpoint in week05/api.md must have a route in server/ with the same method and path; it may answer 501 "
      "until it is built. Found: no route for {x}.",
      "week05/api.md içindeki her endpoint'in server/ içinde aynı metot ve yolla bir route'u olmalı; route, yapılana "
@@ -1818,10 +2447,242 @@ TR_RULES: list[tuple[str, str]] = [
      "week05/ai_log_05.md, Evidence bloğunda bir test çalıştırmasının çıktısını terminalinin gösterdiği gibi, son "
      "satırına kadar içermeli; örneğin '1 failed, 1 passed'. Bulunan: böyle bir satır yok."),
     ("week05/ai_log_05.md holds the output of a test run", "week05/ai_log_05.md bir test çalıştırmasının çıktısını içeriyor"),
+    # Week 6 (VC, 22 Oct 2026)
+    ('It is checked once {p} is there.',
+     '{p} gelince kontrol edilir.'),
+    ('course test LOGIN_01: a code is sent to a valid e-mail',
+     'ders testi LOGIN_01: geçerli bir e-postaya kod gönderiliyor'),
+    ('Course test LOGIN_01 (a code is sent to a valid e-mail) must pass. Found: {f}.',
+     'LOGIN_01 ders testi (geçerli bir e-postaya kod gönderiliyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_02: something that is not an e-mail is refused',
+     'ders testi LOGIN_02: e-posta olmayan bir değer reddediliyor'),
+    ('Course test LOGIN_02 (something that is not an e-mail is refused) must pass. Found: {f}.',
+     'LOGIN_02 ders testi (e-posta olmayan bir değer reddediliyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_03: the right code gives a token',
+     'ders testi LOGIN_03: doğru kod bir token veriyor'),
+    ('Course test LOGIN_03 (the right code gives a token) must pass. Found: {f}.',
+     'LOGIN_03 ders testi (doğru kod bir token veriyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_04: a wrong code is refused',
+     'ders testi LOGIN_04: yanlış kod reddediliyor'),
+    ('Course test LOGIN_04 (a wrong code is refused) must pass. Found: {f}.',
+     'LOGIN_04 ders testi (yanlış kod reddediliyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_05: the token opens me',
+     "ders testi LOGIN_05: token me'yi açıyor"),
+    ('Course test LOGIN_05 (the token opens me) must pass. Found: {f}.',
+     "LOGIN_05 ders testi (token me'yi açıyor) geçmeli. Bulunan: {f}."),
+    ('course test LOGIN_06: me is refused without a token or with a wrong one',
+     "ders testi LOGIN_06: token olmadan ya da yanlış token'la me reddediliyor"),
+    ('Course test LOGIN_06 (me is refused without a token or with a wrong one) must pass. Found: {f}.',
+     "LOGIN_06 ders testi (token olmadan ya da yanlış token'la me reddediliyor) geçmeli. Bulunan: {f}."),
+    ('course test LOGIN_07: a code works only once',
+     'ders testi LOGIN_07: bir kod yalnızca bir kez çalışıyor'),
+    ('Course test LOGIN_07 (a code works only once) must pass. Found: {f}.',
+     'LOGIN_07 ders testi (bir kod yalnızca bir kez çalışıyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_08: a code expires after 10 minutes',
+     'ders testi LOGIN_08: bir kodun süresi 10 dakikada doluyor'),
+    ('Course test LOGIN_08 (a code expires after 10 minutes) must pass. Found: {f}.',
+     'LOGIN_08 ders testi (bir kodun süresi 10 dakikada doluyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_09: a new code within a minute is refused, and allowed after it',
+     'ders testi LOGIN_09: bir dakika içinde yeni kod isteği reddediliyor, sonra kabul ediliyor'),
+    ('Course test LOGIN_09 (a new code within a minute is refused, and allowed after it) must pass. Found: {f}.',
+     'LOGIN_09 ders testi (bir dakika içinde yeni kod isteği reddediliyor, sonra kabul ediliyor) geçmeli. Bulunan: {f}.'),
+    ('course test LOGIN_10: three wrong codes lock the login for 15 minutes',
+     "ders testi LOGIN_10: üç yanlış kod login'i 15 dakika kilitliyor"),
+    ('Course test LOGIN_10 (three wrong codes lock the login for 15 minutes) must pass. Found: {f}.',
+     "LOGIN_10 ders testi (üç yanlış kod login'i 15 dakika kilitliyor) geçmeli. Bulunan: {f}."),
+    ('server/login_contract.json is filled in',
+     'server/login_contract.json dolduruldu'),
+    ('server/login_contract.json must give, written by hand, request_code, login and me (each a method and a path, such as POST /auth/code) and email_field, code_field and token_field. Found: no such file, or not valid JSON. Run the checker online to bring it.',
+     "server/login_contract.json elle yazılmış request_code, login ve me (her biri bir metot ve bir yol, örneğin POST /auth/code) ile email_field, code_field ve token_field değerlerini vermeli. Bulunan: böyle bir dosya yok ya da geçerli JSON değil. Getirmek için checker'ı internete bağlıyken çalıştır."),
+    ('server/login_contract.json must give, written by hand, request_code, login and me (each a method and a path, such as POST /auth/code) and email_field, code_field and token_field. Found: not filled in: {x}.',
+     'server/login_contract.json elle yazılmış request_code, login ve me (her biri bir metot ve bir yol, örneğin POST /auth/code) ile email_field, code_field ve token_field değerlerini vermeli. Bulunan: doldurulmamış: {x}.'),
+    ('the three login endpoints of server/login_contract.json are rows of week05/api.md',
+     "server/login_contract.json içindeki üç login endpoint'i week05/api.md içinde satır olarak var"),
+    ('Every endpoint in server/login_contract.json must be a row of week05/api.md with the same method and path. Found: not in week05/api.md: {x}.',
+     'server/login_contract.json içindeki her endpoint week05/api.md içinde aynı metot ve yolla bir satır olmalı. Bulunan: week05/api.md içinde olmayanlar: {x}.'),
+    ('It is checked once server/login_contract.json is filled in.',
+     'server/login_contract.json doldurulunca kontrol edilir.'),
+    # Week 6 after the change of course (VC, 22 Oct 2026): the login comes ready; your own must requirements
+    ("server/main.py brings in the course's login (course_login.router)",
+     "server/main.py dersin login'ini içeri alıyor (course_login.router)"),
+    ("server/main.py must bring in the login the course gives, with from server import course_login and "
+     "app.include_router(course_login.router). Found: no server/course_login.py. Run the checker online to bring it.",
+     "server/main.py dersin verdiği login'i from server import course_login ve app.include_router(course_login.router) "
+     "ile içeri almalı. Bulunan: server/course_login.py yok. Getirmek için checker'ı internete bağlıyken çalıştır."),
+    ("server/main.py must bring in the login the course gives, with from server import course_login and "
+     "app.include_router(course_login.router). Found: no such line in server/main.py.",
+     "server/main.py dersin verdiği login'i from server import course_login ve app.include_router(course_login.router) "
+     "ile içeri almalı. Bulunan: server/main.py içinde böyle bir satır yok."),
+    ("a route of one of your own must requirements works: it no longer answers 501",
+     "kendi must gereksinimlerinden birinin route'u çalışıyor: artık 501 dönmüyor"),
+    ("At least one row of week05/api.md that serves a functional must requirement of your own (not the login, "
+     "REQ-001) must have its route in server/ working: no longer answering 501. Found: no functional must "
+     "requirement besides REQ-001 in week02/requirements.json.",
+     "week05/api.md içinde kendi işlevsel must gereksinimlerinden birine (login, yani REQ-001 dışında) hizmet eden en "
+     "az bir satırın server/ içindeki route'u çalışmalı: artık 501 dönmemeli. Bulunan: week02/requirements.json "
+     "içinde REQ-001 dışında işlevsel must gereksinim yok."),
+    ("At least one row of week05/api.md that serves a functional must requirement of your own (not the login, "
+     "REQ-001) must have its route in server/ working: no longer answering 501. Found: no row of week05/api.md "
+     "serves one.",
+     "week05/api.md içinde kendi işlevsel must gereksinimlerinden birine (login, yani REQ-001 dışında) hizmet eden en "
+     "az bir satırın server/ içindeki route'u çalışmalı: artık 501 dönmemeli. Bulunan: week05/api.md içinde böyle "
+     "bir gereksinime hizmet eden satır yok."),
+    ("At least one row of week05/api.md that serves a functional must requirement of your own (not the login, "
+     "REQ-001) must have its route in server/ working: no longer answering 501. Found: no working route; "
+     "server/main.py does not include {r}.",
+     "week05/api.md içinde kendi işlevsel must gereksinimlerinden birine (login, yani REQ-001 dışında) hizmet eden en "
+     "az bir satırın server/ içindeki route'u çalışmalı: artık 501 dönmemeli. Bulunan: çalışan route yok; "
+     "server/main.py şunları içermiyor (include_router): {r}."),
+    ("At least one row of week05/api.md that serves a functional must requirement of your own (not the login, "
+     "REQ-001) must have its route in server/ working: no longer answering 501. Found: every such route still "
+     "answers 501.",
+     "week05/api.md içinde kendi işlevsel must gereksinimlerinden birine (login, yani REQ-001 dışında) hizmet eden en "
+     "az bir satırın server/ içindeki route'u çalışmalı: artık 501 dönmemeli. Bulunan: bu route'ların hepsi şu an "
+     "501 dönüyor."),
+    ("a test named by a test case of one of your own must requirements passes",
+     "kendi must gereksinimlerinden birinin test case'iyle adlandırılmış bir test geçiyor"),
+    ("At least one test in server/tests/ named by a test case of a must requirement of your own (not the login, "
+     "REQ-001), such as test_TC_002_02_..., must pass. Found: no test case of a must requirement besides REQ-001 "
+     "in week04/test_cases.json.",
+     "server/tests/ içinde kendi must gereksinimlerinden birinin (login, yani REQ-001 dışında) test case'iyle "
+     "adlandırılmış en az bir test, örneğin test_TC_002_02_..., geçmeli. Bulunan: week04/test_cases.json içinde "
+     "REQ-001 dışında bir must gereksinimin test case'i yok."),
+    ("At least one test in server/tests/ named by a test case of a must requirement of your own (not the login, "
+     "REQ-001), such as test_TC_002_02_..., must pass. Found: none of their tests passes, or no test is named by "
+     "one of their ids.",
+     "server/tests/ içinde kendi must gereksinimlerinden birinin (login, yani REQ-001 dışında) test case'iyle "
+     "adlandırılmış en az bir test, örneğin test_TC_002_02_..., geçmeli. Bulunan: bunların hiçbir testi geçmiyor ya "
+     "da hiçbir test onların id'leriyle adlandırılmamış."),
+    ("At least one test in server/tests/ named by a test case of a must requirement of your own (not the login, "
+     "REQ-001), such as test_TC_002_02_..., must pass. Found: {f}.",
+     "server/tests/ içinde kendi must gereksinimlerinden birinin (login, yani REQ-001 dışında) test case'iyle "
+     "adlandırılmış en az bir test, örneğin test_TC_002_02_..., geçmeli. Bulunan: {f}."),
+    ("web/ has a page that calls a route of your own must requirements with fetch",
+     "web/ içinde kendi must gereksinimlerinin bir route'unu fetch ile çağıran bir sayfa var"),
+    ("web/ must hold a page of your web client, made from its prototype screen, that calls with fetch a path of "
+     "week05/api.md serving a functional must requirement of your own (not the login). Found: no web/ folder.",
+     "web/ içinde web istemcinin, prototip ekranından yapılmış bir sayfası olmalı; bu sayfa week05/api.md içinde "
+     "kendi işlevsel must gereksinimlerinden birine (login dışında) hizmet eden bir yolu fetch ile çağırmalı. "
+     "Bulunan: web/ klasörü yok."),
+    ("web/ must hold a page of your web client, made from its prototype screen, that calls with fetch a path of "
+     "week05/api.md serving a functional must requirement of your own (not the login). Found: no page in web/.",
+     "web/ içinde web istemcinin, prototip ekranından yapılmış bir sayfası olmalı; bu sayfa week05/api.md içinde "
+     "kendi işlevsel must gereksinimlerinden birine (login dışında) hizmet eden bir yolu fetch ile çağırmalı. "
+     "Bulunan: web/ içinde sayfa yok."),
+    ("web/ must hold a page of your web client, made from its prototype screen, that calls with fetch a path of "
+     "week05/api.md serving a functional must requirement of your own (not the login). Found: no row of "
+     "week05/api.md serves such a requirement.",
+     "web/ içinde web istemcinin, prototip ekranından yapılmış bir sayfası olmalı; bu sayfa week05/api.md içinde "
+     "kendi işlevsel must gereksinimlerinden birine (login dışında) hizmet eden bir yolu fetch ile çağırmalı. "
+     "Bulunan: week05/api.md içinde böyle bir gereksinime hizmet eden satır yok."),
+    ("web/ must hold a page of your web client, made from its prototype screen, that calls with fetch a path of "
+     "week05/api.md serving a functional must requirement of your own (not the login). Found: no page or script "
+     "there that calls fetch with one of those paths.",
+     "web/ içinde web istemcinin, prototip ekranından yapılmış bir sayfası olmalı; bu sayfa week05/api.md içinde "
+     "kendi işlevsel must gereksinimlerinden birine (login dışında) hizmet eden bir yolu fetch ile çağırmalı. "
+     "Bulunan: orada bu yollardan biriyle fetch çağıran bir sayfa ya da script yok."),
+    ("every row of week05/api.md that serves a functional must requirement has a working route",
+     "week05/api.md içinde işlevsel bir must gereksinime hizmet eden her satırın çalışan bir route'u var"),
+    ("Every row of week05/api.md that serves a functional must requirement must have its route in server/, no "
+     "longer answering 501. Found: no row of week05/api.md serves a functional must requirement.",
+     "week05/api.md içinde işlevsel bir must gereksinime hizmet eden her satırın server/ içinde route'u olmalı ve "
+     "artık 501 dönmemeli. Bulunan: week05/api.md içinde işlevsel bir must gereksinime hizmet eden satır yok."),
+    ("Every row of week05/api.md that serves a functional must requirement must have its route in server/, no "
+     "longer answering 501. Found: missing or still 501: {x}; server/main.py does not include {r}.",
+     "week05/api.md içinde işlevsel bir must gereksinime hizmet eden her satırın server/ içinde route'u olmalı ve "
+     "artık 501 dönmemeli. Bulunan: eksik ya da şu an 501 dönenler: {x}; server/main.py şunları içermiyor "
+     "(include_router): {r}."),
+    ("Every row of week05/api.md that serves a functional must requirement must have its route in server/, no "
+     "longer answering 501. Found: missing or still 501: {x}.",
+     "week05/api.md içinde işlevsel bir must gereksinime hizmet eden her satırın server/ içinde route'u olmalı ve "
+     "artık 501 dönmemeli. Bulunan: eksik ya da şu an 501 dönenler: {x}."),
+    ('every test case of a must requirement with run "server" has a test that passes',
+     'run değeri "server" olan, must bir gereksinimin her test case\'inin geçen bir testi var'),
+    ('Every test case of a must requirement with "run": "server" in week04/test_cases.json must have a test in '
+     'server/tests/ named by its id, such as test_TC_002_02_..., that passes. Found: no test case of a must '
+     'requirement with "run": "server".',
+     'week04/test_cases.json içinde "run": "server" olan, must bir gereksinimin her test case\'inin server/tests/ '
+     'içinde kendi id\'siyle adlandırılmış ve geçen bir testi olmalı; örneğin test_TC_002_02_.... Bulunan: '
+     '"run": "server" olan, must bir gereksinimin test case\'i yok.'),
+    ('Every test case of a must requirement with "run": "server" in week04/test_cases.json must have a test in '
+     'server/tests/ named by its id, such as test_TC_002_02_..., that passes. Found: no passing test for {x}.',
+     'week04/test_cases.json içinde "run": "server" olan, must bir gereksinimin her test case\'inin server/tests/ '
+     'içinde kendi id\'siyle adlandırılmış ve geçen bir testi olmalı; örneğin test_TC_002_02_.... Bulunan: '
+     'şunların geçen testi yok: {x}.'),
+    ('Every test case of a must requirement with "run": "server" in week04/test_cases.json must have a test in '
+     'server/tests/ named by its id, such as test_TC_002_02_..., that passes. Found: {f}.',
+     'week04/test_cases.json içinde "run": "server" olan, must bir gereksinimin her test case\'inin server/tests/ '
+     'içinde kendi id\'siyle adlandırılmış ve geçen bir testi olmalı; örneğin test_TC_002_02_.... Bulunan: {f}.'),
+    ("every functional must requirement has a page in web/ that calls the server",
+     "her işlevsel must gereksinimin web/ içinde sunucuyu çağıran bir sayfası var"),
+    ("Every functional must requirement needs a page in web/ that names it in a line like <!-- serves: REQ-002 --> "
+     "and calls the server with fetch. Found: no functional must requirement in week02/requirements.json.",
+     "Her işlevsel must gereksinimin web/ içinde onu <!-- serves: REQ-002 --> gibi bir satırda adlandıran ve "
+     "sunucuyu fetch ile çağıran bir sayfası olmalı. Bulunan: week02/requirements.json içinde işlevsel must "
+     "gereksinim yok."),
+    ("Every functional must requirement needs a page in web/ that names it in a line like <!-- serves: REQ-002 --> "
+     "and calls the server with fetch. Found: no such page for {x}.",
+     "Her işlevsel must gereksinimin web/ içinde onu <!-- serves: REQ-002 --> gibi bir satırda adlandıran ve "
+     "sunucuyu fetch ile çağıran bir sayfası olmalı. Bulunan: şunlar için böyle bir sayfa yok: {x}."),
+    ('server/ serves the pages of web/',
+     'server/ web/ sayfalarını sunuyor'),
+    ('server/ must serve the pages of web/ itself, with StaticFiles (app.mount), an HTMLResponse or a FileResponse, so that the web client and the server share one address. Found: neither.',
+     'server/, web/ sayfalarını kendisi sunmalı: StaticFiles (app.mount), bir HTMLResponse ya da bir FileResponse ile; böylece web istemcisi ile sunucu aynı adresi paylaşır. Bulunan: hiçbiri.'),
+    ('.env is not in the repository, and .gitignore lists it',
+     ".env repo'da yok ve .gitignore onu listeliyor"),
+    ('.env must never be committed, and .gitignore must list it. Found: it is in the repository. Remove it with git rm --cached .env and change the password it held.',
+     ".env asla commit edilmemeli ve .gitignore onu listelemeli. Bulunan: repo'da var. git rm --cached .env ile çıkar ve içindeki şifreyi değiştir."),
+    ('.env must never be committed, and .gitignore must list it. Found: .gitignore does not list .env.',
+     ".env asla commit edilmemeli ve .gitignore onu listelemeli. Bulunan: .gitignore .env'yi listelemiyor."),
+    ('.env.example names the e-mail settings, without the password',
+     '.env.example e-posta ayarlarının adlarını şifre olmadan veriyor'),
+    ('.env.example must list the names of your e-mail settings, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD and SMTP_FROM, with no password after SMTP_PASSWORD=. Found: missing: {x}.',
+     '.env.example e-posta ayarlarının adlarını listelemeli: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD ve SMTP_FROM; SMTP_PASSWORD= sonrasında şifre olmamalı. Bulunan: eksik: {x}.'),
+    ('.env.example must list the names of your e-mail settings, SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD and SMTP_FROM, with no password after SMTP_PASSWORD=. Found: a value after SMTP_PASSWORD=.',
+     '.env.example e-posta ayarlarının adlarını listelemeli: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD ve SMTP_FROM; SMTP_PASSWORD= sonrasında şifre olmamalı. Bulunan: SMTP_PASSWORD= sonrasında bir değer var.'),
+    ('week06/email_code.png shows the e-mail with the code',
+     'week06/email_code.png kodun geldiği e-postayı gösteriyor'),
+    ('week06/ must hold email_code.png (or .jpg): a screenshot of the e-mail with the login code that your server sent by real e-mail. Found: no such file.',
+     'week06/ içinde email_code.png (ya da .jpg) olmalı: sunucunun gerçek e-postayla gönderdiği login kodunu gösteren e-postanın ekran görüntüsü. Bulunan: böyle bir dosya yok.'),
+    ('store.json S2 is filled in',
+     'store.json S2 dolduruldu'),
+    ("week04/store.json S2 must have the date the app record was created, like 2026-10-31, the app's name in the store (app_name) and its package name or bundle id (package), such as com.example.studyroom. Found: one of them missing or wrong.",
+     "week04/store.json içindeki S2'de uygulama kaydının oluşturulduğu tarih (2026-10-31 gibi), uygulamanın mağazadaki adı (app_name) ve paket adı ya da bundle id'si (package, örneğin com.example.studyroom) olmalı. Bulunan: biri eksik ya da yanlış."),
+    ('store.json S2 screenshot is saved',
+     'store.json S2 ekran görüntüsü kaydedilmiş'),
+    ("The file named in 'evidence' in week04/store.json S2 must be saved in week04/. Found: no such file.",
+     "week04/store.json S2 içindeki 'evidence' alanında adı geçen dosya week04/ içine kaydedilmeli. Bulunan: böyle bir dosya yok."),
+    ('every test case in week04/test_cases.json says how it is run',
+     'week04/test_cases.json içindeki her test case nasıl çalıştırıldığını söylüyor'),
+    ('Every test case in week04/test_cases.json must say how it is run: "run": "server", "web" or "manual". Found: missing or wrong in {x}.',
+     'week04/test_cases.json içindeki her test case nasıl çalıştırıldığını söylemeli: "run": "server", "web" ya da "manual". Bulunan: eksik ya da yanlış olanlar: {x}.'),
+    ('Every test case in week04/test_cases.json must say how it is run: "run": "server", "web" or "manual". Found: no test cases.',
+     'week04/test_cases.json içindeki her test case nasıl çalıştırıldığını söylemeli: "run": "server", "web" ya da "manual". Bulunan: test case yok.'),
+    ('{p} names the groupmate who attacked your work',
+     "{p} çalışmana saldıran grup arkadaşını adlandırıyor"),
+    ('{p} must name each groupmate who tried to break your work, with a valid 9-digit student number. Found: {n} {u}, {m} with a valid number.',
+     "{p} çalışmanı kırmaya çalışan her grup arkadaşını geçerli 9 haneli öğrenci numarasıyla yazmalı. Bulunan: {n} giriş, {m} tanesinde geçerli numara var."),
+    ('It is checked once the file names the student number of the groupmate who attacked your work.',
+     "Dosya çalışmana saldıran grup arkadaşının öğrenci numarasını verince kontrol edilir."),
+    ('{p} says what each attacker tried and what happened',
+     '{p} her saldırganın ne denediğini ve ne olduğunu söylüyor'),
+    ('{p} must say, in your own words, what each attacker tried (tried) and what your server or your page did (happened). Found: {n} {u} without both.',
+     "{p} her saldırganın ne denediğini (tried) ve sunucunun ya da sayfanın ne yaptığını (happened) kendi sözlerinle söylemeli. Bulunan: {n} giriş ikisini birden içermiyor."),
+    ('{p} says for each finding whether you fix it, and why',
+     '{p} her bulgu için düzeltip düzeltmeyeceğini ve nedenini söylüyor'),
+    ("{p} must say for each attacker's finding whether you fix it (accepted: true or false) and why. Found: {n} {u} without a decision and a reason.",
+     '{p} her saldırganın bulgusu için düzeltip düzeltmeyeceğini (accepted: true ya da false) ve nedenini söylemeli. Bulunan: {n} giriş karar ve neden içermiyor.'),
+    # a course test the entries above do not name (they come first, so every LOGIN_NN of the table has its own Turkish)
+    ('course test {k}: {w}', 'ders testi {k}: {w}'),
+    ('Course test {k} ({w}) must pass. Found: {f}.', '{k} ders testi ({w}) geçmeli. Bulunan: {f}.'),
 ]
 
 # Messages of the run itself (not of a check), same {name} fields; Turkish only when `tr` was asked for.
 TR_UI = {
+    "pytest, fastapi or freezegun is not installed: run pip install -r week06/requirements.txt in your virtual environment, then run the checker again":
+        "pytest, fastapi ya da freezegun kurulu değil: sanal ortamında pip install -r week06/requirements.txt çalıştır, sonra checker'ı yeniden çalıştır",
+    "it did not run (see the tests' own output: python -m pytest course_tests -q)":
+        "çalışmadı (testlerin kendi çıktısına bak: python -m pytest course_tests -q)",
     "Secret scan": "Gizli anahtar taraması",
     "no API keys found": "API anahtarı bulunamadı",
     "KEYS FOUND — remove them and rotate them NOW": "ANAHTAR BULUNDU — hemen sil ve yenile",
@@ -1858,6 +2719,8 @@ TR_UI = {
         "\n  Cumartesi 23:59'a kadar yapılacak {n} madde var. Bunlar bu çalıştırmada kalmış sayılmaz —\n  henüz süreleri gelmedi. Oturum sonu notu yalnızca ders içi maddeleri okur.",
     "PASS": "TAMAM",
     "FAIL": "EKSİK",
+    "NOT YET": "BEKLİYOR",
+    "({k} not yet)": "({k} bekliyor)",
     "{n} line(s) above have no Turkish yet and are shown in English.": "Yukarıdaki {n} satırın henüz Türkçesi yok, İngilizce gösterildi.",
 }
 
@@ -2121,6 +2984,8 @@ RAW_BASE = "https://raw.githubusercontent.com/vedatcoskun-course/aiasd-template/
 
 
 ROOT_CODE_FROM = {"server": 5}  # code folders at the root of the template, and the week they arrive in
+COURSE_CODE_FROM = {"course_tests": 6}  # code the course owns (VC, 22 Oct 2026): brought and put back like AI_* files
+COURSE_FILE_FROM = {"server/course_login.py": 6}  # one file of the course inside server/ (VC, 22 Oct 2026): the same
 
 
 def sync_course_files(current: int) -> None:
@@ -2131,6 +2996,8 @@ def sync_course_files(current: int) -> None:
 
     - course documents at the root (`AI_*`, `AI_Doc2_media/…`): the course owns them,
       so a missing or changed one is (re)written here;
+    - the course's tests (`course_tests/…`) and its login (`server/course_login.py`), from Week 6:
+      the course owns them too, so they are (re)written like the documents;
     - a week's folder (`weekNN/…`), the `PROPOSAL.md` scaffold and the `server/` starter
       (from Week 5): yours once you have them, so a file is written only if it does not
       exist yet — never overwritten — and only for weeks the course has published.
@@ -2159,6 +3026,15 @@ def sync_course_files(current: int) -> None:
         elif rel == "PROPOSAL.md":
             if current < 2 or target.exists():
                 continue
+        elif rel in COURSE_FILE_FROM or rel.split("/")[0] in COURSE_CODE_FROM:  # the course's, put back if changed
+            if current < COURSE_FILE_FROM.get(rel, COURSE_CODE_FROM.get(rel.split("/")[0], 99)):
+                continue
+            if target.exists():
+                try:
+                    if hashlib.sha256(target.read_bytes()).hexdigest() == digest:
+                        continue
+                except OSError:
+                    continue
         elif rel.split("/")[0] in ROOT_CODE_FROM:  # server/ from Week 5: yours once you have it
             if current < ROOT_CODE_FROM[rel.split("/")[0]] or target.exists():
                 continue
@@ -2282,6 +3158,8 @@ def main() -> int:
                 seen = wk
             if status == PASS:
                 print(f"  ✓ {say('PASS')}  {shown_sentence(name)}")
+            elif status == NOTYET:
+                print(f"  · {say('NOT YET')}  {shown_sentence(name)}. {shown_sentence(detail)}")
             else:
                 print(f"  ✗ {say('FAIL')}  {shown_sentence(detail)}")
         print()
@@ -2290,11 +3168,13 @@ def main() -> int:
         slots = [SESSION] if scored == SESSION else [SESSION, DEADLINE]
         rows = [r for r in results if r[3] in slots]
         show(rows, f"Weeks 1-{current}", True)
-        failed = [r for r in rows if r[2] != PASS]
+        failed = [r for r in rows if r[2] == FAIL]
+        waiting = [r for r in rows if r[2] == NOTYET]
         print("-" * 64)
         print(
-            f"  {len(rows) - len(failed)} passed, {len(failed)} failed  "
-            f"(weeks 1-{current}, {scored})"
+            f"  {len(rows) - len(failed) - len(waiting)} passed, {len(failed)} failed"
+            + (f", {len(waiting)} not yet" if waiting else "")
+            + f"  (weeks 1-{current}, {scored})"
         )
         print("-" * 64)
         return 0 if (not failed and secrets_ok) else 1
@@ -2309,16 +3189,20 @@ def main() -> int:
     show(session_rows, say("Was due at the end of the session" if past else "Due at the end of the session"), False)
     show(deadline_rows, say("Was due Saturday 23:59" if past else "Due by Saturday 23:59"), False)
 
-    s_bad = [r for r in session_rows if r[2] != PASS]
-    d_bad = [r for r in deadline_rows if r[2] != PASS]
+    s_bad = [r for r in session_rows if r[2] == FAIL]
+    d_bad = [r for r in deadline_rows if r[2] == FAIL]
+    s_wait = [r for r in session_rows if r[2] == NOTYET]
+    d_wait = [r for r in deadline_rows if r[2] == NOTYET]
     older: dict[int, int] = {}
     for r in results:
         n = int(r[0][1:])
-        if n < shown and r[2] != PASS:
+        if n < shown and r[2] == FAIL:
             older[n] = older.get(n, 0) + 1
     print("-" * 64)
-    print("  " + say("In the lab:     {a} of {b} done", a=len(session_rows) - len(s_bad), b=len(session_rows)))
-    print("  " + say("By Saturday:    {a} of {b} done", a=len(deadline_rows) - len(d_bad), b=len(deadline_rows)))
+    print("  " + say("In the lab:     {a} of {b} done", a=len(session_rows) - len(s_bad) - len(s_wait), b=len(session_rows) - len(s_wait))
+          + ("  " + say("({k} not yet)", k=len(s_wait)) if s_wait else ""))
+    print("  " + say("By Saturday:    {a} of {b} done", a=len(deadline_rows) - len(d_bad) - len(d_wait), b=len(deadline_rows) - len(d_wait))
+          + ("  " + say("({k} not yet)", k=len(d_wait)) if d_wait else ""))
     if older:
         listing = " · ".join(f"week{n:02d}: {older[n]}" for n in sorted(older, reverse=True))
         print("  " + say(

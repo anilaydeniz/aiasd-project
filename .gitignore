@@ -19,6 +19,7 @@ env/
 .env
 *.key
 *.pem
+login_code.txt
 
 # Streamlit
 .streamlit/secrets.toml
