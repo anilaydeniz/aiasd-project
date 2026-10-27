@@ -12,6 +12,13 @@
   ],
   "week": 6,
   "members": [
-    { "student_id": "", "role": "attacker", "tried": "", "happened": "", "accepted": null, "why": "" }
+    {
+      "student_id": "220504010",
+      "role": "attacker",
+      "tried": "Tried sending negative portion count (-5) and a non-existent recipe ID 'truffle_pasta' to POST /prep/portions without authorization.",
+      "happened": "Server refused the unauthenticated request with 401; after authenticating, it rejected negative portions with 422 and unknown recipe with 404.",
+      "accepted": null,
+      "why": ""
+    }
   ]
 }

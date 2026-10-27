@@ -14,13 +14,20 @@ and the same path, and every row of week05/api.md is an endpoint here. The check
 compares the two.
 """
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from server import course_login, prep
 
 app = FastAPI(title="KitchenOps")
 app.include_router(course_login.router)
 app.include_router(prep.router)
+
+WEB = Path(__file__).resolve().parent.parent / "web"
+if WEB.is_dir():
+    app.mount("/web", StaticFiles(directory=WEB, html=True), name="web")
 
 
 @app.get("/health")

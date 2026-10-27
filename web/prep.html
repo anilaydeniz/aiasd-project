@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Log Prepared Dishes</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-002, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <div>
+      <span class="meta">RECIPE DEPLETION</span>
+      <h1 style="margin: 0; font-size: 1.4rem;">Log Prepared Dishes</h1>
+    </div>
+    <a href="login.html" id="btn-logout" class="meta" style="cursor: pointer;">Logout</a>
+  </div>
+
+  <p>Select the prepared recipe and portion count to automatically deduct raw ingredients from stock using calibrated Bill of Materials (BOM).</p>
+
+  <form id="prep-form">
+    <div style="margin-bottom: 14px;">
+      <label for="recipe-select" style="display: block; font-weight: 600; margin-bottom: 6px;">Recipe Selection</label>
+      <select id="recipe-select" class="input-portion" style="width: 100%; text-align: left; padding: 10px;" required>
+        <option value="rigatoni_pomodoro" selected>Rigatoni Pomodoro (120g pasta, 80g sauce / portion)</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 14px;">
+      <label for="portion-count" style="display: block; font-weight: 600; margin-bottom: 6px;">Portions Prepared</label>
+      <div class="stepper-row" style="display: flex; gap: 8px;">
+        <button type="button" class="btn-step" id="btn-dec" style="padding: 10px 18px; font-size: 1.2rem; cursor: pointer;">−</button>
+        <input type="number" id="portion-count" class="input-portion" min="1" max="200" value="10" style="text-align: center; flex: 1; font-weight: 700; font-size: 1.2rem;" required>
+        <button type="button" class="btn-step" id="btn-inc" style="padding: 10px 18px; font-size: 1.2rem; cursor: pointer;">+</button>
+      </div>
+    </div>
+
+    <!-- Live BOM Deduction Preview Card -->
+    <div class="card highlight" id="ingredient-preview" style="margin-bottom: 14px;">
+      <div class="row">
+        <strong>Calculated BOM Deduction:</strong>
+        <span class="badge warning" id="portion-badge">10 Portions</span>
+      </div>
+      <div class="list" style="margin-top: 6px;">
+        <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Pasta (Rigatoni)</span>
+          <span style="color: #c53030; font-weight: 700;" id="deduct-pasta">-1.20 kg</span>
+        </div>
+        <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <span>Tomato Sauce Base</span>
+          <span style="color: #c53030; font-weight: 700;" id="deduct-sauce">-0.80 kg</span>
+        </div>
+        <div class="item-row" style="display: flex; justify-content: space-between;">
+          <span>FIFO Lot Source</span>
+          <span class="meta">Lot #P-201 (Oldest Batch)</span>
+        </div>
+      </div>
+      <p class="note" style="margin-top: 4px; font-size: 0.8rem; color: #718096;">FIFO Rule: Oldest unexpired batch in storage is automatically prioritized for depletion.</p>
+    </div>
+
+    <button class="button" id="btn-confirm-deplete" type="submit" style="width: 100%; padding: 12px; font-size: 1rem; font-weight: 700;">
+      Confirm &amp; Deplete Stock
+    </button>
+  </form>
+
+  <div id="result-card" class="card" style="margin-top: 16px; display: none;"></div>
+</main>
+
+<script>
+const token = sessionStorage.getItem("token");
+if (!token) {
+  window.location.href = "login.html";
+}
+
+const portionInput = document.querySelector("#portion-count");
+const btnDec = document.querySelector("#btn-dec");
+const btnInc = document.querySelector("#btn-inc");
+const portionBadge = document.querySelector("#portion-badge");
+const deductPasta = document.querySelector("#deduct-pasta");
+const deductSauce = document.querySelector("#deduct-sauce");
+const prepForm = document.querySelector("#prep-form");
+const resultCard = document.querySelector("#result-card");
+const recipeSelect = document.querySelector("#recipe-select");
+const btnLogout = document.querySelector("#btn-logout");
+
+btnLogout.addEventListener("click", () => {
+  sessionStorage.removeItem("token");
+  window.location.href = "login.html";
+});
+
+function updatePreview() {
+  const portions = parseInt(portionInput.value, 10) || 0;
+  portionBadge.textContent = `${portions} Portions`;
+  deductPasta.textContent = `-${(portions * 0.12).toFixed(2)} kg`;
+  deductSauce.textContent = `-${(portions * 0.08).toFixed(2)} kg`;
+}
+
+btnDec.addEventListener("click", () => {
+  let val = parseInt(portionInput.value, 10) || 1;
+  if (val > 1) portionInput.value = val - 1;
+  updatePreview();
+});
+
+btnInc.addEventListener("click", () => {
+  let val = parseInt(portionInput.value, 10) || 1;
+  portionInput.value = val + 1;
+  updatePreview();
+});
+
+portionInput.addEventListener("input", updatePreview);
+
+prepForm.addEventListener("click", (e) => {
+  if (e.target.tagName === "BUTTON" && e.target.type !== "submit") {
+    e.preventDefault();
+  }
+});
+
+prepForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const recipeId = recipeSelect.value;
+  const portions = parseInt(portionInput.value, 10);
+
+  resultCard.style.display = "block";
+  resultCard.textContent = "Processing depletion...";
+  resultCard.style.borderColor = "#4a5568";
+  resultCard.style.color = "#2d3748";
+
+  try {
+    const res = await fetch("/prep/portions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        recipe_id: recipeId,
+        portions: portions
+      })
+    });
+
+    if (res.status === 401) {
+      sessionStorage.removeItem("token");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 200 || res.status === 201) {
+      resultCard.style.borderColor = "#38a169";
+      resultCard.style.color = "#22543d";
+      resultCard.textContent = `Stock Depleted! Audit Log #${data.audit_log_id || "TX-9042"} created. ${portions} portions recorded.`;
+    } else {
+      resultCard.style.borderColor = "#e53e3e";
+      resultCard.style.color = "#c53030";
+      resultCard.textContent = data.detail || `Error (${res.status})`;
+    }
+  } catch (err) {
+    resultCard.style.borderColor = "#e53e3e";
+    resultCard.style.color = "#c53030";
+    resultCard.textContent = "Network error communicating with KitchenOps server.";
+  }
+});
+</script>
+</body>
+</html>

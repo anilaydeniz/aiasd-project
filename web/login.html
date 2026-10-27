@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-001, REQ-006 -->
+<main class="phone">
+  <div class="row" style="margin-bottom: 16px;">
+    <div>
+      <span class="meta">KITCHENOPS ACCESS</span>
+      <h1 style="margin: 0; font-size: 1.5rem;">Sign In</h1>
+    </div>
+  </div>
+
+  <p>Passwordless kitchen staff login with 4-digit verification code.</p>
+
+  <div id="step-email">
+    <div style="margin-bottom: 14px;">
+      <label for="email-input" style="display: block; font-weight: 600; margin-bottom: 6px;">Staff Email Address</label>
+      <input type="email" id="email-input" class="input-portion" style="width: 100%; text-align: left; padding: 10px;" placeholder="chef@kitchenops.internal" required>
+    </div>
+    <button class="button" id="btn-send-code" type="button">Send Verification Code</button>
+  </div>
+
+  <div id="step-code" class="hidden" style="margin-top: 14px;">
+    <div style="margin-bottom: 14px;">
+      <label for="code-input" style="display: block; font-weight: 600; margin-bottom: 6px;">Enter 4-Digit Code</label>
+      <input type="text" id="code-input" maxlength="4" class="input-portion" style="width: 100%; text-align: center; letter-spacing: 6px; font-size: 1.3rem; padding: 10px;" placeholder="••••" required>
+    </div>
+    <button class="button" id="btn-verify-code" type="button">Verify &amp; Enter Kitchen</button>
+  </div>
+
+  <div id="status-message" class="card" style="margin-top: 16px; display: none;"></div>
+</main>
+
+<script>
+const emailInput = document.querySelector("#email-input");
+const codeInput = document.querySelector("#code-input");
+const btnSendCode = document.querySelector("#btn-send-code");
+const btnVerifyCode = document.querySelector("#btn-verify-code");
+const stepEmail = document.querySelector("#step-email");
+const stepCode = document.querySelector("#step-code");
+const statusMsg = document.querySelector("#status-message");
+
+function showMsg(text, isError = false) {
+  statusMsg.style.display = "block";
+  statusMsg.textContent = text;
+  statusMsg.style.borderColor = isError ? "#e53e3e" : "#38a169";
+  statusMsg.style.color = isError ? "#c53030" : "#22543d";
+}
+
+btnSendCode.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  if (!email) {
+    showMsg("Please enter your staff email.", true);
+    return;
+  }
+  showMsg("Sending code...");
+  try {
+    const res = await fetch("/auth/code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 200) {
+      showMsg("Code sent! Check your inbox or test file.");
+      stepCode.classList.remove("hidden");
+    } else {
+      showMsg(data.detail || `Request failed (${res.status})`, true);
+    }
+  } catch (err) {
+    showMsg("Network error connecting to server.", true);
+  }
+});
+
+btnVerifyCode.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const code = codeInput.value.trim();
+  if (!code) {
+    showMsg("Please enter the 4-digit code.", true);
+    return;
+  }
+  showMsg("Verifying code...");
+  try {
+    const res = await fetch("/auth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 200 && data.token) {
+      sessionStorage.setItem("token", data.token);
+      showMsg("Success! Redirecting to kitchen prep...");
+      window.location.href = "prep.html";
+    } else {
+      showMsg(data.detail || "Wrong code. Check and try again.", true);
+    }
+  } catch (err) {
+    showMsg("Network error connecting to server.", true);
+  }
+});
+</script>
+</body>
+</html>

@@ -46,3 +46,49 @@ def test_TC_002_01_unauthenticated_prep_is_refused():
         json={"recipe_id": "rigatoni_pomodoro", "portions": 10},
     )
     assert response.status_code == 401
+
+
+def test_TC_002_01_invalid_portion_count_is_refused():
+    """TC-002-01: Portions <= 0 is refused with 422 Unprocessable Entity."""
+    app.dependency_overrides[current_user] = lambda: "chef@kitchenops.internal"
+    try:
+        response = client.post(
+            "/prep/portions",
+            json={"recipe_id": "rigatoni_pomodoro", "portions": 0},
+            headers={"Authorization": "Bearer test_valid_token"},
+        )
+        assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_TC_002_01_unknown_recipe_is_refused():
+    """TC-002-01: An unrecognized recipe ID is refused with 404 Not Found."""
+    app.dependency_overrides[current_user] = lambda: "chef@kitchenops.internal"
+    try:
+        response = client.post(
+            "/prep/portions",
+            json={"recipe_id": "unknown_recipe", "portions": 5},
+            headers={"Authorization": "Bearer test_valid_token"},
+        )
+        assert response.status_code == 404
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_TC_002_01_insufficient_stock_is_refused():
+    """TC-002-01: Preparation exceeding stock is refused with 409 Conflict."""
+    INVENTORY["pasta"] = 1.0  # Only 1kg pasta available
+    INVENTORY["tomato_sauce"] = 30.0
+
+    app.dependency_overrides[current_user] = lambda: "chef@kitchenops.internal"
+    try:
+        # 10 portions requires 1.2kg pasta > 1.0kg available
+        response = client.post(
+            "/prep/portions",
+            json={"recipe_id": "rigatoni_pomodoro", "portions": 10},
+            headers={"Authorization": "Bearer test_valid_token"},
+        )
+        assert response.status_code == 409
+    finally:
+        app.dependency_overrides.clear()
