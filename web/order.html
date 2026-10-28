@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KitchenOps - Purchase Orders</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- serves: REQ-003, REQ-006 -->
+<main class="phone">
+  <div class="row">
+    <div>
+      <span class="meta">PROCUREMENT</span>
+      <h1 style="margin: 0; font-size: 1.4rem;">Purchase Orders</h1>
+    </div>
+    <div>
+      <a href="home.html" class="meta" style="cursor: pointer; margin-right: 8px;">Dashboard</a>
+      <a href="login.html" id="btn-logout" class="meta" style="cursor: pointer;">Logout</a>
+    </div>
+  </div>
+
+  <p>Automated replenishment orders generated when ingredient stocks drop below safety thresholds.</p>
+
+  <!-- Live Restock Order Card -->
+  <div class="card" id="po-card" style="border-left: 4px solid #dd6b20;">
+    <div class="row">
+      <div>
+        <span class="meta" id="po-id-label">PO-2026-041 DRAFT</span>
+        <h2 style="margin: 0; font-size: 1.15rem;" id="po-supplier-title">Metro Food Wholesale Ltd.</h2>
+      </div>
+      <span class="badge danger" id="po-status-badge">Buffer Breach</span>
+    </div>
+    <p class="meta" id="po-trigger-desc" style="margin-top: 4px;">Triggered by: Cooking Cream 35% dropping below 5.0 L safety buffer.</p>
+
+    <div class="list" style="margin-top: 10px;">
+      <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span>Replenish Item</span>
+        <strong id="po-item-name">Cooking Cream 35% (Dairy)</strong>
+      </div>
+      <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span>Current Depot Stock</span>
+        <strong style="color: #c53030;" id="po-current-stock">3.5 L (Deficit: -1.5 L)</strong>
+      </div>
+      <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span>Order Quantity</span>
+        <span id="po-order-amount"><strong>20.0 Liters</strong></span>
+      </div>
+      <div class="item-row" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <span>Estimated Cost</span>
+        <strong style="color: #2b6cb0; font-size: 1.05rem;">€76.00 / 2,650 TL</strong>
+      </div>
+      <div class="item-row" style="display: flex; justify-content: space-between;">
+        <span>Estimated Delivery</span>
+        <span class="badge success">Tomorrow 08:30 (Prep Shift)</span>
+      </div>
+    </div>
+
+    <button class="button" id="btn-dispatch-po" type="button" style="margin-top: 12px; width: 100%;">
+      🚀 Dispatch Purchase Order to Supplier
+    </button>
+  </div>
+
+  <div id="dispatch-result" class="card" style="margin-top: 14px; display: none;"></div>
+
+  <!-- Quick Nav Menu Card -->
+  <div class="menu-card" style="margin-top: 14px;">
+    <a class="menu-item" href="prep.html" style="display: flex; justify-content: space-between; text-decoration: none; color: inherit; padding: 10px;">
+      <div>
+        <strong>🍳 Log Prepared Dishes</strong>
+        <p class="meta" style="margin: 2px 0 0 0;">Recipe BOM depletion &amp; portion logging</p>
+      </div>
+      <span>→</span>
+    </a>
+    <a class="menu-item" href="home.html" style="display: flex; justify-content: space-between; text-decoration: none; color: inherit; padding: 10px; border-top: 1px solid #edf2f7;">
+      <div>
+        <strong>🏠 Back to Dashboard</strong>
+        <p class="meta" style="margin: 2px 0 0 0;">Live inventory monitor &amp; station status</p>
+      </div>
+      <span>→</span>
+    </a>
+  </div>
+</main>
+
+<script>
+const token = sessionStorage.getItem("token");
+if (!token) {
+  window.location.href = "login.html";
+}
+
+const poCard = document.querySelector("#po-card");
+const poIdLabel = document.querySelector("#po-id-label");
+const poSupplierTitle = document.querySelector("#po-supplier-title");
+const poStatusBadge = document.querySelector("#po-status-badge");
+const poTriggerDesc = document.querySelector("#po-trigger-desc");
+const poItemName = document.querySelector("#po-item-name");
+const poCurrentStock = document.querySelector("#po-current-stock");
+const poOrderAmount = document.querySelector("#po-order-amount");
+const btnDispatch = document.querySelector("#btn-dispatch-po");
+const dispatchResult = document.querySelector("#dispatch-result");
+const btnLogout = document.querySelector("#btn-logout");
+
+let activePoId = "PO-2026-041";
+
+btnLogout.addEventListener("click", () => {
+  sessionStorage.removeItem("token");
+  window.location.href = "login.html";
+});
+
+async function loadReplenishOrders() {
+  try {
+    const res = await fetch("/orders/replenish", {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem("token");
+      window.location.href = "login.html";
+      return;
+    }
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 200 && data.orders && data.orders.length > 0) {
+      const order = data.orders[0];
+      activePoId = order.po_id;
+      poIdLabel.textContent = `${order.po_id} ${order.status.toUpperCase()}`;
+      poSupplierTitle.textContent = order.supplier;
+      poItemName.textContent = order.ingredient_name || order.ingredient;
+      poCurrentStock.textContent = `${order.current_stock.toFixed(1)} ${order.unit} (Threshold: ${order.threshold.toFixed(1)} ${order.unit})`;
+      poOrderAmount.textContent = `${order.order_amount.toFixed(1)} ${order.unit}`;
+      if (order.status === "dispatched") {
+        poStatusBadge.textContent = "Dispatched";
+        poStatusBadge.className = "badge success";
+        btnDispatch.style.display = "none";
+      }
+    }
+  } catch (err) {
+    poTriggerDesc.textContent = "Offline or server unavailable.";
+  }
+}
+
+btnDispatch.addEventListener("click", async () => {
+  dispatchResult.style.display = "block";
+  dispatchResult.textContent = "Transmitting purchase order to wholesale EDI...";
+  dispatchResult.style.borderColor = "#4a5568";
+  dispatchResult.style.color = "#2d3748";
+
+  try {
+    const res = await fetch("/orders/dispatch", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ po_id: activePoId })
+    });
+
+    if (res.status === 401) {
+      sessionStorage.removeItem("token");
+      window.location.href = "login.html";
+      return;
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 200) {
+      dispatchResult.style.borderColor = "#38a169";
+      dispatchResult.style.color = "#22543d";
+      dispatchResult.textContent = `Purchase Order ${data.po_id} dispatched to ${data.supplier} for ${data.order_amount} ${data.unit}. Dispatched by: ${data.dispatched_by}.`;
+      poStatusBadge.textContent = "Dispatched";
+      poStatusBadge.className = "badge success";
+      poCard.style.borderLeftColor = "#38a169";
+      btnDispatch.style.display = "none";
+    } else {
+      dispatchResult.style.borderColor = "#e53e3e";
+      dispatchResult.style.color = "#c53030";
+      dispatchResult.textContent = data.detail || `Dispatch failed (${res.status})`;
+    }
+  } catch (err) {
+    dispatchResult.style.borderColor = "#e53e3e";
+    dispatchResult.style.color = "#c53030";
+    dispatchResult.textContent = "Network error communicating with KitchenOps server.";
+  }
+});
+
+loadReplenishOrders();
+</script>
+</body>
+</html>
+

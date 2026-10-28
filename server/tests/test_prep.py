@@ -62,6 +62,25 @@ def test_TC_002_01_invalid_portion_count_is_refused():
         app.dependency_overrides.clear()
 
 
+def test_TC_002_02_submitting_invalid_portion_count_is_prevented():
+    """TC-002-02: Submitting invalid portion count of zero is prevented without depleting stock."""
+    INVENTORY["pasta"] = 50.0
+    INVENTORY["tomato_sauce"] = 30.0
+    app.dependency_overrides[current_user] = lambda: "chef@kitchenops.internal"
+    try:
+        response = client.post(
+            "/prep/portions",
+            json={"recipe_id": "rigatoni_pomodoro", "portions": 0},
+            headers={"Authorization": "Bearer test_valid_token"},
+        )
+        assert response.status_code == 422
+        # Verify stock was not touched
+        assert INVENTORY["pasta"] == 50.0
+        assert INVENTORY["tomato_sauce"] == 30.0
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_TC_002_01_unknown_recipe_is_refused():
     """TC-002-01: An unrecognized recipe ID is refused with 404 Not Found."""
     app.dependency_overrides[current_user] = lambda: "chef@kitchenops.internal"

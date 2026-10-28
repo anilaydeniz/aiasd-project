@@ -90,6 +90,7 @@ Free core tier for single-station kitchens (up to 30 inventory items and 10 dail
 - 2026-10-27 — REQ-002: wired course login into main.py via login_contract.json, added POST /prep/portions endpoint to api.md, and implemented dish portion preparation stock depletion with TC-002-01 test suite.
 - 2026-10-27 — REQ-002: mounted web/ static client on FastAPI server, created web/prep.html and web/login.html, expanded TC-002-01 test suite with 404, 409, 422 validations, and recorded attacker round in group_06.json.
 - 2026-10-27 — REQ-002: added GET /inventory/levels endpoint to api.md and prep.py, created web/home.html kitchen dashboard with live stock monitoring, and expanded test suite to 25 passing tests.
+- 2026-10-28 — REQ-003: added GET /orders/replenish and POST /orders/dispatch endpoints to api.md, implemented safety threshold monitoring in server/orders.py, expanded test suite with TC-003-01 and TC-003-02, and created web/order.html.
 
 
 

@@ -57,3 +57,7 @@ grades/
 private/
 ~$*
 *.pptx
+
+# AI Assistant Memory
+AGENTS.md
+PROJE_HAFIZASI.md

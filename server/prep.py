@@ -11,6 +11,7 @@ router = APIRouter()
 INVENTORY: dict[str, float] = {
     "pasta": 50.0,
     "tomato_sauce": 30.0,
+    "cooking_cream": 3.5,
 }
 
 RECIPES: dict[str, dict] = {
