@@ -108,4 +108,3 @@ def dispatch_purchase_order(
         "unit": order["unit"],
         "supplier": order["supplier"],
     }
-

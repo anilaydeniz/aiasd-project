@@ -7,11 +7,12 @@
       "title": "Log in with the 4-digit code sent to e-mail",
       "precondition": "none",
       "steps": [
-        "Open the application at index.html",
-        "Enter chef@kitchenops.internal in the email field and tap Send code",
-        "On the code screen, enter 1234 and tap Log in"
+        "Send POST request to /auth/code with JSON payload {\"email\": \"chef@kitchenops.internal\"}",
+        "Retrieve the 4-digit verification code sent to the email address",
+        "Send POST request to /auth/token with JSON payload {\"email\": \"chef@kitchenops.internal\", \"code\": \"1234\"}"
       ],
-      "expected": "The KitchenOps dashboard screen opens successfully with no password requested."
+      "expected": "Server returns HTTP 200 with JSON access_token; client successfully establishes session.",
+      "run": "server"
     },
     {
       "id": "TC-001-02",
@@ -19,90 +20,92 @@
       "title": "A wrong login code is refused with an error message",
       "precondition": "A 4-digit code has been requested for chef@kitchenops.internal",
       "steps": [
-        "On the code verification screen, enter 0000 in the code field",
-        "Tap Log in"
+        "Send POST request to /auth/token with JSON payload {\"email\": \"chef@kitchenops.internal\", \"code\": \"0000\"}"
       ],
-      "expected": "The error message 'Wrong code. Check the e-mail and try again.' appears and the user remains on the code screen."
+      "expected": "Server refuses the invalid code with HTTP 401 Unauthorized and returns an error detail.",
+      "run": "server"
     },
     {
       "id": "TC-001-03",
       "req": "REQ-001",
       "title": "An expired login code is refused with an error message",
-      "precondition": "A 4-digit code was sent to chef@kitchenops.internal more than 10 minutes ago",
+      "precondition": "A 4-digit code was requested for chef@kitchenops.internal more than 10 minutes ago",
       "steps": [
-        "On the code verification screen, enter the expired 4-digit code 1234",
-        "Tap Log in"
+        "Simulate time expiration exceeding 10 minutes from code generation",
+        "Send POST request to /auth/token with JSON payload {\"email\": \"chef@kitchenops.internal\", \"code\": \"1234\"}"
       ],
-      "expected": "The error message 'Expired code. Please request a new code.' appears and the server returns HTTP 401."
+      "expected": "Server rejects the expired code with HTTP 401 Unauthorized and prompts for a new code request.",
+      "run": "server"
     },
     {
       "id": "TC-001-04",
       "req": "REQ-001",
       "title": "An invalid email address format is refused with a 422 error",
-      "precondition": "Application is opened at index.html",
+      "precondition": "none",
       "steps": [
-        "Enter 'invalid-email-format' without an @ or domain in the email field",
-        "Tap Send code"
+        "Send POST request to /auth/code with malformed payload {\"email\": \"invalid-email-format\"}"
       ],
-      "expected": "The server rejects the payload with HTTP 422 Unprocessable Entity and highlights the malformed email field."
+      "expected": "Server rejects the request with HTTP 422 Unprocessable Entity indicating invalid email format.",
+      "run": "server"
     },
     {
       "id": "TC-001-05",
       "req": "REQ-001",
       "title": "Requesting a second login code within 60 seconds is refused with 429 Too Many Requests",
-      "precondition": "A 4-digit code has just been requested for chef@kitchenops.internal less than 60 seconds ago",
+      "precondition": "A code was requested for chef@kitchenops.internal less than 60 seconds ago",
       "steps": [
-        "On index.html, re-enter chef@kitchenops.internal within 60 seconds",
-        "Tap Send code"
+        "Send second POST request to /auth/code for chef@kitchenops.internal within the 60-second cooldown window"
       ],
-      "expected": "The server refuses the request with HTTP 429 Too Many Requests and shows 'Please wait before requesting another code.'"
+      "expected": "Server refuses the throttled request with HTTP 429 Too Many Requests.",
+      "run": "server"
     },
     {
       "id": "TC-001-06",
       "req": "REQ-001",
       "title": "Querying current authenticated session profile returns user details or 401 when unauthorized",
-      "precondition": "User is authenticated with a valid bearer token",
+      "precondition": "Valid JWT bearer token obtained via /auth/token",
       "steps": [
-        "Send GET request to /auth/me with Bearer token header"
+        "Send GET request to /auth/me with Authorization: Bearer <valid_token>",
+        "Send GET request to /auth/me without authorization header or with an invalid token"
       ],
-      "expected": "Server returns HTTP 200 with user email and kitchen role, or HTTP 401 when token is missing or invalid."
+      "expected": "Server returns HTTP 200 with user profile for valid token, and HTTP 401 Unauthorized for missing/invalid token.",
+      "run": "server"
     },
     {
       "id": "TC-002-01",
       "req": "REQ-002",
       "title": "Log 10 portions of Rigatoni Pomodoro to deplete raw ingredients",
-      "precondition": "Logged into KitchenOps on home.html",
+      "precondition": "Logged into KitchenOps with active bearer token",
       "steps": [
-        "Tap 'Log Prepared Dishes' on the dashboard",
-        "Select 'Rigatoni Pomodoro (120g pasta, 80g sauce)' as the recipe",
-        "Enter 10 in the completed portions field",
-        "Tap 'Confirm & Deplete Stock'"
+        "Send POST request to /prep/portions with Authorization: Bearer <token> and JSON {\"recipe_id\": \"rigatoni_pomodoro\", \"portions\": 10}",
+        "Send GET request to /inventory/levels with Authorization: Bearer <token>"
       ],
-      "expected": "The confirmation screen opens displaying Audit Log #TX-9042 with 1.2 kg pasta and 0.8 kg tomato sauce deducted from stock."
+      "expected": "Server returns HTTP 200 with audit transaction; pasta stock decreases by 1.2 kg and tomato sauce decreases by 0.8 kg.",
+      "run": "server"
     },
     {
       "id": "TC-002-02",
       "req": "REQ-002",
       "title": "Submitting invalid portion count of zero is prevented",
-      "precondition": "On the prep.html screen",
+      "precondition": "Logged into KitchenOps with active bearer token",
       "steps": [
-        "Select 'Rigatoni Pomodoro' as the recipe",
-        "Enter 0 in the completed portions field",
-        "Tap 'Confirm & Deplete Stock'"
+        "Send POST request to /prep/portions with Authorization: Bearer <token> and JSON {\"recipe_id\": \"rigatoni_pomodoro\", \"portions\": 0}",
+        "Send POST request to /prep/portions with Authorization: Bearer <token> and JSON {\"recipe_id\": \"rigatoni_pomodoro\", \"portions\": -5}"
       ],
-      "expected": "The form prevents submission and displays 'Please enter at least 1 portion' without depleting stock."
+      "expected": "Server rejects both invalid requests with HTTP 422 Unprocessable Entity without altering stock levels.",
+      "run": "server"
     },
     {
       "id": "TC-003-01",
       "req": "REQ-003",
       "title": "Stock dropping below safety threshold generates automated supplier PO",
-      "precondition": "Cooking cream stock is at 3.5 L, which is below the 5.0 L safety threshold",
+      "precondition": "Cooking cream inventory is at 3.5 L, below the 5.0 L safety threshold",
       "steps": [
-        "Open 'Orders' from the navigation tabs or dashboard alert",
-        "Inspect pending purchase order PO-2026-041",
-        "Tap 'Dispatch Purchase Order'"
+        "Send GET request to /orders/replenish with Authorization: Bearer <token>",
+        "Send POST request to /orders/dispatch with Authorization: Bearer <token> and JSON {\"order_id\": \"PO-2026-041\"}"
       ],
-      "expected": "The order screen displays a 20.0-liter replenishment entry for cooking cream and dispatches PO-2026-041 to Wholesale Dairy."
+      "expected": "Server returns HTTP 200 with draft purchase order PO-2026-041 for 20.0 L cooking cream, and dispatches it successfully.",
+      "run": "server"
     },
     {
       "id": "TC-003-02",
@@ -110,10 +113,10 @@
       "title": "Stock above safety threshold does not trigger unneeded purchase order",
       "precondition": "Pasta inventory is healthy at 13.3 kg with safety threshold set to 5.0 kg",
       "steps": [
-        "Open 'Live Inventory' from the navigation tabs",
-        "Verify pasta stock level and active status badge"
+        "Send GET request to /orders/replenish with Authorization: Bearer <token>"
       ],
-      "expected": "Pasta is tagged with green 'In Stock' badge and no pending replenishment draft appears for pasta."
+      "expected": "Server returns HTTP 200 with empty replenishment list, asserting no unnecessary purchase orders are triggered.",
+      "run": "server"
     },
     {
       "id": "TC-004-01",
@@ -121,9 +124,11 @@
       "title": "Perishable batch expiring within 48 hours displays amber alert banner",
       "precondition": "Cooking Cream batch #B-104 expires in 36 hours",
       "steps": [
-        "Open 'Live Inventory' from the navigation tabs"
+        "Open web/home.html in browser and inspect live inventory card status",
+        "Verify batch expiry indicators on active ingredient items"
       ],
-      "expected": "An amber alert box displays 'FIFO Alert (48h Spoilage Window): Lot #B-104 expires on Oct 14' with priority rotation label."
+      "expected": "An amber alert box displays 'FIFO Alert (48h Spoilage Window): Lot #B-104 expires on Oct 14' with priority rotation label.",
+      "run": "web"
     },
     {
       "id": "TC-004-02",
@@ -131,22 +136,23 @@
       "title": "Oldest unexpired batch is prioritized for recipe depletion over newer batch",
       "precondition": "Pasta has two batches in storage: Lot #P-201 (arrived Oct 01) and Lot #P-208 (arrived Oct 10)",
       "steps": [
-        "Open 'Log Prep Dish' and view the FIFO lot source preview card for Rigatoni Pomodoro"
+        "Open web/prep.html with dish recipe Rigatoni Pomodoro selected",
+        "Inspect FIFO lot allocation preview before depletion confirmation"
       ],
-      "expected": "The preview explicitly attributes depletion to the older Lot #P-201 in accordance with FIFO rules."
+      "expected": "The preview explicitly attributes depletion to the older Lot #P-201 in accordance with FIFO rules.",
+      "run": "web"
     },
     {
       "id": "TC-005-01",
       "req": "REQ-005",
       "title": "Record inbound wholesale delivery of 25kg flour into inventory",
-      "precondition": "Logged into KitchenOps",
+      "precondition": "Logged into KitchenOps receiving view",
       "steps": [
-        "Tap 'Receive Inbound Deliveries' from dashboard or inventory",
-        "Select 'All-Purpose Flour (25 kg bag)' as the delivered ingredient",
-        "Verify quantity 25, batch LOT-FL-20261013, and expiry date 2027-04-15",
-        "Tap 'Verify & Increment Stock'"
+        "Open receiving view, select All-Purpose Flour (25 kg bag)",
+        "Input quantity 25, batch LOT-FL-20261013, expiry 2027-04-15, and confirm"
       ],
-      "expected": "The inventory screen opens confirming the newly received flour batch is added to active stock."
+      "expected": "The inventory screen opens confirming the newly received flour batch is added to active stock.",
+      "run": "manual"
     },
     {
       "id": "TC-006-01",
@@ -154,9 +160,10 @@
       "title": "Every screen fits a mobile phone viewport 390 px wide",
       "precondition": "Browser phone simulation view is set to 390 px width",
       "steps": [
-        "Navigate sequentially through index.html, code.html, home.html, prep.html, prep_success.html, inventory.html, order.html, order_success.html, and receiving.html"
+        "Navigate sequentially through web/login.html, web/home.html, web/prep.html, and web/order.html at 390px width"
       ],
-      "expected": "No screen displays horizontal scrollbars, text is fully legible, and interactive buttons are comfortably accessible."
+      "expected": "No screen displays horizontal scrollbars, text is fully legible, and interactive buttons are comfortably accessible.",
+      "run": "manual"
     }
   ]
 }

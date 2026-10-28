@@ -130,4 +130,3 @@ def test_TC_003_02_stock_above_threshold_does_not_trigger_unneeded_po():
         assert len(pasta_pos) == 0
     finally:
         app.dependency_overrides.clear()
-
