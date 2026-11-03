@@ -98,6 +98,28 @@ export default function PrepScreen({ user, onLogout }) {
           placeholderTextColor="#64748b"
         />
 
+        <View style={styles.quickButtonsRow}>
+          {[5, 10, 20, 50].map((num) => (
+            <TouchableOpacity
+              key={num}
+              style={[
+                styles.quickBtn,
+                portions === String(num) && styles.quickBtnActive,
+              ]}
+              onPress={() => setPortions(String(num))}
+            >
+              <Text
+                style={[
+                  styles.quickBtnText,
+                  portions === String(num) && styles.quickBtnTextActive,
+                ]}
+              >
+                {num} portions
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {error ? (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>⚠ {error}</Text>
@@ -229,7 +251,32 @@ const styles = StyleSheet.create({
     padding: 12,
     color: '#ffffff',
     fontSize: 16,
-    marginBottom: 14,
+    marginBottom: 10,
+  },
+  quickButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  quickBtn: {
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#334155',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  quickBtnActive: {
+    borderColor: '#38bdf8',
+    backgroundColor: '#0369a1',
+  },
+  quickBtnText: {
+    color: '#94a3b8',
+    fontSize: 12,
+  },
+  quickBtnTextActive: {
+    color: '#ffffff',
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#2563eb',
