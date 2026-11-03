@@ -11,7 +11,9 @@
     },
     "android": {
       "package": "com.anilaydeniz.kitchenops"
-    }
+    },
+    "plugins": [
+      "expo-status-bar"
+    ]
   }
 }
-
