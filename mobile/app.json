@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "KitchenOps",
+    "slug": "kitchenops",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anilaydeniz.kitchenops"
+    },
+    "android": {
+      "package": "com.anilaydeniz.kitchenops"
+    }
+  }
+}
