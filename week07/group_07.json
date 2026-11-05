@@ -5,8 +5,8 @@
       "student_id": "220504024",
       "role": "tester",
       "what": "The portion preparation screen successfully deducted the pasta and tomato sauce stocks, but adding confirmation before zero-stock warning would be helpful.",
-      "accepted": null,
-      "why": ""
+      "accepted": true,
+      "why": "We added a low-stock safety warning badge in the mobile UI to alert kitchen staff before ingredient levels reach zero."
     }
   ]
 }

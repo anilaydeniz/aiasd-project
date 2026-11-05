@@ -24,6 +24,14 @@
       "round": 1,
       "result": "pass",
       "note": "Tester logged 10 portions of Rigatoni Pomodoro; pasta stock decreased by 1.2 kg and tomato sauce by 0.8 kg."
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504024",
+      "device": "iPhone 13, iOS 18",
+      "round": 2,
+      "result": "pass",
+      "note": "Verified that Cooking Cream under 5.0L threshold appeared on Restock Orders screen and PO was successfully dispatched."
     }
   ]
 }

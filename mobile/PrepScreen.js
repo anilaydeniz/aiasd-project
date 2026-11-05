@@ -158,8 +158,15 @@ export default function PrepScreen({ user, onLogout }) {
           <Text style={styles.cardTitle}>Live Inventory Stock Levels</Text>
           {Object.entries(inventory).map(([ing, qty]) => (
             <View key={ing} style={styles.stockRow}>
-              <Text style={styles.stockLabel}>{ing}</Text>
-              <Text style={styles.stockValue}>{qty} kg</Text>
+              <View style={styles.stockLabelContainer}>
+                <Text style={styles.stockLabel}>{ing}</Text>
+                {qty < 5.0 ? (
+                  <View style={styles.lowStockWarningBadge}>
+                    <Text style={styles.lowStockWarningText}>⚠ Buffer Alert</Text>
+                  </View>
+                ) : null}
+              </View>
+              <Text style={[styles.stockValue, qty < 5.0 && styles.stockValueLow]}>{qty} kg</Text>
             </View>
           ))}
         </View>
@@ -327,9 +334,32 @@ const styles = StyleSheet.create({
   stockRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#334155',
+  },
+  stockLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  lowStockWarningBadge: {
+    backgroundColor: '#7f1d1d',
+    borderColor: '#ef4444',
+    borderWidth: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    marginLeft: 8,
+  },
+  lowStockWarningText: {
+    color: '#fca5a5',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  stockValueLow: {
+    color: '#f87171',
+    fontWeight: 'bold',
   },
   stockLabel: {
     color: '#94a3b8',
