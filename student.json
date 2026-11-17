@@ -3,5 +3,14 @@
   "first_name": "Anıl",
   "last_name": "Aydeniz",
   "nickname": "anilaydeniz",
-  "section": "en"
+  "section": "en",
+  "computers": [
+    {
+      "hostname": "DESKTOP-HSB72EO",
+      "git_email": "220504045@st.atlas.edu.tr",
+      "owner": "220504045",
+      "also_used_by": "",
+      "why": ""
+    }
+  ]
 }
