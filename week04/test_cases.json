@@ -164,6 +164,19 @@
       ],
       "expected": "No screen displays horizontal scrollbars, text is fully legible, and interactive buttons are comfortably accessible.",
       "run": "manual"
+    },
+    {
+      "id": "TC-009-01",
+      "req": "REQ-009",
+      "title": "Chef asks the AI assistant about low ingredient inventory on mobile",
+      "precondition": "Logged into KitchenOps mobile app on phone with valid bearer token",
+      "steps": [
+        "Open the Chat screen from the mobile navigation tabs",
+        "Type 'Which ingredients are currently below their safety threshold?' into the input field",
+        "Tap the Send button to dispatch POST /chat"
+      ],
+      "expected": "The screen displays the response with the 'AI answer' label, showing the pantry items below safety buffer, and decrements the user's daily quota from 20.",
+      "run": "manual"
     }
   ]
 }

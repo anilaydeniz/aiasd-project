@@ -56,6 +56,13 @@
       "functional": false,
       "priority": "could",
       "acceptance": "Querying the 200-item kitchen pantry inventory endpoint responds in under 800 milliseconds measured across twenty consecutive requests."
+    },
+    {
+      "id": "REQ-009",
+      "description": "An authenticated kitchen staff member chats with an AI kitchen assistant to query inventory stock, recipe substitutions, and supplier restock advice.",
+      "functional": true,
+      "priority": "must",
+      "acceptance": "Only an authenticated logged-in chef can query the kitchen assistant about inventory depletion, recipe substitutions, and supplier restock advice using only their own restaurant kitchen data, with a daily quota limit of 20 messages per user per day."
     }
   ]
 }
