@@ -6,6 +6,7 @@ import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import LoginScreen from './LoginScreen';
 import PrepScreen from './PrepScreen';
 import OrderScreen from './OrderScreen';
+import ChatScreen from './ChatScreen';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -25,8 +26,12 @@ export default function App() {
                 user={session.user}
                 onLogout={() => setSession(null)}
               />
-            ) : (
+            ) : activeTab === 'orders' ? (
               <OrderScreen
+                user={session.user}
+              />
+            ) : (
+              <ChatScreen
                 user={session.user}
               />
             )}
@@ -50,7 +55,17 @@ export default function App() {
             >
               <Text style={styles.navIcon}>📦</Text>
               <Text style={[styles.navLabel, activeTab === 'orders' && styles.navLabelActive]}>
-                Restock Orders
+                Orders
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.navItem, activeTab === 'chat' && styles.navItemActive]}
+              onPress={() => setActiveTab('chat')}
+            >
+              <Text style={styles.navIcon}>🤖</Text>
+              <Text style={[styles.navLabel, activeTab === 'chat' && styles.navLabelActive]}>
+                AI Chat
               </Text>
             </TouchableOpacity>
 
