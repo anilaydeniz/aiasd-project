@@ -10,11 +10,13 @@ from pydantic import BaseModel, Field
 
 from server.course_login import current_user
 from server.prep import INVENTORY, RECIPES
+from server.storage import load_db, save_state
 
 router = APIRouter()
 
 DAILY_QUOTA = 20
-USER_MESSAGE_COUNTS: dict[str, int] = {}
+_initial_db = load_db()
+USER_MESSAGE_COUNTS: dict[str, int] = _initial_db.get("user_message_counts", {})
 
 
 class ChatRequest(BaseModel):
@@ -102,6 +104,7 @@ def chat_with_assistant(body: ChatRequest, user: str = Depends(current_user)) ->
     reply_text = _generate_ai_reply(body.message, user)
 
     USER_MESSAGE_COUNTS[user] = current_count + 1
+    save_state(user_message_counts=USER_MESSAGE_COUNTS)
     remaining = DAILY_QUOTA - USER_MESSAGE_COUNTS[user]
 
     return {

@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from server.course_login import current_user
 from server.prep import INVENTORY
+from server.storage import load_db, save_state
 
 router = APIRouter()
 
@@ -35,20 +36,24 @@ THRESHOLDS: dict[str, dict] = {
     },
 }
 
-# In-memory purchase orders store
-PURCHASE_ORDERS: dict[str, dict] = {
-    "PO-2026-041": {
-        "po_id": "PO-2026-041",
-        "ingredient": "cooking_cream",
-        "ingredient_name": "Cooking Cream 35%",
-        "current_stock": 3.5,
-        "threshold": 5.0,
-        "order_amount": 20.0,
-        "unit": "L",
-        "supplier": "Metro Food Wholesale Ltd.",
-        "status": "draft",
-    }
-}
+# Persistent purchase orders store backed by server/data/kitchenops_db.json (§5.2)
+_initial_db = load_db()
+PURCHASE_ORDERS: dict[str, dict] = _initial_db.get(
+    "purchase_orders",
+    {
+        "PO-2026-041": {
+            "po_id": "PO-2026-041",
+            "ingredient": "cooking_cream",
+            "ingredient_name": "Cooking Cream 35%",
+            "current_stock": 3.5,
+            "threshold": 5.0,
+            "order_amount": 20.0,
+            "unit": "L",
+            "supplier": "Metro Food Wholesale Ltd.",
+            "status": "draft",
+        }
+    },
+)
 
 
 class DispatchOrderRequest(BaseModel):
@@ -78,6 +83,7 @@ def get_replenishment_orders(user: str = Depends(current_user)) -> dict:
             else:
                 PURCHASE_ORDERS[po_id]["current_stock"] = current_level
 
+    save_state(purchase_orders=PURCHASE_ORDERS)
     orders_list = list(PURCHASE_ORDERS.values())
     return {"orders": orders_list, "total_orders": len(orders_list)}
 
@@ -97,6 +103,7 @@ def dispatch_purchase_order(
 
     order["status"] = "dispatched"
     order["dispatched_by"] = user
+    save_state(purchase_orders=PURCHASE_ORDERS)
 
     return {
         "success": True,

@@ -4,15 +4,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from server.course_login import current_user
+from server.storage import load_db, save_state
 
 router = APIRouter()
 
-# In-memory stock inventory:
-INVENTORY: dict[str, float] = {
-    "pasta": 50.0,
-    "tomato_sauce": 30.0,
-    "cooking_cream": 3.5,
-}
+# Persistent stock inventory backed by server/data/kitchenops_db.json (§5.2):
+_initial_db = load_db()
+INVENTORY: dict[str, float] = _initial_db.get(
+    "inventory",
+    {
+        "pasta": 50.0,
+        "tomato_sauce": 30.0,
+        "cooking_cream": 3.5,
+    },
+)
 
 RECIPES: dict[str, dict] = {
     "rigatoni_pomodoro": {
@@ -48,11 +53,13 @@ def log_prep_portions(body: PrepPortionsRequest, user: str = Depends(current_use
                 detail=f"Insufficient stock for {ingredient}: needed {required}kg, available {INVENTORY.get(ingredient, 0.0)}kg",
             )
 
-    # Deduct stock
+    # Deduct stock and persist to storage (§5.2)
     for ingredient, amount_per_portion in recipe["bill_of_materials"].items():
         required = round(amount_per_portion * body.portions, 3)
         INVENTORY[ingredient] = round(INVENTORY[ingredient] - required, 3)
         depleted.append({"ingredient": ingredient, "amount_kg": required})
+
+    save_state(inventory=INVENTORY)
 
     return {
         "success": True,

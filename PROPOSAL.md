@@ -93,6 +93,7 @@ Free core tier for single-station kitchens (up to 30 inventory items and 10 dail
 - 2026-10-28 — REQ-003: added GET /orders/replenish and POST /orders/dispatch endpoints to api.md, implemented safety threshold monitoring in server/orders.py, expanded test suite with TC-003-01 and TC-003-02, and created web/order.html.
 - 2026-10-28 — CR-01: TC-001-01 to TC-006-01: classified execution mode ("run": "server" | "web" | "manual") across all 14 test cases in week04/test_cases.json; transitioned server test cases from prototype clicksteps to live HTTP API operations with precise endpoint paths, JSON payloads, and status codes.
 - 2026-11-17 — CR-02: chatbot assistant. New REQ-009 (must), new TC-009-01 (manual), new api.md row POST /chat; affected files: week02/requirements.json, week04/test_cases.json, week05/api.md.
+- 2026-11-21 — data persistence: server state (inventory, purchase orders, chat quotas) persists across restarts in server/data/kitchenops_db.json; updated week05/DESIGN.md with persistent file storage and Google Gemini LLM API.
 
 
 
