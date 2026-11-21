@@ -11,5 +11,28 @@
     "app_name": "KitchenOps",
     "package": "com.anilaydeniz.kitchenops",
     "evidence": "store_s2.png"
+  },
+  "S3": {
+    "date": "2026-11-21",
+    "track": "closed testing",
+    "version": "1.0.0 (1)",
+    "classmate_testers": [
+      "220504008",
+      "220504048",
+      "220504031",
+      "220504023",
+      "220504029",
+      "220504010"
+    ],
+    "other_testers": [
+      "Ali Aydeniz",
+      "Selahattin Aydeniz",
+      "Gönül Yılmaz",
+      "Hikmet Yılmaz",
+      "Zeynep Güher",
+      "Murat Çakmak"
+    ],
+    "privacy_url": "https://gist.github.com/anilaydeniz/ff1dca5760ba44e8fac1f76f95a636de",
+    "evidence": "store_s3.png"
   }
 }
