@@ -1,0 +1,26 @@
+{
+  "_how_to_fill_this_in": [
+    "This file is your bug list (ASSIGNMENT_09 §4.3 and §5.2). Every 'fail' or 'blocked' run of beta_runs.json, and every other problem that a tester found, is one entry, unless it is the same problem as an earlier entry.",
+    "id is BUG- and a number: BUG-01, BUG-02, and so on. An id never changes its meaning.",
+    "found_by lists the testers who found it, written as in beta_runs.json.",
+    "tc is the id of the test case, or \"free\".",
+    "severity is 'high' (the user cannot finish the main task, or data is lost or exposed), 'medium' (the user can finish it, but with difficulty) or 'low' (a cosmetic problem). You decide it.",
+    "what says what is wrong, in one full sentence, so that someone who has never seen your app understands it.",
+    "status is 'open' in the lecture. By Saturday it becomes 'fixed' (fix_commit names the commit of the fix, and that commit's message names the BUG id) or 'not fixed' (why says why, in one full sentence).",
+    "Type this file yourself, by hand, right after the turn. No assistant writes, translates or corrects it, not even for the grammar. Your English or Turkish is not graded. A person reads it.",
+    "Add as many objects as you need, with a comma between them. You may delete this block after you read it. The checker ignores it."
+  ],
+  "week": 9,
+  "bugs": [
+    {
+      "id": "BUG-01",
+      "found_by": [],
+      "tc": "",
+      "severity": "",
+      "what": "",
+      "status": "open",
+      "fix_commit": "",
+      "why": ""
+    }
+  ]
+}

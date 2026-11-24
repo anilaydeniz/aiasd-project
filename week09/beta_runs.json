@@ -1,0 +1,26 @@
+{
+  "_how_to_fill_this_in": [
+    "This file records the runs of your beta testers on your app (ASSIGNMENT_09 §4.2 and §5.2). Write one object for each run, as in mobile_runs.json of Week 7.",
+    "tc is the id of a test case from week04/test_cases.json, or \"free\" for a problem that the tester found while using the app freely.",
+    "tester is the 9-digit student number of the tester. For a tester who is not in this course, write \"outside: \" and the first name and the first letter of the surname, for example \"outside: Ayşe Y.\". Never write an e-mail address.",
+    "device names the phone of the tester, for example 'Samsung A52, Android 14'. The app must be installed from the test track of your store.",
+    "round is 1 for the beta test and 2 for a run again after a fix. Every test case that fails in round 1 must run again in round 2 after the fix, unless the bug is 'not fixed' in bug_list.json.",
+    "result is 'pass', 'fail' or 'blocked'. note says what the tester saw, in one full sentence. A 'fail' run or a 'blocked' run must have a note.",
+    "evidence is only for a tester who is not in this course: the file name of a screenshot in week09/ of their message that says what they saw, or of their feedback in the store console, with the e-mail address and the phone number covered (ASSIGNMENT_09 §5.1). Leave it empty for a classmate.",
+    "In the lecture, each of your classmate testers who is there runs at least three of your test cases, at least one of them outside the login, and then uses the app freely. You watch and do not help.",
+    "Type this file yourself, by hand, right after the turn. No assistant writes, translates or corrects it, not even for the grammar. Your English or Turkish is not graded. A person reads it.",
+    "Add as many objects as you need, with a comma between them. You may delete this block after you read it. The checker ignores it."
+  ],
+  "week": 9,
+  "runs": [
+    {
+      "tc": "",
+      "tester": "",
+      "device": "",
+      "round": 1,
+      "result": "",
+      "note": "",
+      "evidence": ""
+    }
+  ]
+}

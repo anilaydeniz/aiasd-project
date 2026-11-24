@@ -1,0 +1,25 @@
+{
+  "_how_to_fill_this_in": [
+    "This file records the apps that YOU tested as a beta tester (ASSIGNMENT_09 §4.4). Write one object for each app: the app of each classmate who listed you as a tester and who was in the lecture.",
+    "owner is the 9-digit student number of the owner of the app. Do not write your own number.",
+    "device names your phone. The app must be installed from the test track of the owner's store.",
+    "tcs lists the ids of the test cases of the owner that you ran: at least three, at least one of them outside the login. free_use is true if you also used the app freely.",
+    "problems is the number of problems that you saw. note says the most important one in one full sentence, or \"no problem\".",
+    "nobody_listed_me: set it to true only if no classmate listed you as a tester; then the list 'tested' may stay empty.",
+    "The owner writes the same test in their own week09/beta_runs.json. The instructor compares the two files.",
+    "Type this file yourself, by hand, right after the turn. No assistant writes, translates or corrects it, not even for the grammar. Your English or Turkish is not graded. A person reads it.",
+    "Add as many objects as you need, with a comma between them. You may delete this block after you read it. The checker ignores it."
+  ],
+  "week": 9,
+  "nobody_listed_me": false,
+  "tested": [
+    {
+      "owner": "",
+      "device": "",
+      "tcs": [],
+      "free_use": false,
+      "problems": 0,
+      "note": ""
+    }
+  ]
+}

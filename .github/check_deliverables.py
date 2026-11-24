@@ -1830,7 +1830,8 @@ def week6() -> None:
           ".env must never be committed, and .gitignore must list it. Found: "
           + ("it is in the repository. Remove it with git rm --cached .env and change the password it held."
              if tracked else ".gitignore does not list .env."), DEADLINE)
-    example = read(".env.example") or ""
+    # VC, 18 Nov 2026: Week 8 said server/.env, Week 6 the root; the names may be in either file, so both are read
+    example = "\n".join(x.lstrip("\ufeff") for x in (read(".env.example"), read("server/.env.example")) if x)
     names = {}
     for ln in example.splitlines():
         if ln.strip() and not ln.strip().startswith("#") and "=" in ln:
@@ -1984,6 +1985,7 @@ def mobile_tracked_build() -> list[str]:
 # ── live feedback on the commits of the week (VC, 1 Nov 2026) ─────────────────────────────────────────────
 # Only in the student's own run on their computer, from Week 7: no mark is read from it (the marks read GitHub).
 LIVE_FROM = 7
+LIVE_VAGUE = {"fix", "fixes", "fixed", "update", "updates", "updated", "change", "changes", "wip", "minor", "misc", "stuff", "edit", "edits"}
 LIVE_AGENT = re.compile(r"claude|anthropic|copilot|cursor|codex|openai|devin|\[bot\]|gemini|windsurf|aider", re.I)
 LIVE_TRAILER = re.compile(r"^\s*(co-authored-by|generated-by):.*(claude|anthropic|copilot|codex|cursor|openai|gemini|devin|"
                           r"aider|\[bot\])|generated (with|by) \[?(claude|copilot|codex|cursor|gemini)", re.I | re.M)
@@ -2089,7 +2091,7 @@ def live_commits(week: int) -> list[str]:
     if (_git_out("rev-parse", "--is-shallow-repository") or "").strip() == "true":
         return []
     pieces, screens = live_pieces(week)
-    if not pieces:
+    if not pieces and week < 9:
         return []
     now = _dt.datetime.now()
     start = (now - _dt.timedelta(days=(now.weekday() - 5) % 7 or 7)).replace(hour=23, minute=59, second=0, microsecond=0)
@@ -2097,7 +2099,7 @@ def live_commits(week: int) -> list[str]:
     if log is None:
         return []
     counts = {name: 0 for name, _ in pieces}
-    agent, multi = 0, []
+    agent, multi, unlisted, listed = 0, [], [], 0
     # VC, 2 Nov 2026: one new screen and one new route per commit. A screen is new in the commit where its file
     # first gets its '// serves:' line (the files a framework's tool creates do not count until then; a move is not
     # new); a route is new when its 'METHOD /path' was not in server/ before the commit.
@@ -2139,6 +2141,14 @@ def live_commits(week: int) -> list[str]:
         if LIVE_AGENT.search(who) or LIVE_TRAILER.search(msg):
             agent += 1
             continue
+        if week >= 9:   # VC, 22 Nov 2026: after its first line, each commit lists the work it belongs to
+            work = [ln.strip()[2:].strip() for ln in msg.strip().splitlines()[1:] if re.match(r"\s*-\s+\S", ln)]
+            work = [w for w in work if len(w) >= 6 and w.lower().strip(" .") not in LIVE_VAGUE]
+            first = (msg.strip().splitlines() or [""])[0]
+            if work:
+                listed += 1
+            elif not re.search(r"course files|^Merge ", first, re.I):   # the checker's own files, and git's merges
+                unlisted.append(sha)
         changed = []
         for ln in stats.splitlines():
             parts = ln.split("\t")
@@ -2154,7 +2164,14 @@ def live_commits(week: int) -> list[str]:
             after, before = routes(sha), routes(sha + "^")
             if after is not None and before is not None and len(after - before) > 1:
                 multi.append((sha, "routes", sorted(after - before)))
-    out = [say("Your commits this week, piece by piece (read on this computer; your mark reads GitHub):")]
+    if week >= 9:
+        out = [say("Your commits this week (read on this computer; your mark reads GitHub):")]
+        if listed:
+            out.append("  ✓ " + say("{n} commit(s) list the work they belong to.", n=listed))
+        for sha in unlisted:
+            out.append("  ! " + say("Commit {sha} lists no work after its first line. Each commit must list the work it belongs to, one line each beginning with '- ' (a bug, a requirement, a test case or a section of the assignment).", sha=sha))
+    else:
+        out = [say("Your commits this week, piece by piece (read on this computer; your mark reads GitHub):")]
     for name, _ in pieces:
         n = counts[name]
         if n >= 2:
@@ -2163,7 +2180,11 @@ def live_commits(week: int) -> list[str]:
             out.append("  · " + say("{piece}: 1 commit. Commit it again when it works.", piece=say(name)))
         else:
             out.append("  · " + say("{piece}: no commit yet.", piece=say(name)))
-    for sha, kind, names in multi:
+    for sha, kind, names in (multi if week >= 9 else []):
+        out.append("  · " + (say("Advice: commit {sha} adds {k} new screens: {names}. Smaller commits are easier to check.", sha=sha, k=len(names), names=", ".join(names))
+                             if kind == "screens" else
+                             say("Advice: commit {sha} adds {k} new routes: {names}. Smaller commits are easier to check.", sha=sha, k=len(names), names=", ".join(names))))
+    for sha, kind, names in (multi if week < 9 else []):
         out.append("  ! " + (say("Commit {sha} adds {k} new screens: {names}. Each new screen must have its own commit; a commit that adds two or more costs the commit point.", sha=sha, k=len(names), names=", ".join(names))
                              if kind == "screens" else
                              say("Commit {sha} adds {k} new routes: {names}. Each new route must have its own commit; a commit that adds two or more costs the commit point.", sha=sha, k=len(names), names=", ".join(names))))
@@ -2187,7 +2208,9 @@ def live_commits(week: int) -> list[str]:
         n = int(ahead)
         out.append("  ! " + (say("1 commit is not pushed yet. Push it now: git push") if n == 1 else
                              say("{n} commits are not pushed yet. Push them now: git push", n=n)))
-    if agent:
+    if agent and week >= 9:
+        out.append("  · " + say("{n} commit(s) by a coding agent count only if your AI log names them and says how you checked them.", n=agent))
+    elif agent:
         out.append("  · " + (say("1 commit by a coding agent is not counted.") if agent == 1 else
                              say("{n} commits by a coding agent are not counted.", n=agent)))
     return out
@@ -2499,7 +2522,7 @@ def _prose(text: str) -> str:
 
 def week8() -> None:
     """The chatbot as a change request: a functional must requirement, a manual test case, the api.md row of
-    POST /chat (401, 429, 503), the route on the server with the key only in server/.env, and the chat screen in
+    POST /chat (401, 429, 503), the route on the server with the key only in .env, and the chat screen in
     mobile/ (serves:, POST /chat, the label "AI answer"). student.json lists the computers of the student. By
     Saturday: S3 (at least 12 testers, at least 6 of them classmates), PRIVACY.md, the tests still green, and the new
     AI log (how the assistants were used in the whole week)."""
@@ -2567,17 +2590,17 @@ def week8() -> None:
         later(8, 'week04/test_cases.json has a test case of the chatbot with "run": "manual"', why)
         later(8, "PROPOSAL.md has a dated Change log line for the chatbot", why)
 
-    # --- in the lecture: POST /chat on the server, the key only in server/.env --------------------------------
+    # --- in the lecture: POST /chat on the server, the key only in .env --------------------------------
     routes = [k for k in route_defs() if k.startswith("POST ") and k.rstrip("/").endswith("/chat")]
     check(8, "server/ has the route POST /chat", bool(routes),
           "server/ must have the route POST /chat. Found: " + ("no server/ folder." if not (ROOT / "server").is_dir()
                                                               else "no such route."))
     server_code = "\n".join((p.read_text(encoding="utf-8", errors="replace") for p in (ROOT / "server").rglob("*.py")
                              if "tests" not in p.parts and ".venv" not in p.parts)) if (ROOT / "server").is_dir() else ""
-    example = read("server/.env.example") or read(".env.example") or ""
+    example = "\n".join(x.lstrip("\ufeff") for x in (read(".env.example"), read("server/.env.example")) if x)  # the root (Week 6) or server/
     check(8, f"the server reads {LLM_KEY_NAME} from the environment, and .env.example names it without a value",
           LLM_KEY_NAME in server_code and bool(re.search(rf"^\s*{LLM_KEY_NAME}\s*=\s*$", example, re.M)),
-          f'Your server must read the key of the LLM API with os.getenv("{LLM_KEY_NAME}"), and server/.env.example '
+          f'Your server must read the key of the LLM API with os.getenv("{LLM_KEY_NAME}"), and .env.example '
           f"must have the line {LLM_KEY_NAME}= with no value after it. Found: "
           + (f"{LLM_KEY_NAME} is not in the code of server/." if LLM_KEY_NAME not in server_code
              else f"no empty {LLM_KEY_NAME}= line in .env.example."))
@@ -2640,7 +2663,14 @@ def week8() -> None:
           "messages of the chatbot go to your LLM API and name the provider. Found: "
           + ("no PRIVACY.md." if read("PRIVACY.md") is None else f"{pl(len(privacy), 'character')}."), DEADLINE)
 
-    # --- by Saturday: the tests stay green, no build folders in git ---------------------------------------------
+    # --- by Saturday: the tests stay green, no build folders in git; the AI log of the whole week ----------------
+    _still_green(8)
+    _ai_log_whole_week(8)
+
+
+def _still_green(week: int) -> None:
+    """By Saturday (Week 8 on): the ten course tests and every server test case of a must requirement pass, and no
+    build folder of mobile/ is in git."""
     musts, _ = must_requirements()
     cases = test_cases() or []
     res = test_results()
@@ -2649,7 +2679,7 @@ def week8() -> None:
     else:
         red = [f"LOGIN_{n}" for n in LOGIN_TESTS if res["outcomes"].get(f"LOGIN_{n}", ("", ""))[0] != "passed"]
         ok, found = not red, f"not passing: {red[:4]}"
-    check(8, "all ten course tests still pass", ok,
+    check(week, "all ten course tests still pass", ok,
           f"All ten course tests (course_tests/) must still pass. Found: {found}.", DEADLINE)
     server_tc = sorted({str(c.get("id", "")).strip() for c in cases if not c.get("dropped")
                         and str(c.get("req", "")).strip() in musts and str(c.get("run", "")).strip().lower() == "server"})
@@ -2660,21 +2690,23 @@ def week8() -> None:
     else:
         failing = [i for i in server_tc if res["outcomes"].get(i, ("", ""))[0] != "passed"]
         ok, found = not failing, f"no passing test for {failing[:4]}"
-    check(8, 'every test case of a must requirement with run "server" still has a test that passes', ok,
+    check(week, 'every test case of a must requirement with run "server" still has a test that passes', ok,
           'Every test case of a must requirement with "run": "server" in week04/test_cases.json must still have a test '
           f"in server/tests/ named by its id that passes. Found: {found}.", DEADLINE)
     there = (ROOT / "mobile").is_dir()
     tracked = mobile_tracked_build()
-    check(8, "no build files of mobile/ are in git", there and not tracked,
+    check(week, "no build files of mobile/ are in git", there and not tracked,
           "mobile/ must not have in git the folders your framework builds again (node_modules, build, .dart_tool, "
           ".gradle, Pods, .expo): add them to mobile/.gitignore, then git rm -r --cached mobile/<the folder>. Found: "
           + ("no mobile/ folder." if not there else f"in git: {tracked}."), DEADLINE)
 
-    # --- by Saturday: the AI log of the whole week (no Evidence block from Week 8) --------------------------
-    path = ai_log_path(8)
+
+def _ai_log_whole_week(week: int) -> None:
+    """By Saturday (Week 8 on): the AI log of the whole week, without an Evidence block."""
+    path = ai_log_path(week)
     parts = _md_parts(path)
     short = [n for n in (3, 4, 5) if len(_prose(parts.get(n, ""))) < 20]
-    check(8, f"{path} is filled in", read(path) is not None and not short,
+    check(week, f"{path} is filled in", read(path) is not None and not short,
           f"{path} must be filled in, in your own words: parts 3, 4 and 5 each need at least one real sentence. "
           "Found: " + ("no such file." if read(path) is None else f"part {short[0]} is empty." if short else "every part is filled in."),
           DEADLINE)
@@ -2684,12 +2716,12 @@ def week8() -> None:
         # VC, 13 Oct 2026: an untouched file earns no free ticks; a week without an assistant is allowed once the
         # log is written (parts 3 to 5)
         why = "It is checked once the log is filled in."
-        later(8, f"{path} lists each assistant with its model, and whether it is free or paid", why, DEADLINE)
-        later(8, f"every use of an assistant in {path} is a full row with its commit", why, DEADLINE)
+        later(week, f"{path} lists each assistant with its model, and whether it is free or paid", why, DEADLINE)
+        later(week, f"every use of an assistant in {path} is a full row with its commit", why, DEADLINE)
         return
     half = [n for n, r in enumerate(assistants, 1) if len(r) < 3 or not all(r[:3])
             or not re.search(r"\b(free|paid|ücretsiz|ücretli)\b", r[2], re.I)]
-    check(8, f"{path} lists each assistant with its model, and whether it is free or paid", not half,
+    check(week, f"{path} lists each assistant with its model, and whether it is free or paid", not half,
           f"Every row of part 1 of {path} must name the assistant, its model, and free or paid, with the plan of a "
           f"paid one. Found: row {half[0] if half else 0} is not complete.", DEADLINE)
     bad_use = [n for n, r in enumerate(uses, 1) if len(r) < 6 or not all(r[:6])]
@@ -2702,18 +2734,243 @@ def week8() -> None:
         if not any(is_commit(s) or (is_commit(s) is None and re.search(r"[a-f]", s)) for s in shas):
             no_commit.append(n)
     if assistants and not uses:
-        check(8, f"every use of an assistant in {path} is a full row with its commit", False,
+        check(week, f"every use of an assistant in {path} is a full row with its commit", False,
               f"Part 2 of {path} must have one row for each real use of an assistant this week. Found: part 1 lists "
               "an assistant, but part 2 has no row.", DEADLINE)
     else:
-        check(8, f"every use of an assistant in {path} is a full row with its commit", not bad_use and not no_commit,
+        check(week, f"every use of an assistant in {path} is a full row with its commit", not bad_use and not no_commit,
               f"Every row of part 2 of {path} must fill in all six columns, and its last column must name the commit "
               'where the result went (the first 7 characters of its id) or say "not kept". Found: '
               + (f"row {bad_use[0]} is not complete." if bad_use else f"row {no_commit[0] if no_commit else 0} names "
                  "no commit of this repository."), DEADLINE)
 
 
-CHECKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5, 6: week6, 7: week7, 8: week8}
+W9_RESULTS = ("pass", "fail", "blocked")
+W9_SEVERITY = ("high", "medium", "low")
+W9_STATUS = ("open", "fixed", "not fixed")
+
+
+def _w9_items(path: str, key: str, real: str) -> list[dict] | None:
+    """The entries of a Week 9 file (None when the file is missing or not JSON); an entry whose `real` field is
+    empty is the scaffold's and is left out."""
+    data = load_json(path)
+    if not isinstance(data, dict) or not isinstance(data.get(key), list):
+        return None
+    return [x for x in data[key] if isinstance(x, dict) and (filled(x.get(real)) or x.get(real) not in ("", None, [], False, 0))]
+
+
+def _w9_tester(value) -> str:
+    """A tester as written: a 9-digit number, or 'outside: <first name> <initial>.'; "" when neither."""
+    t = " ".join(str(value or "").split())
+    if re.fullmatch(r"\d{9}", t):
+        return t
+    if re.fullmatch(r"(?i)outside:\s*\S.{1,40}", t) and "@" not in t:
+        return t
+    return ""
+
+
+def week9() -> None:
+    """The beta test (VC, 22 Nov 2026). In the lecture: week09/beta_runs.json (the runs of the classmate testers
+    on the app from the test track), week09/bug_list.json (every fail/blocked run and every other problem) and
+    week09/tested_by_me.json (the apps the student tested; the instructor compares it with the owners'
+    beta_runs.json, the checker cannot). By Saturday: a decision for every bug, round 2 for the fixed ones, a
+    screenshot for each tester outside the course, at least four server test cases of the chatbot, the Report
+    route with its api.md row, button and test case, test_report_09.md, S4, the tests green and the AI log."""
+    me = my_number()
+    cases = test_cases() or []
+    tc_req = {str(c.get("id", "")).strip(): str(c.get("req", "")).strip() for c in cases if not c.get("dropped")}
+    st = load_json("week04/store.json")
+    s3 = st.get("S3") if isinstance(st, dict) and isinstance(st.get("S3"), dict) else {}
+    mates = {str(x).strip().split("-")[0] for x in (s3.get("classmate_testers") or []) if re.fullmatch(r"\d{9}(-\d+)?", str(x).strip())}
+    mates.discard(me)
+
+    # --- in the lecture: the runs of the testers ---------------------------------------------------------------
+    runs = _w9_items("week09/beta_runs.json", "runs", "tester")
+    bad = []
+    for n, r in enumerate(runs or [], 1):
+        tc, res = str(r.get("tc", "")).strip(), str(r.get("result", "")).strip().lower()
+        if (not (tc == "free" or tc in tc_req) or not _w9_tester(r.get("tester")) or not filled(r.get("device"))
+                or r.get("round") not in (1, 2) or res not in W9_RESULTS
+                or (res != "pass" and len(str(r.get("note", "")).strip()) < 15) or "@" in json.dumps(r)):
+            bad.append(n)
+    check(9, "every run in week09/beta_runs.json is complete", runs is not None and bool(runs) and not bad,
+          "Every run in week09/beta_runs.json must name an existing test case (or \"free\"), the tester (a 9-digit "
+          "number, or \"outside: \" and a first name), the device, the round (1 or 2), the result (pass, fail or blocked) "
+          "and, for fail or blocked, a note of one full sentence, and no e-mail address. Found: "
+          + ("no such file, or it is not valid JSON." if runs is None else "no run." if not runs else f"run {bad[0]} is not complete." if bad else "every run is complete."))
+    per: dict[str, list[str]] = {}
+    for r in runs or []:
+        t = _w9_tester(r.get("tester"))
+        if r.get("round") == 1 and re.fullmatch(r"\d{9}", t) and t != me and (not mates or t in mates):
+            per.setdefault(t, []).append(str(r.get("tc", "")).strip())
+    good = [t for t, tcs in per.items() if len({x for x in tcs if x in tc_req}) >= 3
+            and any(tc_req.get(x) not in ("", "REQ-001") for x in tcs)]
+    short = [t for t in per if t not in good]
+    check(9, "week09/beta_runs.json holds the beta test of your classmate testers", bool(good) and not short,
+          "week09/beta_runs.json must hold the round-1 runs of each classmate tester who tested your app in the lecture "
+          "(a number from \"classmate_testers\" of S3): at least three of your test cases from each, one of them outside "
+          "the login. Found: " + ("no round-1 run of a classmate tester." if not per
+                                 else f"tester {short[0]} has fewer than three test cases, or none outside the login." if short
+                                 else "every classmate tester has run three test cases."))
+
+    # --- in the lecture: the bug list -------------------------------------------------------------------------
+    bugs = _w9_items("week09/bug_list.json", "bugs", "what")
+    ids = [str(b.get("id", "")).strip() for b in bugs or []]
+    badb = [n for n, b in enumerate(bugs or [], 1)
+            if not re.fullmatch(r"BUG-\d{2,3}", ids[n - 1]) or ids.count(ids[n - 1]) > 1
+            or not isinstance(b.get("found_by"), list) or not b["found_by"] or not all(_w9_tester(x) for x in b["found_by"])
+            or not (str(b.get("tc", "")).strip() == "free" or str(b.get("tc", "")).strip() in tc_req)
+            or str(b.get("severity", "")).strip().lower() not in W9_SEVERITY or len(str(b.get("what", "")).strip()) < 20
+            or str(b.get("status", "")).strip().lower() not in W9_STATUS]
+    failed = [r for r in runs or [] if r.get("round") == 1 and str(r.get("result", "")).strip().lower() in ("fail", "blocked")]
+    if bugs is None:
+        check(9, "every entry of week09/bug_list.json is complete", False,
+              "week09/bug_list.json must hold your bug list. Found: no such file, or it is not valid JSON.")
+    else:
+        check(9, "every entry of week09/bug_list.json is complete", not badb,
+              "Every entry of week09/bug_list.json must have its own id like BUG-01, the testers who found it in found_by, "
+              "the test case (or \"free\"), the severity (high, medium or low), what is wrong in one full sentence, and the "
+              f"status (open, fixed or not fixed). Found: entry {badb[0] if badb else 0} is not complete.")
+    missing = [r for r in failed if not any(str(b.get("tc", "")).strip() == str(r.get("tc", "")).strip()
+                                           and _w9_tester(r.get("tester")) in [_w9_tester(x) for x in (b.get("found_by") or [])]
+                                           for b in bugs or [])]
+    check(9, "every failed run of week09/beta_runs.json is in week09/bug_list.json", runs is not None and not missing,
+          "Every fail or blocked run of round 1 in week09/beta_runs.json must have its entry in week09/bug_list.json, "
+          "with the same test case and the tester in found_by. Found: "
+          + ("no week09/beta_runs.json." if runs is None else f"no entry for the run of {str(missing[0].get('tc', '')).strip()} by "
+             f"{_w9_tester(missing[0].get('tester'))}." if missing else "every failed run has its entry."))
+
+    # --- in the lecture: the apps the student tested (the instructor compares them with the owners' files) ------
+    data = load_json("week09/tested_by_me.json")
+    tested = _w9_items("week09/tested_by_me.json", "tested", "owner")
+    nobody = isinstance(data, dict) and data.get("nobody_listed_me") is True
+    badt = [n for n, t in enumerate(tested or [], 1)
+            if not re.fullmatch(r"\d{9}", str(t.get("owner", "")).strip()) or str(t.get("owner", "")).strip() == me
+            or not filled(t.get("device")) or not isinstance(t.get("tcs"), list)
+            or len({x for x in t["tcs"] if re.fullmatch(r"TC-\d{3}-\d{2}", str(x).strip())}) < 3
+            or len(str(t.get("note", "")).strip()) < 10 or not isinstance(t.get("problems"), int)]
+    check(9, "week09/tested_by_me.json records the apps that you tested",
+          tested is not None and not badt and (bool(tested) or nobody),
+          "week09/tested_by_me.json must have one entry for each app that you tested in the lecture: the 9-digit number "
+          "of its owner, your device, at least three test cases that you ran, the number of problems and a note. If no "
+          "classmate listed you as a tester, set \"nobody_listed_me\" to true. Found: "
+          + ("no such file, or it is not valid JSON." if tested is None else f"entry {badt[0]} is not complete." if badt
+             else "no app."))
+
+    # --- by Saturday: a decision for every bug, round 2, the screenshots of the testers outside the course -------
+    if bugs:
+        open_ = [str(b.get("id", "")).strip() for b in bugs if str(b.get("status", "")).strip().lower() not in ("fixed", "not fixed")]
+        nofix = [str(b.get("id", "")).strip() for b in bugs if str(b.get("status", "")).strip().lower() == "fixed"
+                 and not any(is_commit(x) or (is_commit(x) is None) for x in
+                             re.findall(r"(?<![0-9A-Za-z])[0-9a-f]{7,40}(?![0-9A-Za-z])", str(b.get("fix_commit", ""))))]
+        nowhy = [str(b.get("id", "")).strip() for b in bugs if str(b.get("status", "")).strip().lower() == "not fixed"
+                 and len(str(b.get("why", "")).strip()) < 20]
+        first = (open_ or nofix or nowhy or [""])[0]
+        check(9, "every bug in week09/bug_list.json has a decision", not (open_ or nofix or nowhy),
+              'Every entry of week09/bug_list.json must be "fixed", with the commit of the fix in fix_commit, or "not '
+              'fixed", with the reason in why in one full sentence. Found: '
+              + (f"{first} is still open." if open_ else f"{first} names no commit of this repository." if nofix
+                 else f"{first} has no reason." if nowhy else "every bug has a decision."), DEADLINE)
+        r2 = [str(b.get("id", "")).strip() for b in bugs if str(b.get("status", "")).strip().lower() == "fixed"
+              and str(b.get("tc", "")).strip() in tc_req
+              and not any(x.get("round") == 2 and str(x.get("tc", "")).strip() == str(b.get("tc", "")).strip()
+                          and str(x.get("result", "")).strip().lower() == "pass" for x in runs or [])]
+        check(9, "every fixed bug of a test case has a passing run in round 2", not r2,
+              "For every fixed bug of a test case, week09/beta_runs.json must have a run of that test case in round 2 "
+              f"with the result pass. Found: none for {r2[0] if r2 else ''}.", DEADLINE)
+    else:
+        why = "It is checked once week09/bug_list.json holds a bug."
+        later(9, "every bug in week09/bug_list.json has a decision", why, DEADLINE)
+        later(9, "every fixed bug of a test case has a passing run in round 2", why, DEADLINE)
+    outside = [r for r in runs or [] if _w9_tester(r.get("tester")).lower().startswith("outside")]
+    noshot = []
+    for r in outside:
+        ev = str(r.get("evidence", "")).strip().replace("\\", "/")
+        if not ev or ".." in ev or ":" in ev or Path(ev).is_absolute() or not ((ROOT / "week09" / ev).is_file() or (ROOT / ev).is_file()):
+            noshot.append(_w9_tester(r.get("tester")))
+    if outside:
+        check(9, "every run of a tester outside the course names its screenshot", not noshot,
+              "Every run of a tester outside the course in week09/beta_runs.json must name in \"evidence\" a screenshot "
+              "saved in week09/: their message that says what they saw, or their feedback in the store console. Found: "
+              f"none for {noshot[0] if noshot else ''}.", DEADLINE)
+    else:
+        later(9, "every run of a tester outside the course names its screenshot",
+              "It is checked once week09/beta_runs.json holds a run of a tester outside the course.", DEADLINE)
+
+    # --- by Saturday: the chatbot's server tests (a fake model) ---------------------------------------------------
+    req = chat_requirement()
+    if req:
+        srv = sorted(c for c, r in tc_req.items() if r == req and any(
+            str(x.get("run", "")).strip().lower() == "server" for x in cases if str(x.get("id", "")).strip() == c))
+        check(9, f"week04/test_cases.json has at least four test cases of {req} with run server", len(srv) >= 4,
+              f'week04/test_cases.json must have at least four test cases of {req}, the requirement of your chatbot, with '
+              '"run": "server": an answer, 401 without a token, 429 after the daily limit, and 503 when the LLM API fails. '
+              f"Found: {len(srv)}.", DEADLINE)
+    else:
+        later(9, "week04/test_cases.json has at least four test cases of the chatbot with run server",
+              "It is checked once the POST /chat row of week05/api.md names the requirement of the chatbot.", DEADLINE)
+
+    # --- by Saturday: the Report button ------------------------------------------------------------------------
+    rows = [e for e in api_endpoints() if e["key"].startswith("POST ") and e["key"].rstrip("/").endswith("/report")]
+    check(9, "week05/api.md has the row of the Report route", bool(rows),
+          "week05/api.md must have the row of the route that receives a report of an answer of the chatbot, a POST whose "
+          "path ends with /report, such as POST /chat/report. Found: no such row.", DEADLINE)
+    routes = [k for k in route_defs() if k.startswith("POST ") and k.rstrip("/").endswith("/report")]
+    check(9, "server/ has the Report route", bool(routes),
+          "server/ must have the Report route, a POST whose path ends with /report, as in week05/api.md. Found: no such route.",
+          DEADLINE)
+    rreq = next((r for e in rows for r in e["reqs"] if r in requirement_index()), "")
+    if rreq:
+        rcases = [c for c, r in tc_req.items() if r == rreq and any(
+            str(x.get("run", "")).strip().lower() == "server" for x in cases if str(x.get("id", "")).strip() == c)]
+        res = test_results()
+        passing = [c for c in rcases if res["ran"] and res["outcomes"].get(c, ("", ""))[0] == "passed"]
+        check(9, f"the Report route's requirement {rreq} has a server test case whose test passes", bool(passing),
+              f'week04/test_cases.json must have a test case of {rreq}, the requirement of the Report route, with "run": '
+              '"server", and server/tests/ a test named by its id that passes. Found: '
+              + ("no such test case." if not rcases else res["why"] if not res["ran"] else f"no passing test for {rcases[0]}."),
+              DEADLINE)
+    else:
+        later(9, "the Report route's requirement has a server test case whose test passes",
+              "It is checked once the Report row of week05/api.md names an existing requirement.", DEADLINE)
+    src = mobile_project()["sources"]
+    chat = {p: t for p, t in src.items() if req and req in mobile_serves(t)}
+    key = rows[0]["key"] if rows else "POST /chat/report"
+    button = [p for p, t in chat.items() if re.search(r"\bReport\b", t) and calls_path(t, key)]
+    check(9, "the chat screen has a Report button that sends the answer to the Report route", bool(button),
+          "The chat screen in mobile/ (the source file with the serves: line of the chatbot) must show a Report button "
+          "next to each answer and send the answer to the Report route. Found: "
+          + ("no chat screen." if not chat else "no Report button that calls the Report route."), DEADLINE)
+
+    # --- by Saturday: the test report and S4 ----------------------------------------------------------------------
+    parts = _md_parts("week09/test_report_09.md")
+    gaps = [n for n, ok in ((1, bool(_table_rows(parts.get(1, "")))), (2, len(_prose(parts.get(2, ""))) >= 20),
+                            (3, bool(_table_rows(parts.get(3, "")))), (4, len(_prose(parts.get(4, ""))) >= 40),
+                            (5, len(_prose(parts.get(5, ""))) >= 20), (6, bool(re.search(r"\d+\s*%", parts.get(6, "")))))
+            if not ok]
+    check(9, "week09/test_report_09.md is filled in", read("week09/test_report_09.md") is not None and not gaps,
+          "week09/test_report_09.md must be filled in, in your own words: the testers (a table), what was tested, the "
+          "numbers (a table), the three most important findings, what surprised you, and the coverage of your server as "
+          "a percentage. Found: " + ("no such file." if read("week09/test_report_09.md") is None
+                                     else f"part {gaps[0]} is empty." if gaps else "every part is filled in."), DEADLINE)
+    s4 = st.get("S4") if isinstance(st, dict) and isinstance(st.get("S4"), dict) else {}
+    lect = s4.get("testers_in_lecture") if isinstance(s4.get("testers_in_lecture"), list) else []
+    ok4 = (re.fullmatch(r"20\d\d-\d\d-\d\d", str(s4.get("date", "")).strip()) and filled(s4.get("track"))
+           and filled(s4.get("version")) and lect and all(re.fullmatch(r"\d{9}", str(x).strip()) for x in lect)
+           and isinstance(s4.get("bugs"), int) and isinstance(s4.get("fixed"), int) and 0 <= s4["fixed"] <= s4["bugs"]
+           and "@" not in json.dumps(s4))
+    check(9, "store.json S4 is filled in", bool(ok4),
+          "week04/store.json S4 must have the date, the track, the version that your testers tested, the student numbers "
+          "of your testers in the lecture (testers_in_lecture), the first names of your other testers (testers_outside), "
+          "the number of bugs (bugs) and of fixed bugs (fixed), and no e-mail address. Found: one of them missing or wrong.",
+          DEADLINE)
+
+    # --- by Saturday: the tests stay green; the AI log of the whole week ----------------------------------------
+    _still_green(9)
+    _ai_log_whole_week(9)
+
+
+CHECKS = {1: week1, 2: week2, 3: week3, 4: week4, 5: week5, 6: week6, 7: week7, 8: week8, 9: week9}
 
 
 # ── secrets: this one runs for every week ────────────────────────────
@@ -3751,10 +4008,10 @@ TR_RULES: list[tuple[str, str]] = [
      "server/ içinde POST /chat route'u olmalı. Bulunan: böyle bir route yok."),
     ("the server reads LLM_API_KEY from the environment, and .env.example names it without a value",
      "sunucu LLM_API_KEY'i ortamdan okuyor ve .env.example onu değeri olmadan anıyor"),
-    ('Your server must read the key of the LLM API with os.getenv("LLM_API_KEY"), and server/.env.example must have the line LLM_API_KEY= with no value after it. Found: LLM_API_KEY is not in the code of server/.',
-     'Sunucun LLM API anahtarını os.getenv("LLM_API_KEY") ile okumalı ve server/.env.example içinde, arkasında değer olmayan LLM_API_KEY= satırı olmalı. Bulunan: server/ kodunda LLM_API_KEY yok.'),
-    ('Your server must read the key of the LLM API with os.getenv("LLM_API_KEY"), and server/.env.example must have the line LLM_API_KEY= with no value after it. Found: no empty LLM_API_KEY= line in .env.example.',
-     'Sunucun LLM API anahtarını os.getenv("LLM_API_KEY") ile okumalı ve server/.env.example içinde, arkasında değer olmayan LLM_API_KEY= satırı olmalı. Bulunan: .env.example içinde boş bir LLM_API_KEY= satırı yok.'),
+    ('Your server must read the key of the LLM API with os.getenv("LLM_API_KEY"), and .env.example must have the line LLM_API_KEY= with no value after it. Found: LLM_API_KEY is not in the code of server/.',
+     'Sunucun LLM API anahtarını os.getenv("LLM_API_KEY") ile okumalı ve .env.example içinde, arkasında değer olmayan LLM_API_KEY= satırı olmalı. Bulunan: server/ kodunda LLM_API_KEY yok.'),
+    ('Your server must read the key of the LLM API with os.getenv("LLM_API_KEY"), and .env.example must have the line LLM_API_KEY= with no value after it. Found: no empty LLM_API_KEY= line in .env.example.',
+     'Sunucun LLM API anahtarını os.getenv("LLM_API_KEY") ile okumalı ve .env.example içinde, arkasında değer olmayan LLM_API_KEY= satırı olmalı. Bulunan: .env.example içinde boş bir LLM_API_KEY= satırı yok.'),
     ("mobile/ has a screen with serves: {r} that sends the message to POST /chat",
      "mobile/ içinde serves: {r} olan ve mesajı POST /chat'e gönderen bir ekran var"),
     ("mobile/ must have the chat screen: its source file names {r} in a comment like // serves: {s}, and it sends the message to POST /chat. Found: no source file in mobile/ names it.",
@@ -3810,6 +4067,107 @@ TR_RULES: list[tuple[str, str]] = [
      '{p} dosyasının 2. kısmındaki her satırın altı sütunu da dolu olmalı ve son sütun sonucun girdiği commit\'i (kimliğinin ilk 7 karakteri) anmalı ya da "not kept" demeli. Bulunan: {n}. satır eksik.'),
     ('Every row of part 2 of {p} must fill in all six columns, and its last column must name the commit where the result went (the first 7 characters of its id) or say "not kept". Found: row {n} names no commit of this repository.',
      '{p} dosyasının 2. kısmındaki her satırın altı sütunu da dolu olmalı ve son sütun sonucun girdiği commit\'i (kimliğinin ilk 7 karakteri) anmalı ya da "not kept" demeli. Bulunan: {n}. satır bu reponun hiçbir commit\'ini anmıyor.'),
+    # --- Week 9: the beta test (VC, 22 Nov 2026) -------------------------------------------------------------
+    # the NOT YET names come first: their "the chatbot" would otherwise match the {r} of the entries below
+    ("week04/test_cases.json has at least four test cases of the chatbot with run server",
+     "week04/test_cases.json içinde sohbet botunun run server olan en az dört test case'i var"),
+    ("the Report route's requirement has a server test case whose test passes",
+     "Report route'unun gereksiniminin, testi geçen bir server test case'i var"),
+    ("It is checked once week09/bug_list.json holds a bug.",
+     "week09/bug_list.json içinde bir hata olduğunda kontrol edilecek."),
+    ("It is checked once week09/beta_runs.json holds a run of a tester outside the course.",
+     "week09/beta_runs.json içinde dersi almayan bir testçinin çalıştırması olduğunda kontrol edilecek."),
+    ("It is checked once the Report row of week05/api.md names an existing requirement.",
+     "week05/api.md içindeki Report satırı var olan bir gereksinimi andığında kontrol edilecek."),
+    ("every run in week09/beta_runs.json is complete", "week09/beta_runs.json içindeki her çalıştırma tam"),
+    ('Every run in week09/beta_runs.json must name an existing test case (or "free"), the tester (a 9-digit number, or "outside: " and a first name), the device, the round (1 or 2), the result (pass, fail or blocked) and, for fail or blocked, a note of one full sentence, and no e-mail address. Found: no such file, or it is not valid JSON.',
+     'week09/beta_runs.json içindeki her çalıştırma var olan bir test case\'i (ya da "free"), testçiyi (9 haneli bir numara ya da "outside: " ve bir ad), cihazı, turu (1 ya da 2), sonucu (pass, fail ya da blocked) ve fail ya da blocked için tam bir cümlelik bir notu anmalı ve hiçbir e-posta adresi içermemeli. Bulunan: böyle bir dosya yok ya da geçerli bir JSON değil.'),
+    ('Every run in week09/beta_runs.json must name an existing test case (or "free"), the tester (a 9-digit number, or "outside: " and a first name), the device, the round (1 or 2), the result (pass, fail or blocked) and, for fail or blocked, a note of one full sentence, and no e-mail address. Found: no run.',
+     'week09/beta_runs.json içindeki her çalıştırma var olan bir test case\'i (ya da "free"), testçiyi (9 haneli bir numara ya da "outside: " ve bir ad), cihazı, turu (1 ya da 2), sonucu (pass, fail ya da blocked) ve fail ya da blocked için tam bir cümlelik bir notu anmalı ve hiçbir e-posta adresi içermemeli. Bulunan: hiç çalıştırma yok.'),
+    ('Every run in week09/beta_runs.json must name an existing test case (or "free"), the tester (a 9-digit number, or "outside: " and a first name), the device, the round (1 or 2), the result (pass, fail or blocked) and, for fail or blocked, a note of one full sentence, and no e-mail address. Found: run {n} is not complete.',
+     'week09/beta_runs.json içindeki her çalıştırma var olan bir test case\'i (ya da "free"), testçiyi (9 haneli bir numara ya da "outside: " ve bir ad), cihazı, turu (1 ya da 2), sonucu (pass, fail ya da blocked) ve fail ya da blocked için tam bir cümlelik bir notu anmalı ve hiçbir e-posta adresi içermemeli. Bulunan: {n}. çalıştırma eksik.'),
+    ("week09/beta_runs.json holds the beta test of your classmate testers",
+     "week09/beta_runs.json testçi sınıf arkadaşlarının beta testini içeriyor"),
+    ('week09/beta_runs.json must hold the round-1 runs of each classmate tester who tested your app in the lecture (a number from "classmate_testers" of S3): at least three of your test cases from each, one of them outside the login. Found: no round-1 run of a classmate tester.',
+     'week09/beta_runs.json, uygulamanı derste test eden her testçi sınıf arkadaşının (S3\'ün "classmate_testers" alanındaki bir numara) 1. tur çalıştırmalarını içermeli: her birinden test case\'lerinden en az üçü, biri login dışında. Bulunan: bir testçi sınıf arkadaşının 1. tur çalıştırması yok.'),
+    ('week09/beta_runs.json must hold the round-1 runs of each classmate tester who tested your app in the lecture (a number from "classmate_testers" of S3): at least three of your test cases from each, one of them outside the login. Found: tester {t} has fewer than three test cases, or none outside the login.',
+     'week09/beta_runs.json, uygulamanı derste test eden her testçi sınıf arkadaşının (S3\'ün "classmate_testers" alanındaki bir numara) 1. tur çalıştırmalarını içermeli: her birinden test case\'lerinden en az üçü, biri login dışında. Bulunan: {t} testçisinin üçten az test case\'i var ya da hiçbiri login dışında değil.'),
+    ("every entry of week09/bug_list.json is complete", "week09/bug_list.json içindeki her girdi tam"),
+    ("week09/bug_list.json must hold your bug list. Found: no such file, or it is not valid JSON.",
+     "week09/bug_list.json hata listeni içermeli. Bulunan: böyle bir dosya yok ya da geçerli bir JSON değil."),
+    ('Every entry of week09/bug_list.json must have its own id like BUG-01, the testers who found it in found_by, the test case (or "free"), the severity (high, medium or low), what is wrong in one full sentence, and the status (open, fixed or not fixed). Found: entry {n} is not complete.',
+     'week09/bug_list.json içindeki her girdinin BUG-01 gibi kendi id\'si, found_by içinde onu bulan testçiler, test case (ya da "free"), önem (high, medium ya da low), neyin yanlış olduğunu söyleyen tam bir cümle ve durum (open, fixed ya da not fixed) olmalı. Bulunan: {n}. girdi eksik.'),
+    ("every failed run of week09/beta_runs.json is in week09/bug_list.json",
+     "week09/beta_runs.json içindeki her başarısız çalıştırma week09/bug_list.json içinde"),
+    ("Every fail or blocked run of round 1 in week09/beta_runs.json must have its entry in week09/bug_list.json, with the same test case and the tester in found_by. Found: no week09/beta_runs.json.",
+     "week09/beta_runs.json içindeki 1. turun her fail ya da blocked çalıştırmasının, aynı test case ile ve testçisi found_by içinde olarak week09/bug_list.json içinde bir girdisi olmalı. Bulunan: week09/beta_runs.json yok."),
+    ("Every fail or blocked run of round 1 in week09/beta_runs.json must have its entry in week09/bug_list.json, with the same test case and the tester in found_by. Found: no entry for the run of {c} by {t}.",
+     "week09/beta_runs.json içindeki 1. turun her fail ya da blocked çalıştırmasının, aynı test case ile ve testçisi found_by içinde olarak week09/bug_list.json içinde bir girdisi olmalı. Bulunan: {t} testçisinin {c} çalıştırması için girdi yok."),
+    ("Every fail or blocked run of round 1 in week09/beta_runs.json must have its entry in week09/bug_list.json, with the same test case and the tester in found_by. Found: every failed run has its entry.",
+     "week09/beta_runs.json içindeki 1. turun her fail ya da blocked çalıştırmasının, aynı test case ile ve testçisi found_by içinde olarak week09/bug_list.json içinde bir girdisi olmalı. Bulunan: her başarısız çalıştırmanın girdisi var."),
+    ("week09/tested_by_me.json records the apps that you tested",
+     "week09/tested_by_me.json test ettiğin uygulamaları kaydediyor"),
+    ('week09/tested_by_me.json must have one entry for each app that you tested in the lecture: the 9-digit number of its owner, your device, at least three test cases that you ran, the number of problems and a note. If no classmate listed you as a tester, set "nobody_listed_me" to true. Found: no such file, or it is not valid JSON.',
+     'week09/tested_by_me.json derste test ettiğin her uygulama için bir girdi içermeli: sahibinin 9 haneli numarası, cihazın, çalıştırdığın en az üç test case, sorunların sayısı ve bir not. Hiçbir sınıf arkadaşın seni testçi olarak yazmadıysa "nobody_listed_me" alanını true yap. Bulunan: böyle bir dosya yok ya da geçerli bir JSON değil.'),
+    ('week09/tested_by_me.json must have one entry for each app that you tested in the lecture: the 9-digit number of its owner, your device, at least three test cases that you ran, the number of problems and a note. If no classmate listed you as a tester, set "nobody_listed_me" to true. Found: entry {n} is not complete.',
+     'week09/tested_by_me.json derste test ettiğin her uygulama için bir girdi içermeli: sahibinin 9 haneli numarası, cihazın, çalıştırdığın en az üç test case, sorunların sayısı ve bir not. Hiçbir sınıf arkadaşın seni testçi olarak yazmadıysa "nobody_listed_me" alanını true yap. Bulunan: {n}. girdi eksik.'),
+    ('week09/tested_by_me.json must have one entry for each app that you tested in the lecture: the 9-digit number of its owner, your device, at least three test cases that you ran, the number of problems and a note. If no classmate listed you as a tester, set "nobody_listed_me" to true. Found: no app.',
+     'week09/tested_by_me.json derste test ettiğin her uygulama için bir girdi içermeli: sahibinin 9 haneli numarası, cihazın, çalıştırdığın en az üç test case, sorunların sayısı ve bir not. Hiçbir sınıf arkadaşın seni testçi olarak yazmadıysa "nobody_listed_me" alanını true yap. Bulunan: hiç uygulama yok.'),
+    ("every bug in week09/bug_list.json has a decision", "week09/bug_list.json içindeki her hatanın bir kararı var"),
+    ('Every entry of week09/bug_list.json must be "fixed", with the commit of the fix in fix_commit, or "not fixed", with the reason in why in one full sentence. Found: {b} is still open.',
+     'week09/bug_list.json içindeki her girdi, fix_commit içinde düzeltmenin commit\'iyle "fixed" ya da why içinde tam bir cümlelik gerekçesiyle "not fixed" olmalı. Bulunan: {b} hala open.'),
+    ('Every entry of week09/bug_list.json must be "fixed", with the commit of the fix in fix_commit, or "not fixed", with the reason in why in one full sentence. Found: {b} names no commit of this repository.',
+     'week09/bug_list.json içindeki her girdi, fix_commit içinde düzeltmenin commit\'iyle "fixed" ya da why içinde tam bir cümlelik gerekçesiyle "not fixed" olmalı. Bulunan: {b} bu reponun hiçbir commit\'ini anmıyor.'),
+    ('Every entry of week09/bug_list.json must be "fixed", with the commit of the fix in fix_commit, or "not fixed", with the reason in why in one full sentence. Found: {b} has no reason.',
+     'week09/bug_list.json içindeki her girdi, fix_commit içinde düzeltmenin commit\'iyle "fixed" ya da why içinde tam bir cümlelik gerekçesiyle "not fixed" olmalı. Bulunan: {b} için gerekçe yok.'),
+    ('Every entry of week09/bug_list.json must be "fixed", with the commit of the fix in fix_commit, or "not fixed", with the reason in why in one full sentence. Found: every bug has a decision.',
+     'week09/bug_list.json içindeki her girdi, fix_commit içinde düzeltmenin commit\'iyle "fixed" ya da why içinde tam bir cümlelik gerekçesiyle "not fixed" olmalı. Bulunan: her hatanın bir kararı var.'),
+    ("every fixed bug of a test case has a passing run in round 2",
+     "bir test case'ine ait her düzeltilmiş hatanın 2. turda geçen bir çalıştırması var"),
+    ("For every fixed bug of a test case, week09/beta_runs.json must have a run of that test case in round 2 with the result pass. Found: none for {b}.",
+     "Bir test case'ine ait her düzeltilmiş hata için week09/beta_runs.json içinde o test case'in sonucu pass olan bir 2. tur çalıştırması olmalı. Bulunan: {b} için yok."),
+    ("every run of a tester outside the course names its screenshot",
+     "dersi almayan bir testçinin her çalıştırması ekran görüntüsünü anıyor"),
+    ('Every run of a tester outside the course in week09/beta_runs.json must name in "evidence" a screenshot saved in week09/: their message that says what they saw, or their feedback in the store console. Found: none for {t}.',
+     'week09/beta_runs.json içinde dersi almayan bir testçinin her çalıştırması, "evidence" alanında week09/ içine kaydedilmiş bir ekran görüntüsünü anmalı: gördüklerini anlatan mesajının ya da mağaza konsolundaki geri bildiriminin. Bulunan: {t} için yok.'),
+    ("week04/test_cases.json has at least four test cases of {r} with run server",
+     "week04/test_cases.json içinde {r} gereksiniminin run server olan en az dört test case'i var"),
+    ('week04/test_cases.json must have at least four test cases of {r}, the requirement of your chatbot, with "run": "server": an answer, 401 without a token, 429 after the daily limit, and 503 when the LLM API fails. Found: {n}.',
+     'week04/test_cases.json içinde sohbet botunun gereksinimi olan {r} için "run": "server" olan en az dört test case olmalı: bir cevap, token olmadan 401, günlük sınırdan sonra 429 ve LLM API hata verdiğinde 503. Bulunan: {n}.'),
+    ("week05/api.md has the row of the Report route", "week05/api.md içinde Report route'unun satırı var"),
+    ("week05/api.md must have the row of the route that receives a report of an answer of the chatbot, a POST whose path ends with /report, such as POST /chat/report. Found: no such row.",
+     "week05/api.md içinde sohbet botunun bir cevabına ait bildirimi alan route'un satırı olmalı: yolu /report ile biten bir POST, örneğin POST /chat/report. Bulunan: böyle bir satır yok."),
+    ("server/ has the Report route", "server/ içinde Report route'u var"),
+    ("server/ must have the Report route, a POST whose path ends with /report, as in week05/api.md. Found: no such route.",
+     "server/ içinde week05/api.md'deki gibi yolu /report ile biten bir POST olan Report route'u olmalı. Bulunan: böyle bir route yok."),
+    ("the Report route's requirement {r} has a server test case whose test passes",
+     "Report route'unun gereksinimi {r} için testi geçen bir server test case'i var"),
+    ('week04/test_cases.json must have a test case of {r}, the requirement of the Report route, with "run": "server", and server/tests/ a test named by its id that passes. Found: no such test case.',
+     'week04/test_cases.json içinde Report route\'unun gereksinimi olan {r} için "run": "server" olan bir test case ve server/tests/ içinde onun id\'siyle adlandırılmış, geçen bir test olmalı. Bulunan: böyle bir test case yok.'),
+    ('week04/test_cases.json must have a test case of {r}, the requirement of the Report route, with "run": "server", and server/tests/ a test named by its id that passes. Found: no passing test for {c}.',
+     'week04/test_cases.json içinde Report route\'unun gereksinimi olan {r} için "run": "server" olan bir test case ve server/tests/ içinde onun id\'siyle adlandırılmış, geçen bir test olmalı. Bulunan: {c} için geçen bir test yok.'),
+    ('week04/test_cases.json must have a test case of {r}, the requirement of the Report route, with "run": "server", and server/tests/ a test named by its id that passes. Found: {f}',
+     'week04/test_cases.json içinde Report route\'unun gereksinimi olan {r} için "run": "server" olan bir test case ve server/tests/ içinde onun id\'siyle adlandırılmış, geçen bir test olmalı. Bulunan: {f}'),
+    ("the chat screen has a Report button that sends the answer to the Report route",
+     "sohbet ekranında cevabı Report route'una gönderen bir Report butonu var"),
+    ("The chat screen in mobile/ (the source file with the serves: line of the chatbot) must show a Report button next to each answer and send the answer to the Report route. Found: no chat screen.",
+     "mobile/ içindeki sohbet ekranı (sohbet botunun serves: satırını taşıyan kaynak dosya) her cevabın yanında bir Report butonu göstermeli ve cevabı Report route'una göndermeli. Bulunan: sohbet ekranı yok."),
+    ("The chat screen in mobile/ (the source file with the serves: line of the chatbot) must show a Report button next to each answer and send the answer to the Report route. Found: no Report button that calls the Report route.",
+     "mobile/ içindeki sohbet ekranı (sohbet botunun serves: satırını taşıyan kaynak dosya) her cevabın yanında bir Report butonu göstermeli ve cevabı Report route'una göndermeli. Bulunan: Report route'unu çağıran bir Report butonu yok."),
+    ("week09/test_report_09.md is filled in", "week09/test_report_09.md dolu"),
+    ("week09/test_report_09.md must be filled in, in your own words: the testers (a table), what was tested, the numbers (a table), the three most important findings, what surprised you, and the coverage of your server as a percentage. Found: no such file.",
+     "week09/test_report_09.md kendi sözlerinle doldurulmalı: testçiler (bir tablo), neyin test edildiği, sayılar (bir tablo), en önemli üç bulgu, seni şaşırtan ve sunucunun kapsamı yüzde olarak. Bulunan: böyle bir dosya yok."),
+    ("week09/test_report_09.md must be filled in, in your own words: the testers (a table), what was tested, the numbers (a table), the three most important findings, what surprised you, and the coverage of your server as a percentage. Found: part {n} is empty.",
+     "week09/test_report_09.md kendi sözlerinle doldurulmalı: testçiler (bir tablo), neyin test edildiği, sayılar (bir tablo), en önemli üç bulgu, seni şaşırtan ve sunucunun kapsamı yüzde olarak. Bulunan: {n}. kısım boş."),
+    ("week09/test_report_09.md must be filled in, in your own words: the testers (a table), what was tested, the numbers (a table), the three most important findings, what surprised you, and the coverage of your server as a percentage. Found: every part is filled in.",
+     "week09/test_report_09.md kendi sözlerinle doldurulmalı: testçiler (bir tablo), neyin test edildiği, sayılar (bir tablo), en önemli üç bulgu, seni şaşırtan ve sunucunun kapsamı yüzde olarak. Bulunan: her kısım dolu."),
+    ("store.json S4 is filled in", "store.json S4 dolu"),
+    ("week04/store.json S4 must have the date, the track, the version that your testers tested, the student numbers of your testers in the lecture (testers_in_lecture), the first names of your other testers (testers_outside), the number of bugs (bugs) and of fixed bugs (fixed), and no e-mail address. Found: one of them missing or wrong.",
+     "week04/store.json S4 içinde tarih, kanal, testçilerinin test ettiği sürüm, derste test eden testçilerinin öğrenci numaraları (testers_in_lecture), diğer testçilerinin adları (testers_outside), hataların sayısı (bugs) ve düzeltilen hataların sayısı (fixed) olmalı ve hiçbir e-posta adresi olmamalı. Bulunan: bunlardan biri eksik ya da yanlış."),
+    ('Every run in week09/beta_runs.json must name an existing test case (or "free"), the tester (a 9-digit number, or "outside: " and a first name), the device, the round (1 or 2), the result (pass, fail or blocked) and, for fail or blocked, a note of one full sentence, and no e-mail address. Found: every run is complete.',
+     'week09/beta_runs.json içindeki her çalıştırma var olan bir test case\'i (ya da "free"), testçiyi (9 haneli bir numara ya da "outside: " ve bir ad), cihazı, turu (1 ya da 2), sonucu (pass, fail ya da blocked) ve fail ya da blocked için tam bir cümlelik bir notu anmalı ve hiçbir e-posta adresi içermemeli. Bulunan: her çalıştırma tam.'),
+    ('week09/beta_runs.json must hold the round-1 runs of each classmate tester who tested your app in the lecture (a number from "classmate_testers" of S3): at least three of your test cases from each, one of them outside the login. Found: every classmate tester has run three test cases.',
+     'week09/beta_runs.json, uygulamanı derste test eden her testçi sınıf arkadaşının (S3\'ün "classmate_testers" alanındaki bir numara) 1. tur çalıştırmalarını içermeli: her birinden test case\'lerinden en az üçü, biri login dışında. Bulunan: her testçi sınıf arkadaşı üç test case çalıştırmış.'),
     # a course test the entries above do not name (they come first, so every LOGIN_NN of the table has its own Turkish)
     ('course test {k}: {w}', 'ders testi {k}: {w}'),
     ('Course test {k} ({w}) must pass. Found: {f}.', '{k} ders testi ({w}) geçmeli. Bulunan: {f}.'),
@@ -3895,6 +4253,18 @@ TR_UI = {
         "Önceki haftalarda hala eksik olan kontroller: {listing} — birine bakmak için: python .github/check_deliverables.py {n} tr",
     "\n  {n} still to do before Saturday 23:59. Those do not fail this run —\n  they are not due yet. The lab items are what the end-of-session mark reads.":
         "\n  Cumartesi 23:59'a kadar yapılacak {n} madde var. Bunlar bu çalıştırmada kalmış sayılmaz —\n  henüz süreleri gelmedi. Oturum sonu notu yalnızca ders içi maddeleri okur.",
+    "Your commits this week (read on this computer; your mark reads GitHub):":
+        "Bu haftaki commit'lerin (bu bilgisayardan okundu; notun GitHub'dan okunur):",
+    "{n} commit(s) list the work they belong to.":
+        "{n} commit ait olduğu işleri listeliyor.",
+    "Commit {sha} lists no work after its first line. Each commit must list the work it belongs to, one line each beginning with '- ' (a bug, a requirement, a test case or a section of the assignment).":
+        "{sha} commit'i ilk satırından sonra hiçbir iş listelemiyor. Her commit ait olduğu işleri, her biri ayrı satırda ve '- ' ile başlayarak listelemeli (bir hata, bir gereksinim, bir test case ya da ödevin bir bölümü).",
+    "Advice: commit {sha} adds {k} new screens: {names}. Smaller commits are easier to check.":
+        "Öneri: {sha} commit'i {k} yeni ekran ekliyor: {names}. Küçük commit'leri kontrol etmek daha kolaydır.",
+    "Advice: commit {sha} adds {k} new routes: {names}. Smaller commits are easier to check.":
+        "Öneri: {sha} commit'i {k} yeni route ekliyor: {names}. Küçük commit'leri kontrol etmek daha kolaydır.",
+    "{n} commit(s) by a coding agent count only if your AI log names them and says how you checked them.":
+        "Bir kodlama ajanının {n} commit'i, ancak AI log'un onları anıyor ve nasıl kontrol ettiğini söylüyorsa sayılır.",
     "PASS": "TAMAM",
     "FAIL": "EKSİK",
     "NOT YET": "BEKLİYOR",
