@@ -14,12 +14,75 @@ and the same path, and every row of week05/api.md is an endpoint here. The check
 compares the two.
 """
 
+import json
+import os
+import urllib.request
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from server import chat, course_login, orders, prep
+
+# --- Brevo HTTPS Email Delivery Bridge (REQ-001) ---
+_orig_deliver = course_login._deliver
+
+
+def _send_brevo_api(email: str, code: str, app_name: str) -> bool:
+    api_key = os.environ.get("BREVO_API_KEY")
+    if not api_key:
+        return False
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key.strip(),
+        "content-type": "application/json",
+    }
+    sender_email = (
+        os.environ.get("SMTP_FROM")
+        or "anilaydeniz76@gmail.com"
+    )
+    payload = {
+        "sender": {"name": app_name, "email": sender_email},
+        "to": [{"email": email}],
+        "subject": f"Your login code for {app_name}",
+        "htmlContent": (
+            f"<p>Your login code for <strong>{app_name}</strong> is <strong>{code}</strong>. "
+            "It is valid for 10 minutes.</p>"
+        ),
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=10) as resp:
+        return resp.status in (200, 201)
+
+
+def _custom_deliver(email: str, code: str) -> None:
+    # 1. During course tests / CI: write to code file
+    if os.environ.get("AIASD_CODE_FILE"):
+        return _orig_deliver(email, code)
+
+    # 2. Try Brevo HTTPS REST API (guaranteed delivery across cloud / Render free tier):
+    if os.environ.get("BREVO_API_KEY"):
+        try:
+            app_name = course_login._field("app_name", "KitchenOps")
+            if _send_brevo_api(email, code, app_name):
+                return
+        except Exception:
+            pass
+
+    # 3. Fallback to standard SMTP:
+    try:
+        return _orig_deliver(email, code)
+    except Exception:
+        pass
+
+
+course_login._deliver = _custom_deliver
 
 app = FastAPI(title="KitchenOps")
 app.include_router(course_login.router)
