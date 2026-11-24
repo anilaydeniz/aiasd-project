@@ -4,7 +4,7 @@
   "tested": [
     {
       "owner": "220504031",
-      "device": "iPhone 13, iOS 18",
+      "device": "Techo Spark 7, Android 11",
       "tcs": [
         "TC-001-01",
         "TC-002-01",
@@ -16,7 +16,7 @@
     },
     {
       "owner": "220504023",
-      "device": "iPhone 14",
+      "device": "Techo Spark 7, Android 11 ",
       "tcs": [
         "TC-001-01",
         "TC-001-02",
@@ -35,7 +35,7 @@
     },
     {
       "owner": "220504008",
-      "device": "iPhone 13, iOS 18",
+      "device": "Techo Spark 7, Android 11",
       "tcs": [
         "TC-001-01",
         "TC-002-01",
@@ -47,11 +47,23 @@
     },
     {
       "owner": "220504024",
-      "device": "iPhone 13, iOS 18",
+      "device": "iPhone 13, iOS 27",
       "tcs": [
         "TC-001-02",
         "TC-002-02",
         "TC-009-01"
+      ],
+      "free_use": true,
+      "problems": 0,
+      "note": "no problem"
+    },
+    {
+      "owner": "220504015",
+      "device": "Techo Spark 7, Android 11",
+      "tcs": [
+        "TC-001-01",
+        "TC-002-01",
+        "TC-003-01"
       ],
       "free_use": true,
       "problems": 0,

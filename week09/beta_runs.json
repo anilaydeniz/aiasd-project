@@ -4,7 +4,7 @@
     {
       "tc": "TC-001-01",
       "tester": "220504023",
-      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1.0",
       "round": 1,
       "result": "pass",
       "note": "Logged in successfully using verification code delivered by the backend.",
@@ -13,7 +13,7 @@
     {
       "tc": "TC-002-01",
       "tester": "220504023",
-      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1.0",
       "round": 1,
       "result": "pass",
       "note": "Prepared 10 portions of Rigatoni Pomodoro and stock decremented accurately.",
@@ -22,7 +22,7 @@
     {
       "tc": "TC-003-01",
       "tester": "220504023",
-      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1.0",
       "round": 1,
       "result": "pass",
       "note": "Replenishment order dispatched and pending status updated properly.",
@@ -31,7 +31,7 @@
     {
       "tc": "free",
       "tester": "220504023",
-      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1.0",
       "round": 1,
       "result": "fail",
       "note": "The bottom navigation bar slightly overlaps the action buttons on the small screen resolution.",
@@ -76,7 +76,7 @@
     {
       "tc": "TC-001-01",
       "tester": "220504031",
-      "device": "Realme 10, Android 13",
+      "device": "Realme 10, Android 14",
       "round": 1,
       "result": "pass",
       "note": "Authentication verified through email token without delay.",
@@ -85,7 +85,7 @@
     {
       "tc": "TC-002-01",
       "tester": "220504031",
-      "device": "Realme 10, Android 13",
+      "device": "Realme 10, Android 14",
       "round": 1,
       "result": "pass",
       "note": "Logged portion cooking activity and pantry ingredient quantities updated.",
@@ -94,7 +94,7 @@
     {
       "tc": "TC-003-01",
       "tester": "220504031",
-      "device": "Realme 10, Android 13",
+      "device": "Realme 10, Android 14",
       "round": 1,
       "result": "pass",
       "note": "Order dispatch generated purchase transaction with supplier payload.",
@@ -103,7 +103,7 @@
     {
       "tc": "free",
       "tester": "220504031",
-      "device": "Realme 10, Android 13",
+      "device": "Realme 10, Android 14",
       "round": 1,
       "result": "fail",
       "note": "The chat screen message input field is partially covered when the virtual keyboard pops up.",
@@ -148,7 +148,7 @@
     {
       "tc": "TC-001-01",
       "tester": "220504048",
-      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "device": "Samsung Galaxy S23 Ultra, Android 17",
       "round": 1,
       "result": "pass",
       "note": "Quick credential verification and transition into main dashboard shell.",
@@ -157,7 +157,7 @@
     {
       "tc": "TC-002-01",
       "tester": "220504048",
-      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "device": "Samsung Galaxy S23 Ultra, Android 17",
       "round": 1,
       "result": "pass",
       "note": "Recipe portion deduction worked instantaneously with zero latency.",
@@ -166,7 +166,7 @@
     {
       "tc": "TC-003-01",
       "tester": "220504048",
-      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "device": "Samsung Galaxy S23 Ultra, Android 17",
       "round": 1,
       "result": "pass",
       "note": "Purchasing order transaction persisted and verified via API response.",
@@ -175,7 +175,7 @@
     {
       "tc": "free",
       "tester": "220504048",
-      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "device": "Samsung Galaxy S23 Ultra, Android 17",
       "round": 1,
       "result": "pass",
       "note": "Smooth user interface response and fast real-time synchronization with cloud backend.",
