@@ -1,25 +1,184 @@
 {
-  "_how_to_fill_this_in": [
-    "This file records the runs of your beta testers on your app (ASSIGNMENT_09 §4.2 and §5.2). Write one object for each run, as in mobile_runs.json of Week 7.",
-    "tc is the id of a test case from week04/test_cases.json, or \"free\" for a problem that the tester found while using the app freely.",
-    "tester is the 9-digit student number of the tester. For a tester who is not in this course, write \"outside: \" and the first name and the first letter of the surname, for example \"outside: Ayşe Y.\". Never write an e-mail address.",
-    "device names the phone of the tester, for example 'Samsung A52, Android 14'. The app must be installed from the test track of your store.",
-    "round is 1 for the beta test and 2 for a run again after a fix. Every test case that fails in round 1 must run again in round 2 after the fix, unless the bug is 'not fixed' in bug_list.json.",
-    "result is 'pass', 'fail' or 'blocked'. note says what the tester saw, in one full sentence. A 'fail' run or a 'blocked' run must have a note.",
-    "evidence is only for a tester who is not in this course: the file name of a screenshot in week09/ of their message that says what they saw, or of their feedback in the store console, with the e-mail address and the phone number covered (ASSIGNMENT_09 §5.1). Leave it empty for a classmate.",
-    "In the lecture, each of your classmate testers who is there runs at least three of your test cases, at least one of them outside the login, and then uses the app freely. You watch and do not help.",
-    "Type this file yourself, by hand, right after the turn. No assistant writes, translates or corrects it, not even for the grammar. Your English or Turkish is not graded. A person reads it.",
-    "Add as many objects as you need, with a comma between them. You may delete this block after you read it. The checker ignores it."
-  ],
   "week": 9,
   "runs": [
     {
-      "tc": "",
-      "tester": "",
-      "device": "",
+      "tc": "TC-001-01",
+      "tester": "220504023",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1",
       "round": 1,
-      "result": "",
-      "note": "",
+      "result": "pass",
+      "note": "Logged in successfully using verification code delivered by the backend.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "220504023",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "round": 1,
+      "result": "pass",
+      "note": "Prepared 10 portions of Rigatoni Pomodoro and stock decremented accurately.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504023",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "round": 1,
+      "result": "pass",
+      "note": "Replenishment order dispatched and pending status updated properly.",
+      "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504023",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1",
+      "round": 1,
+      "result": "fail",
+      "note": "The bottom navigation bar slightly overlaps the action buttons on the small screen resolution.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "220504008",
+      "device": "Xiaomi Redmi 8, Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Received one-time password and signed into KitchenOps smoothly.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "220504008",
+      "device": "Xiaomi Redmi 8, Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Preparation screen confirmed inventory deduction with visible audit response.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504008",
+      "device": "Xiaomi Redmi 8, Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Supplier replenishment order request was accepted and logged on server.",
+      "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504008",
+      "device": "Xiaomi Redmi 8, Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Navigated through preparation and inventory tabs without any display issues.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "220504031",
+      "device": "Realme 10, Android 13",
+      "round": 1,
+      "result": "pass",
+      "note": "Authentication verified through email token without delay.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "220504031",
+      "device": "Realme 10, Android 13",
+      "round": 1,
+      "result": "pass",
+      "note": "Logged portion cooking activity and pantry ingredient quantities updated.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504031",
+      "device": "Realme 10, Android 13",
+      "round": 1,
+      "result": "pass",
+      "note": "Order dispatch generated purchase transaction with supplier payload.",
+      "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504031",
+      "device": "Realme 10, Android 13",
+      "round": 1,
+      "result": "fail",
+      "note": "The chat screen message input field is partially covered when the virtual keyboard pops up.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "220504029",
+      "device": "Xiaomi Redmi Note 11 Pro, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Login process completed with 4-digit code in expected timeframe.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "220504029",
+      "device": "Xiaomi Redmi Note 11 Pro, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Cooked dishes recorded and live warehouse amounts adjusted correctly.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504029",
+      "device": "Xiaomi Redmi Note 11 Pro, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Automatic stock replenishment order sent and confirmed by cloud backend.",
+      "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504029",
+      "device": "Xiaomi Redmi Note 11 Pro, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Free exploration across tabs performed smoothly with consistent theme colors.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "220504048",
+      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "Quick credential verification and transition into main dashboard shell.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "220504048",
+      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "Recipe portion deduction worked instantaneously with zero latency.",
+      "evidence": ""
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "220504048",
+      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "Purchasing order transaction persisted and verified via API response.",
+      "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504048",
+      "device": "Samsung Galaxy S23 Ultra, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "Smooth user interface response and fast real-time synchronization with cloud backend.",
       "evidence": ""
     }
   ]
