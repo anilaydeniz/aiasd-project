@@ -38,10 +38,7 @@ def _send_brevo_api(email: str, code: str, app_name: str) -> bool:
         "api-key": api_key.strip(),
         "content-type": "application/json",
     }
-    sender_email = (
-        os.environ.get("SMTP_FROM")
-        or "anilaydeniz76@gmail.com"
-    )
+    sender_email = os.environ.get("SMTP_FROM") or "anilaydeniz76@gmail.com"
     payload = {
         "sender": {"name": app_name, "email": sender_email},
         "to": [{"email": email}],
