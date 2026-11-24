@@ -1,41 +1,82 @@
 // mobile/App.js
 // KitchenOps main mobile container with authentication flow & multi-screen navigation
 
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import React, { useState, Component } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import LoginScreen from './LoginScreen';
 import PrepScreen from './PrepScreen';
 import OrderScreen from './OrderScreen';
 import ChatScreen from './ChatScreen';
 
+class ErrorBoundary extends Component {
+  state = { hasError: false, error: null };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.warn('KitchenOps UI error caught:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <Text style={{ color: '#ef4444', fontSize: 20, fontWeight: 'bold', marginBottom: 12 }}>Application Encountered an Error</Text>
+          <Text style={{ color: '#94a3b8', fontSize: 14, textAlign: 'center', marginBottom: 20 }}>
+            {String(this.state.error?.message || 'Unexpected display error')}
+          </Text>
+          <TouchableOpacity
+            onPress={() => this.setState({ hasError: false })}
+            style={{ backgroundColor: '#0284c7', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 8 }}
+          >
+            <Text style={{ color: '#ffffff', fontWeight: 'bold' }}>Restart Session</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const [session, setSession] = useState(null);
   const [activeTab, setActiveTab] = useState('prep');
 
+  const safeUser = session
+    ? (typeof session.user === 'object' && session.user !== null
+        ? (session.user.email || session.user.user || 'chef@kitchenops.internal')
+        : String(session.user || 'chef@kitchenops.internal'))
+    : 'chef@kitchenops.internal';
+
   return (
-    <View style={styles.container}>
-      {!session ? (
-        <LoginScreen
-          onLoginSuccess={(user, token) => setSession({ user, token })}
-        />
-      ) : (
-        <View style={styles.appShell}>
-          <View style={styles.content}>
-            {activeTab === 'prep' ? (
-              <PrepScreen
-                user={session.user}
-                onLogout={() => setSession(null)}
-              />
-            ) : activeTab === 'orders' ? (
-              <OrderScreen
-                user={session.user}
-              />
-            ) : (
-              <ChatScreen
-                user={session.user}
-              />
-            )}
-          </View>
+    <ErrorBoundary>
+      <View style={styles.container}>
+        {!session ? (
+          <LoginScreen
+            onLoginSuccess={(user, token) => {
+              const emailStr = typeof user === 'object' && user !== null
+                ? (user.email || user.user || 'chef@kitchenops.internal')
+                : String(user || 'chef@kitchenops.internal');
+              setSession({ user: emailStr, token });
+            }}
+          />
+        ) : (
+          <View style={styles.appShell}>
+            <View style={styles.content}>
+              {activeTab === 'prep' ? (
+                <PrepScreen
+                  user={safeUser}
+                  onLogout={() => setSession(null)}
+                />
+              ) : activeTab === 'orders' ? (
+                <OrderScreen
+                  user={safeUser}
+                />
+              ) : (
+                <ChatScreen
+                  user={safeUser}
+                />
+              )}
+            </View>
 
           {/* Bottom Navigation Bar */}
           <View style={styles.navBar}>
@@ -79,7 +120,8 @@ export default function App() {
           </View>
         </View>
       )}
-    </View>
+      </View>
+    </ErrorBoundary>
   );
 }
 

@@ -71,7 +71,7 @@ export default function OrderScreen({ user }) {
         </View>
         <Text style={styles.title}>Automated Supplier Orders</Text>
         <Text style={styles.subtitle}>
-          Active Chef: {user || 'chef@kitchenops.internal'}
+          Active Chef: {typeof user === 'object' && user ? (user.email || user.user || 'chef@kitchenops.internal') : String(user || 'chef@kitchenops.internal')}
         </Text>
       </View>
 

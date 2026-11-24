@@ -1,6 +1,6 @@
 // mobile/api.js
 // KitchenOps mobile API client for server communication
-export const SERVER = 'http://172.20.10.2:8000'; // Laptop IPv4 address on hotspot/Wi-Fi
+export const SERVER = 'https://kitchenops-api-ekg4.onrender.com'; // Live 24/7 Render Cloud Server
 let token = null;
 
 export const setToken = (t) => {

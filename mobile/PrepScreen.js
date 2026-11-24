@@ -75,7 +75,7 @@ export default function PrepScreen({ user, onLogout }) {
         </View>
         <Text style={styles.title}>Dish Prep & FIFO Stock</Text>
         <Text style={styles.subtitle}>
-          Logged in: {user || 'chef@kitchenops.internal'}
+          Logged in: {typeof user === 'object' && user ? (user.email || user.user || 'chef@kitchenops.internal') : String(user || 'chef@kitchenops.internal')}
         </Text>
       </View>
 

@@ -91,7 +91,9 @@ export default function ChatScreen({ user }) {
             <Text style={styles.quotaText}>Daily: {quotaRemaining}/20</Text>
           </View>
         </View>
-        <Text style={styles.headerSubtitle}>Logged in as: {user || 'chef@kitchenops.internal'}</Text>
+        <Text style={styles.headerSubtitle}>
+          Logged in as: {typeof user === 'object' && user ? (user.email || user.user || 'chef@kitchenops.internal') : String(user || 'chef@kitchenops.internal')}
+        </Text>
       </View>
 
       {/* Error alert banner for 429 and 503 */}

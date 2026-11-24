@@ -2,7 +2,7 @@
   "expo": {
     "name": "KitchenOps",
     "slug": "kitchenops",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "ios": {
@@ -10,10 +10,17 @@
       "bundleIdentifier": "com.anilaydeniz.kitchenops"
     },
     "android": {
-      "package": "com.anilaydeniz.kitchenops"
+      "package": "com.anilaydeniz.kitchenops",
+      "versionCode": 3
     },
     "plugins": [
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d90a84ca-63ba-4b83-893e-b0ea21763318"
+      }
+    },
+    "owner": "anilaydeniz"
   }
 }
