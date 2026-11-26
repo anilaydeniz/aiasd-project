@@ -34,5 +34,27 @@
     ],
     "privacy_url": "https://gist.github.com/anilaydeniz/ff1dca5760ba44e8fac1f76f95a636de",
     "evidence": "store_s3.png"
+  },
+  "S4": {
+    "date": "2026-11-28",
+    "track": "closed testing",
+    "version": "1.0.1 (2), fixes in 1.0.2 (3)",
+    "testers_in_lecture": [
+      "220504023",
+      "220504008",
+      "220504031",
+      "220504029",
+      "220504048"
+    ],
+    "testers_outside": [
+      "Ali",
+      "Selahattin",
+      "Gönül",
+      "Hikmet",
+      "Zeynep",
+      "Murat"
+    ],
+    "bugs": 4,
+    "fixed": 4
   }
 }

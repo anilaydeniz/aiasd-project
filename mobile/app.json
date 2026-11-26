@@ -4,14 +4,24 @@
     "slug": "kitchenops",
     "version": "1.0.2",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A1D20"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anilaydeniz.kitchenops"
     },
     "android": {
       "package": "com.anilaydeniz.kitchenops",
-      "versionCode": 3
+      "versionCode": 3,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1A1D20"
+      }
     },
     "plugins": [
       "expo-status-bar"
