@@ -1,22 +1,22 @@
 // mobile/PrepScreen.js
 // serves: REQ-002, REQ-006
-// KitchenOps mobile kitchen prep screen: portion preparation & stock depletion
+// KitchenOps mobile kitchen prep screen: portion preparation, automated BOM stock deduction & buffer alerts
 
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { api } from './api';
 
 export default function PrepScreen({ user, onLogout }) {
   const [recipeId, setRecipeId] = useState('rigatoni_pomodoro');
-  const [portions, setPortions] = useState('10');
+  const [portions, setPortions] = useState(10);
   const [inventory, setInventory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -37,12 +37,15 @@ export default function PrepScreen({ user, onLogout }) {
     fetchInventory();
   }, []);
 
+  const handleAdjustPortions = (delta) => {
+    setPortions((prev) => Math.max(1, prev + delta));
+  };
+
   const handlePrep = async () => {
     setError('');
     setResult(null);
-    const numPortions = parseInt(portions, 10);
-    if (!numPortions || numPortions <= 0) {
-      setError('Please enter a valid portion count greater than 0.');
+    if (!portions || portions <= 0) {
+      setError('Please select at least 1 portion to prepare.');
       return;
     }
 
@@ -50,335 +53,496 @@ export default function PrepScreen({ user, onLogout }) {
     try {
       const res = await api('POST', '/prep/portions', {
         recipe_id: recipeId,
-        portions: numPortions,
+        portions: portions,
       });
 
       if (res.status === 200 && res.data && res.data.success) {
         setResult(res.data);
         fetchInventory();
       } else {
-        const detail = res.data && res.data.detail ? res.data.detail : 'Preparation failed.';
-        setError(detail);
+        const detail =
+          res.data && res.data.detail ? res.data.detail : 'Preparation request failed.';
+        setError(typeof detail === 'string' ? detail : 'Preparation error.');
       }
     } catch (e) {
-      setError('Network communication failed.');
+      setError('Network communication error with KitchenOps server.');
     } finally {
       setLoading(false);
     }
   };
 
+  // Recipe specs
+  const recipeName = 'Rigatoni Pomodoro';
+  const recipeStation = 'Hot Line 1';
+
+  // Projected ingredient depletion calculation
+  const pastaDepletion = (portions * 0.12).toFixed(2);
+  const tomatoDepletion = (portions * 0.08).toFixed(2);
+  const oliveOilDepletion = (portions * 0.015).toFixed(3);
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>KitchenOps Mobile</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Header Station Info */}
+      <View style={styles.headerBar}>
+        <View>
+          <Text style={styles.headerStation}>STATION 1 · PREP & COOKING</Text>
+          <Text style={styles.headerTitle}>{recipeName}</Text>
         </View>
-        <Text style={styles.title}>Dish Prep & FIFO Stock</Text>
-        <Text style={styles.subtitle}>
-          Logged in: {typeof user === 'object' && user ? (user.email || user.user || 'chef@kitchenops.internal') : String(user || 'chef@kitchenops.internal')}
-        </Text>
+        <View style={styles.stationBadge}>
+          <Text style={styles.stationBadgeText}>{recipeStation}</Text>
+        </View>
       </View>
 
+      {/* Main Preparation Control Card */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Selected Recipe</Text>
-        <View style={styles.recipeBox}>
-          <Text style={styles.recipeName}>Rigatoni Pomodoro</Text>
-          <Text style={styles.recipeMeta}>
-            Bill of Materials: 120g pasta, 80g tomato sauce per portion
-          </Text>
+        <Text style={styles.sectionTitle}>Portion Configuration</Text>
+        <Text style={styles.sectionSubtitle}>
+          Adjust batch quantity to calculate automated bill-of-materials stock deduction.
+        </Text>
+
+        <View style={styles.stepperContainer}>
+          <TouchableOpacity
+            style={styles.stepButton}
+            onPress={() => handleAdjustPortions(-5)}
+          >
+            <Text style={styles.stepButtonText}>-5</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.stepButton}
+            onPress={() => handleAdjustPortions(-1)}
+          >
+            <Text style={styles.stepButtonText}>-1</Text>
+          </TouchableOpacity>
+
+          <View style={styles.portionDisplay}>
+            <Text style={styles.portionNumber}>{portions}</Text>
+            <Text style={styles.portionUnit}>PORTIONS</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.stepButton}
+            onPress={() => handleAdjustPortions(1)}
+          >
+            <Text style={styles.stepButtonText}>+1</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.stepButton}
+            onPress={() => handleAdjustPortions(5)}
+          >
+            <Text style={styles.stepButtonText}>+5</Text>
+          </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>Portions to Prepare</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={portions}
-          onChangeText={setPortions}
-          placeholder="e.g. 10"
-          placeholderTextColor="#64748b"
-        />
-
-        <View style={styles.quickButtonsRow}>
-          {[5, 10, 20, 50].map((num) => (
+        <View style={styles.chipRow}>
+          {[5, 10, 20, 50].map((count) => (
             <TouchableOpacity
-              key={num}
+              key={count}
               style={[
-                styles.quickBtn,
-                portions === String(num) && styles.quickBtnActive,
+                styles.quickChip,
+                portions === count && styles.quickChipActive,
               ]}
-              onPress={() => setPortions(String(num))}
+              onPress={() => setPortions(count)}
             >
               <Text
                 style={[
-                  styles.quickBtnText,
-                  portions === String(num) && styles.quickBtnTextActive,
+                  styles.quickChipText,
+                  portions === count && styles.quickChipTextActive,
                 ]}
               >
-                {num} portions
+                {count} pax
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
+        {/* Projected BOM Depletion Box */}
+        <View style={styles.depletionBox}>
+          <Text style={styles.depletionTitle}>PROJECTED PANTRY DEPLETION</Text>
+          <View style={styles.depletionRow}>
+            <Text style={styles.depletionItem}>Rigatoni Pasta</Text>
+            <Text style={styles.depletionQty}>-{pastaDepletion} kg</Text>
+          </View>
+          <View style={styles.depletionRow}>
+            <Text style={styles.depletionItem}>San Marzano Tomatoes</Text>
+            <Text style={styles.depletionQty}>-{tomatoDepletion} kg</Text>
+          </View>
+          <View style={[styles.depletionRow, { borderBottomWidth: 0 }]}>
+            <Text style={styles.depletionItem}>Extra Virgin Olive Oil</Text>
+            <Text style={styles.depletionQty}>-{oliveOilDepletion} L</Text>
+          </View>
+        </View>
+
         {error ? (
           <View style={styles.errorBox}>
-            <Text style={styles.errorText}>⚠ {error}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : null}
 
         {result ? (
           <View style={styles.successBox}>
-            <Text style={styles.successTitle}>✓ Prep Logged Successfully!</Text>
+            <Text style={styles.successTitle}>✓ Preparation Batch Recorded</Text>
             <Text style={styles.successDetail}>
-              Portions: {result.portions} · Audit ID: {result.audit_log_id}
+              Successfully prepared {result.portions_prepared || portions} portions.
             </Text>
-            {result.depleted && result.depleted.map((item, idx) => (
-              <Text key={idx} style={styles.depletedItem}>
-                - Depleted {item.ingredient}: {item.amount_kg} kg
-              </Text>
-            ))}
+            <Text style={styles.successSub}>
+              Pantry stock decremented via FIFO batch rules.
+            </Text>
           </View>
         ) : null}
 
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          style={[styles.primaryButton, loading && styles.buttonDisabled]}
           onPress={handlePrep}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.buttonText}>Log Portions & Deduct Stock</Text>
+            <Text style={styles.primaryButtonText}>
+              Confirm Preparation & Deplete Stock
+            </Text>
           )}
         </TouchableOpacity>
       </View>
 
-      {inventory ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Live Inventory Stock Levels</Text>
-          {Object.entries(inventory).map(([ing, qty]) => (
-            <View key={ing} style={styles.stockRow}>
-              <View style={styles.stockLabelContainer}>
-                <Text style={styles.stockLabel}>{ing}</Text>
-                {qty < 5.0 ? (
-                  <View style={styles.lowStockWarningBadge}>
-                    <Text style={styles.lowStockWarningText}>⚠ Buffer Alert</Text>
-                  </View>
-                ) : null}
-              </View>
-              <Text style={[styles.stockValue, qty < 5.0 && styles.stockValueLow]}>{qty} kg</Text>
-            </View>
-          ))}
+      {/* Live Pantry Stock Card with Buffer Alerts */}
+      <View style={styles.card}>
+        <View style={styles.cardHeaderRow}>
+          <Text style={styles.sectionTitle}>Live Pantry Stock</Text>
+          <TouchableOpacity onPress={fetchInventory}>
+            <Text style={styles.refreshLink}>Refresh</Text>
+          </TouchableOpacity>
         </View>
-      ) : null}
+        <Text style={styles.sectionSubtitle}>
+          Real-time ingredient levels synced across all kitchen terminals.
+        </Text>
 
-      {onLogout ? (
-        <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
-      ) : null}
+        {inventory ? (
+          <View style={styles.inventoryList}>
+            {Object.entries(inventory).map(([itemKey, itemData]) => {
+              const currentStock = itemData.current ?? itemData.qty ?? 0;
+              const unit = itemData.unit || 'kg';
+              const buffer = itemData.buffer_threshold || itemData.threshold || 5;
+              const isLow = currentStock <= buffer;
+
+              return (
+                <View key={itemKey} style={styles.inventoryRow}>
+                  <View style={styles.inventoryInfo}>
+                    <Text style={styles.inventoryName}>
+                      {itemData.name || itemKey.replace(/_/g, ' ')}
+                    </Text>
+                    <Text style={styles.inventoryMeta}>
+                      Buffer Threshold: {buffer} {unit}
+                    </Text>
+                  </View>
+                  <View style={styles.inventoryRight}>
+                    <Text
+                      style={[
+                        styles.inventoryAmount,
+                        isLow && styles.inventoryAmountLow,
+                      ]}
+                    >
+                      {currentStock} {unit}
+                    </Text>
+                    {isLow && (
+                      <View style={styles.bufferBadge}>
+                        <Text style={styles.bufferBadgeText}>⚠ BUFFER ALERT</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        ) : (
+          <ActivityIndicator color="#1D4ED8" style={{ marginVertical: 20 }} />
+        )}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#0f172a',
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: '#EDF2F7',
   },
-  header: {
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  headerBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
   },
-  badge: {
-    backgroundColor: '#0284c7',
-    paddingHorizontal: 12,
+  headerStation: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1D4ED8',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A202C',
+  },
+  stationBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderRadius: 99,
   },
-  badgeText: {
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#f8fafc',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#94a3b8',
+  stationBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#166534',
   },
   card: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
+    padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#CBD5E1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#f8fafc',
-    marginBottom: 12,
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  recipeBox: {
-    backgroundColor: '#0f172a',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  recipeName: {
-    color: '#38bdf8',
-    fontSize: 16,
+  refreshLink: {
+    fontSize: 12.5,
+    color: '#1D4ED8',
     fontWeight: '600',
   },
-  recipeMeta: {
-    color: '#64748b',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  label: {
-    color: '#cbd5e1',
-    fontSize: 14,
-    marginBottom: 6,
-    fontWeight: '500',
-  },
-  input: {
-    backgroundColor: '#0f172a',
-    borderWidth: 1,
-    borderColor: '#475569',
-    borderRadius: 10,
-    padding: 12,
-    color: '#ffffff',
+  sectionTitle: {
     fontSize: 16,
-    marginBottom: 10,
+    fontWeight: '700',
+    color: '#1A202C',
+    marginBottom: 4,
   },
-  quickButtonsRow: {
+  sectionSubtitle: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginBottom: 16,
+    lineHeight: 17,
+  },
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  stepButton: {
+    backgroundColor: '#E2E8F0',
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  stepButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  portionDisplay: {
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    minWidth: 110,
+  },
+  portionNumber: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#1E3A8A',
+  },
+  portionUnit: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 1,
+  },
+  chipRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
   },
-  quickBtn: {
-    backgroundColor: '#0f172a',
-    borderWidth: 1,
-    borderColor: '#334155',
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  quickBtnActive: {
-    borderColor: '#38bdf8',
-    backgroundColor: '#0369a1',
-  },
-  quickBtnText: {
-    color: '#94a3b8',
-    fontSize: 12,
-  },
-  quickBtnTextActive: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: '#2563eb',
-    paddingVertical: 14,
+  quickChip: {
+    flex: 1,
+    backgroundColor: '#F1F5F9',
     borderRadius: 10,
+    paddingVertical: 8,
     alignItems: 'center',
-    marginTop: 8,
+    marginHorizontal: 3,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  quickChipActive: {
+    backgroundColor: '#DBEAFE',
+    borderColor: '#93C5FD',
+  },
+  quickChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  quickChipTextActive: {
+    color: '#1D4ED8',
+    fontWeight: '700',
+  },
+  depletionBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    marginBottom: 16,
+  },
+  depletionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
+  depletionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  depletionItem: {
+    fontSize: 13,
+    color: '#1E293B',
+  },
+  depletionQty: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#DC2626',
+  },
+  primaryButton: {
+    backgroundColor: '#1D4ED8',
+    borderRadius: 12,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#1D4ED8',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   buttonDisabled: {
     opacity: 0.6,
   },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
   errorBox: {
-    backgroundColor: '#7f1d1d',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 12,
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 14,
   },
   errorText: {
-    color: '#fca5a5',
+    color: '#DC2626',
     fontSize: 13,
   },
   successBox: {
-    backgroundColor: '#064e3b',
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+    borderRadius: 10,
     padding: 12,
-    borderRadius: 8,
     marginBottom: 14,
   },
   successTitle: {
-    color: '#6ee7b7',
-    fontWeight: 'bold',
+    color: '#166534',
     fontSize: 14,
-    marginBottom: 4,
+    fontWeight: '700',
+    marginBottom: 2,
   },
   successDetail: {
-    color: '#a7f3d0',
-    fontSize: 12,
-    marginBottom: 4,
+    color: '#15803D',
+    fontSize: 12.5,
   },
-  depletedItem: {
-    color: '#d1fae5',
-    fontSize: 12,
+  successSub: {
+    color: '#166534',
+    fontSize: 11.5,
+    marginTop: 2,
   },
-  stockRow: {
+  inventoryList: {
+    marginTop: 4,
+  },
+  inventoryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    borderBottomColor: '#F1F5F9',
   },
-  stockLabelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  inventoryInfo: {
+    flex: 1,
   },
-  lowStockWarningBadge: {
-    backgroundColor: '#7f1d1d',
-    borderColor: '#ef4444',
-    borderWidth: 1,
+  inventoryName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1E293B',
+    textTransform: 'capitalize',
+  },
+  inventoryMeta: {
+    fontSize: 11.5,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  inventoryRight: {
+    alignItems: 'flex-end',
+  },
+  inventoryAmount: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1E293B',
+  },
+  inventoryAmountLow: {
+    color: '#DC2626',
+  },
+  bufferBadge: {
+    backgroundColor: '#FEF2F2',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
-    marginLeft: 8,
+    marginTop: 3,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  lowStockWarningText: {
-    color: '#fca5a5',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  stockValueLow: {
-    color: '#f87171',
-    fontWeight: 'bold',
-  },
-  stockLabel: {
-    color: '#94a3b8',
-    fontSize: 14,
-    textTransform: 'capitalize',
-  },
-  stockValue: {
-    color: '#f8fafc',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  logoutButton: {
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 8,
-  },
-  logoutText: {
-    color: '#ef4444',
-    fontSize: 14,
-    fontWeight: '600',
+  bufferBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#DC2626',
   },
 });

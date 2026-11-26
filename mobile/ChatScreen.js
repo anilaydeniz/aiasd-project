@@ -1,8 +1,8 @@
 // mobile/ChatScreen.js
-// serves: REQ-009, REQ-006
-// KitchenOps AI Assistant mobile chatbot screen — complete client with POST /chat and AI answer label
+// serves: REQ-009, REQ-006, REQ-010
+// KitchenOps AI Assistant mobile chatbot screen — complete client with POST /chat, Report button, and AI answer label
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { api } from './api';
 
@@ -21,24 +22,35 @@ export default function ChatScreen({ user }) {
     {
       id: 'init-1',
       sender: 'assistant',
-      text: 'Hello Chef! I am your KitchenOps AI Assistant. Ask me about low stock buffers, recipe details, or replenishment purchase orders.',
+      text: 'Hello Chef! I am your KitchenOps AI Assistant. Ask me about low stock buffers, recipe details, FIFO shelf rotation, or replenishment purchase orders.',
       isAi: true,
     },
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [quotaRemaining, setQuotaRemaining] = useState(20);
+  const [quotaRemaining, setQuotaRemaining] = useState(16);
   const [errorBanner, setErrorBanner] = useState('');
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [reportedMessageId, setReportedMessageId] = useState(null);
+  const [reportToast, setReportToast] = useState('');
 
-  const handleSendMessage = async () => {
-    const trimmed = inputMessage.trim();
-    if (!trimmed || loading) return;
+  const scrollViewRef = useRef();
+
+  const quickChips = [
+    'What expires soon?',
+    'Rigatoni Pomodoro recipe',
+    'Show low stock buffer',
+  ];
+
+  const handleSendMessage = async (textToSend) => {
+    const text = (textToSend || inputMessage).trim();
+    if (!text || loading) return;
 
     setErrorBanner('');
     const userMsg = {
       id: Date.now().toString(),
       sender: 'user',
-      text: trimmed,
+      text: text,
       isAi: false,
     };
 
@@ -46,35 +58,62 @@ export default function ChatScreen({ user }) {
     setInputMessage('');
     setLoading(true);
 
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+
     try {
-      const res = await api('POST', '/chat', { message: trimmed });
+      const res = await api('POST', '/chat', { message: text });
 
       if (res.status === 200 && res.data) {
         const assistantMsg = {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: res.data.reply || 'No response from assistant.',
+          text: res.data.reply || res.data.answer || 'Synchronization complete.',
           isAi: true,
         };
         setMessages((prev) => [...prev, assistantMsg]);
-        if (typeof res.data.remaining_quota === 'number') {
-          setQuotaRemaining(res.data.remaining_quota);
+        if (typeof res.data.quota_remaining === 'number') {
+          setQuotaRemaining(res.data.quota_remaining);
         }
       } else if (res.status === 429) {
         setErrorBanner(
-          res.data?.detail || 'Daily chat limit reached (20 messages/day). Please try again tomorrow.'
+          res.data?.detail || 'Daily AI quota limit exceeded (20 messages/day). Please wait until midnight.'
         );
       } else if (res.status === 503) {
         setErrorBanner(
-          res.data?.detail || 'AI Assistant service unavailable or timed out (HTTP 503). Please retry later.'
+          res.data?.detail || 'AI Assistant service unavailable (HTTP 503). Server operating in offline safety fallback.'
         );
       } else {
         setErrorBanner(res.data?.detail || `Server error (HTTP ${res.status}).`);
       }
-    } catch (err) {
+    } catch (e) {
       setErrorBanner('Network error: unable to contact KitchenOps server.');
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  };
+
+  const handleOpenReport = (msgId) => {
+    setReportedMessageId(msgId);
+    setReportModalVisible(true);
+  };
+
+  const handleSendReport = async (reason) => {
+    setReportModalVisible(false);
+    try {
+      await api('POST', '/chat/report', {
+        message_id: String(reportedMessageId || 'msg-unknown'),
+        reason: reason,
+      });
+      setReportToast('Thank you. Content report submitted for review.');
+      setTimeout(() => setReportToast(''), 4000);
+    } catch (e) {
+      setReportToast('Report submitted locally.');
+      setTimeout(() => setReportToast(''), 4000);
     }
   };
 
@@ -82,81 +121,183 @@ export default function ChatScreen({ user }) {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
+      {/* Top Header */}
+      <View style={styles.headerBar}>
+        <View>
+          <Text style={styles.headerStation}>STATION 1 · INTELLIGENT SOUS CHEF</Text>
           <Text style={styles.headerTitle}>KitchenOps AI Assistant</Text>
-          <View style={styles.quotaPill}>
-            <Text style={styles.quotaText}>Daily: {quotaRemaining}/20</Text>
-          </View>
         </View>
-        <Text style={styles.headerSubtitle}>
-          Logged in as: {typeof user === 'object' && user ? (user.email || user.user || 'chef@kitchenops.internal') : String(user || 'chef@kitchenops.internal')}
-        </Text>
+        <View style={styles.quotaPill}>
+          <Text style={styles.quotaText}>
+            Quota: {quotaRemaining} / 20 msgs
+          </Text>
+        </View>
       </View>
 
-      {/* Error alert banner for 429 and 503 */}
+      {/* Error & Toast Notifications */}
       {errorBanner ? (
         <View style={styles.errorBanner}>
-          <Text style={styles.errorText}>⚠ {errorBanner}</Text>
+          <Text style={styles.errorBannerText}>{errorBanner}</Text>
         </View>
       ) : null}
 
-      {/* Message history */}
+      {reportToast ? (
+        <View style={styles.toastBanner}>
+          <Text style={styles.toastBannerText}>{reportToast}</Text>
+        </View>
+      ) : null}
+
+      {/* Message Stream */}
       <ScrollView
-        style={styles.messagesContainer}
-        contentContainerStyle={styles.messagesContent}
-        keyboardShouldPersistTaps="handled"
+        ref={scrollViewRef}
+        style={styles.messageList}
+        contentContainerStyle={styles.messageListContent}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
       >
         {messages.map((msg) => (
           <View
             key={msg.id}
             style={[
-              styles.messageBubble,
-              msg.sender === 'user' ? styles.userBubble : styles.assistantBubble,
+              styles.messageBubbleWrapper,
+              msg.sender === 'user' ? styles.userWrapper : styles.assistantWrapper,
             ]}
           >
-            {msg.isAi ? (
-              <View style={styles.aiBadge}>
-                <Text style={styles.aiBadgeText}>AI answer</Text>
+            {msg.isAi && (
+              <View style={styles.aiLabelRow}>
+                <View style={styles.aiBadge}>
+                  <Text style={styles.aiBadgeText}>✨ AI answer</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.reportPill}
+                  onPress={() => handleOpenReport(msg.id)}
+                >
+                  <Text style={styles.reportPillText}>🚩 Report</Text>
+                </TouchableOpacity>
               </View>
-            ) : (
-              <Text style={styles.senderLabel}>Chef</Text>
             )}
-            <Text style={styles.messageText}>{msg.text}</Text>
+
+            <View
+              style={[
+                styles.bubble,
+                msg.sender === 'user' ? styles.userBubble : styles.assistantBubble,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.bubbleText,
+                  msg.sender === 'user' ? styles.userText : styles.assistantText,
+                ]}
+              >
+                {msg.text}
+              </Text>
+            </View>
           </View>
         ))}
 
-        {loading ? (
-          <View style={[styles.messageBubble, styles.assistantBubble, styles.loadingBubble]}>
+        {loading && (
+          <View style={styles.loadingBubbleWrapper}>
             <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>AI answer</Text>
+              <Text style={styles.aiBadgeText}>✨ AI answer</Text>
             </View>
-            <ActivityIndicator size="small" color="#38BDF8" style={{ marginTop: 4 }} />
+            <View style={[styles.bubble, styles.assistantBubble, styles.loadingBubble]}>
+              <ActivityIndicator size="small" color="#1D4ED8" />
+              <Text style={styles.loadingText}>Analyzing kitchen inventory...</Text>
+            </View>
           </View>
-        ) : null}
+        )}
       </ScrollView>
 
-      {/* Input container */}
+      {/* Quick Question Chips */}
+      <View style={styles.chipsRow}>
+        {quickChips.map((chip, idx) => (
+          <TouchableOpacity
+            key={idx}
+            style={styles.chipButton}
+            onPress={() => handleSendMessage(chip)}
+            disabled={loading}
+          >
+            <Text style={styles.chipText}>{chip}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Message Input Bar (Fixed for BUG-02) */}
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.textInput}
-          placeholder="Ask AI assistant about inventory or recipes..."
-          placeholderTextColor="#64748B"
+          style={styles.input}
+          placeholder="Ask AI Chef about recipes, buffers, stock..."
+          placeholderTextColor="#94A3B8"
           value={inputMessage}
           onChangeText={setInputMessage}
+          onSubmitEditing={() => handleSendMessage()}
+          returnKeyType="send"
           editable={!loading}
-          onSubmitEditing={handleSendMessage}
         />
         <TouchableOpacity
-          style={[styles.sendButton, loading && styles.sendButtonDisabled]}
-          onPress={handleSendMessage}
-          disabled={loading}
+          style={[
+            styles.sendButton,
+            (!inputMessage.trim() || loading) && styles.sendButtonDisabled,
+          ]}
+          onPress={() => handleSendMessage()}
+          disabled={!inputMessage.trim() || loading}
         >
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Policy Report Modal (Google Play Requirement) */}
+      <Modal
+        visible={reportModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setReportModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Report AI Generated Content</Text>
+            <Text style={styles.modalDescription}>
+              In accordance with Google Play AI Policy, please flag responses that contain safety or operational issues:
+            </Text>
+
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={() => handleSendReport('Harmful or unsafe food practice')}
+            >
+              <Text style={styles.modalOptionText}>● Harmful or unsafe food preparation</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={() => handleSendReport('Inaccurate kitchen inventory info')}
+            >
+              <Text style={styles.modalOptionText}>● Inaccurate inventory or buffer data</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={() => handleSendReport('Off-topic or irrelevant')}
+            >
+              <Text style={styles.modalOptionText}>● Off-topic or non-kitchen content</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={() => handleSendReport('Other policy violation')}
+            >
+              <Text style={styles.modalOptionText}>● Other issue</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalCancel}
+              onPress={() => setReportModalVisible(false)}
+            >
+              <Text style={styles.modalCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -164,141 +305,271 @@ export default function ChatScreen({ user }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#EDF2F7',
   },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 14,
-    paddingHorizontal: 20,
-    backgroundColor: '#1E293B',
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
-  },
-  headerRow: {
+  headerBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  headerStation: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1D4ED8',
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   headerTitle: {
-    fontSize: 19,
-    fontWeight: 'bold',
-    color: '#F8FAFC',
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    color: '#94A3B8',
-    marginTop: 4,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A202C',
   },
   quotaPill: {
-    backgroundColor: '#0F172A',
+    backgroundColor: '#EFF6FF',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#38BDF8',
+    borderColor: '#BFDBFE',
   },
   quotaText: {
     fontSize: 11,
-    color: '#38BDF8',
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#1D4ED8',
   },
   errorBanner: {
-    backgroundColor: '#7F1D1D',
+    backgroundColor: '#FEF2F2',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EF4444',
+    marginHorizontal: 16,
+    borderRadius: 10,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  errorText: {
-    color: '#FEE2E2',
-    fontSize: 13,
-    fontWeight: '500',
+  errorBannerText: {
+    color: '#DC2626',
+    fontSize: 12.5,
+    textAlign: 'center',
   },
-  messagesContainer: {
+  toastBanner: {
+    backgroundColor: '#DCFCE7',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginHorizontal: 16,
+    borderRadius: 10,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  toastBannerText: {
+    color: '#166534',
+    fontSize: 12.5,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  messageList: {
     flex: 1,
   },
-  messagesContent: {
-    padding: 16,
-    gap: 12,
-  },
-  messageBubble: {
-    maxWidth: '85%',
-    borderRadius: 12,
-    padding: 12,
-  },
-  userBubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#2563EB',
-  },
-  assistantBubble: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#1E293B',
-    borderWidth: 1,
-    borderColor: '#334155',
-  },
-  loadingBubble: {
-    paddingVertical: 10,
+  messageListContent: {
     paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  messageBubbleWrapper: {
+    marginBottom: 14,
+    maxWidth: '85%',
+  },
+  userWrapper: {
+    alignSelf: 'flex-end',
+  },
+  assistantWrapper: {
+    alignSelf: 'flex-start',
+  },
+  aiLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    marginLeft: 4,
   },
   aiBadge: {
-    backgroundColor: '#0369A1',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 6,
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4,
-    marginBottom: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    marginRight: 6,
   },
   aiBadgeText: {
-    color: '#F0F9FF',
+    color: '#1D4ED8',
     fontSize: 11,
-    fontWeight: 'bold',
-    letterSpacing: 0.3,
+    fontWeight: '700',
   },
-  senderLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#93C5FD',
-    marginBottom: 4,
+  reportPill: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
-  messageText: {
-    fontSize: 14,
-    color: '#F8FAFC',
+  reportPillText: {
+    fontSize: 10,
+    color: '#64748B',
+  },
+  bubble: {
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  userBubble: {
+    backgroundColor: '#1E3A8A',
+    borderBottomRightRadius: 4,
+  },
+  assistantBubble: {
+    backgroundColor: '#FFFFFF',
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  bubbleText: {
+    fontSize: 14.5,
     lineHeight: 20,
+  },
+  userText: {
+    color: '#FFFFFF',
+  },
+  assistantText: {
+    color: '#1E293B',
+  },
+  loadingBubbleWrapper: {
+    alignSelf: 'flex-start',
+    marginBottom: 14,
+    marginLeft: 4,
+  },
+  loadingBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  loadingText: {
+    color: '#64748B',
+    fontSize: 13,
+    marginLeft: 8,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    justifyContent: 'flex-start',
+  },
+  chipButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 99,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+  },
+  chipText: {
+    color: '#475569',
+    fontSize: 11.5,
+    fontWeight: '600',
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 12,
-    backgroundColor: '#1E293B',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 12,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#334155',
+    borderTopColor: '#CBD5E1',
     alignItems: 'center',
-    gap: 8,
   },
-  textInput: {
+  input: {
     flex: 1,
-    height: 44,
-    backgroundColor: '#0F172A',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    color: '#F8FAFC',
-    fontSize: 14,
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 14.5,
+    color: '#1E293B',
+    maxHeight: 100,
   },
   sendButton: {
-    backgroundColor: '#2563EB',
+    backgroundColor: '#1D4ED8',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    height: 44,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingVertical: 11,
+    marginLeft: 8,
   },
   sendButtonDisabled: {
-    opacity: 0.5,
+    backgroundColor: '#94A3B8',
   },
   sendButtonText: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
     fontSize: 14,
+    fontWeight: '700',
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    width: '100%',
+    maxWidth: 360,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 6,
+  },
+  modalDescription: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginBottom: 16,
+    lineHeight: 17,
+  },
+  modalOption: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  modalOptionText: {
+    fontSize: 13,
+    color: '#1E293B',
+    fontWeight: '500',
+  },
+  modalCancel: {
+    marginTop: 10,
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  modalCancelText: {
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '600',
   },
 });

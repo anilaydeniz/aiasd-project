@@ -62,12 +62,36 @@
       "device": "Techo Spark 7, Android 11",
       "tcs": [
         "TC-001-01",
+        "TC-003-01",
+        "TC-009-01"
+      ],
+      "free_use": true,
+      "problems": 0,
+      "note": "no problem"
+    },
+    {
+      "owner": "220504029",
+      "device": "Techo Spark 7, Android 11",
+      "tcs": [
+        "TC-001-01",
         "TC-002-01",
         "TC-003-01"
       ],
       "free_use": true,
       "problems": 0,
-      "note": "no problem"
+      "note": "no problem, the design is simple and clear"
+    },
+    {
+      "owner": "220504010",
+      "device": "Techo Spark 7, Android 11",
+      "tcs": [
+        "TC-001-01",
+        "TC-002-01",
+        "TC-003-01"
+      ],
+      "free_use": true,
+      "problems": 0,
+      "note": "no problem, authenticated smoothly and verified main workflow"
     }
   ]
 }

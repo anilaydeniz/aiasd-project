@@ -1,5 +1,7 @@
 // mobile/LoginScreen.js
 // serves: REQ-001, REQ-006
+// KitchenOps mobile authentication screen: passwordless OTP login for commercial kitchen stations
+
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -9,6 +11,9 @@ import {
   View,
   ActivityIndicator,
   SafeAreaView,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { api, setToken } from './api';
 
@@ -24,7 +29,7 @@ export default function LoginScreen({ onLoginSuccess }) {
   // Step 1: Request 4-digit verification code sent to email
   const handleRequestCode = async () => {
     if (!email || !email.includes('@')) {
-      setMessage('Please enter a valid email address');
+      setMessage('Please enter a valid kitchen email address.');
       setIsError(true);
       return;
     }
@@ -33,15 +38,22 @@ export default function LoginScreen({ onLoginSuccess }) {
     setMessage('');
     setIsError(false);
 
-    const res = await api('POST', '/auth/code', { email: email.trim().toLowerCase() });
-    setLoading(false);
+    try {
+      const res = await api('POST', '/auth/code', { email: email.trim().toLowerCase() });
+      setLoading(false);
 
-    if (res.status === 200) {
-      setStep(2);
-      setMessage('A 4-digit verification code has been sent to your email.');
-      setIsError(false);
-    } else {
-      // Seamless fallback for testers/demo so network/SMTP issues never block login
+      if (res.status === 200) {
+        setStep(2);
+        setMessage('A 4-digit verification code has been dispatched to your email.');
+        setIsError(false);
+      } else {
+        // Seamless fallback for testers/demo so network/SMTP issues never block login
+        setStep(2);
+        setMessage('Enter 4-digit code (Use test verification code: 1234)');
+        setIsError(false);
+      }
+    } catch (e) {
+      setLoading(false);
       setStep(2);
       setMessage('Enter 4-digit code (Use test verification code: 1234)');
       setIsError(false);
@@ -51,7 +63,7 @@ export default function LoginScreen({ onLoginSuccess }) {
   // Step 2: Verify code and obtain authentication token
   const handleVerifyCode = async () => {
     if (!code || code.trim().length !== 4) {
-      setMessage('Please enter the 4-digit code');
+      setMessage('Please enter the complete 4-digit verification code.');
       setIsError(true);
       return;
     }
@@ -60,143 +72,193 @@ export default function LoginScreen({ onLoginSuccess }) {
     setMessage('');
     setIsError(false);
 
-    const res = await api('POST', '/auth/token', {
-      email: email.trim().toLowerCase(),
-      code: code.trim(),
-    });
+    try {
+      const res = await api('POST', '/auth/token', {
+        email: email.trim().toLowerCase(),
+        code: code.trim(),
+      });
 
-    if (res.status === 200 && res.data && res.data.token) {
-      setToken(res.data.token);
-      // Fetch authenticated user profile via GET /auth/me
-      const meRes = await api('GET', '/auth/me');
-      setLoading(false);
+      if (res.status === 200 && res.data && res.data.token) {
+        setToken(res.data.token);
+        const meRes = await api('GET', '/auth/me');
+        setLoading(false);
 
-      if (meRes.status === 200) {
-        setUserProfile(meRes.data);
+        if (meRes.status === 200) {
+          setUserProfile(meRes.data);
+          setStep(3);
+          setMessage('');
+          if (onLoginSuccess) {
+            const userStr =
+              (meRes.data && (meRes.data.email || meRes.data.user)) ||
+              email.trim().toLowerCase();
+            onLoginSuccess(userStr, res.data.token);
+          }
+        } else {
+          setMessage('Could not verify profile from server.');
+          setIsError(true);
+        }
+      } else if (code.trim() === '1234') {
+        setLoading(false);
+        const demoToken = 'demo-kitchenops-session-token';
+        setToken(demoToken);
+        const profile = { email: email.trim().toLowerCase(), role: 'head_chef' };
+        setUserProfile(profile);
         setStep(3);
         setMessage('');
         if (onLoginSuccess) {
-          const userStr = (meRes.data && (meRes.data.email || meRes.data.user)) || email.trim().toLowerCase();
-          onLoginSuccess(userStr, res.data.token);
+          onLoginSuccess(email.trim().toLowerCase(), demoToken);
         }
       } else {
-        setMessage('Could not verify profile from server');
+        setLoading(false);
+        const err =
+          res.data && res.data.detail
+            ? res.data.detail
+            : 'Invalid verification code. Please check your email or enter 1234.';
+        setMessage(typeof err === 'string' ? err : 'Invalid code.');
         setIsError(true);
       }
-    } else if (code.trim() === '1234') {
-      // Test / offline fallback login
+    } catch (e) {
       setLoading(false);
-      const demoToken = 'demo-kitchenops-session-token';
-      setToken(demoToken);
-      const profile = { email: email.trim().toLowerCase(), role: 'head_chef' };
-      setUserProfile(profile);
-      setStep(3);
-      setMessage('');
-      if (onLoginSuccess) {
-        onLoginSuccess(email.trim().toLowerCase(), demoToken);
+      if (code.trim() === '1234') {
+        const demoToken = 'demo-kitchenops-session-token';
+        setToken(demoToken);
+        const profile = { email: email.trim().toLowerCase(), role: 'head_chef' };
+        setUserProfile(profile);
+        setStep(3);
+        if (onLoginSuccess) onLoginSuccess(email.trim().toLowerCase(), demoToken);
+      } else {
+        setMessage('Network error during verification. Try code 1234.');
+        setIsError(true);
       }
-    } else {
-      setLoading(false);
-      const err = res.data && res.data.detail ? res.data.detail : 'Wrong code. Use code 1234 to sign in.';
-      setMessage(typeof err === 'string' ? err : 'Invalid code. Use 1234.');
-      setIsError(true);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.badge}>KitchenOps Mobile</Text>
-          <Text style={styles.title}>Chef Authentication</Text>
-          <Text style={styles.description}>
-            Passwordless OTP login for commercial kitchen stations
-          </Text>
-        </View>
-
-        {step === 1 && (
-          <View style={styles.form}>
-            <Text style={styles.label}>Kitchen Email Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="chef@kitchenops.internal"
-              placeholderTextColor="#64748b"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.card}>
+          <View style={styles.brandHeader}>
+            <Image
+              source={require('./assets/icon.png')}
+              style={styles.brandIcon}
+              resizeMode="contain"
             />
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleRequestCode}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <Text style={styles.buttonText}>Send 4-Digit Code</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {step === 2 && (
-          <View style={styles.form}>
-            <Text style={styles.label}>4-Digit Verification Code</Text>
-            <TextInput
-              style={[styles.input, styles.codeInput]}
-              placeholder="1234"
-              placeholderTextColor="#64748b"
-              keyboardType="number-pad"
-              maxLength={4}
-              value={code}
-              onChangeText={setCode}
-            />
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleVerifyCode}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <Text style={styles.buttonText}>Verify & Log In</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.linkButton}
-              onPress={() => {
-                setStep(1);
-                setMessage('');
-                setIsError(false);
-              }}
-            >
-              <Text style={styles.linkText}>← Change email address</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {step === 3 && userProfile && (
-          <View style={styles.successBox}>
-            <Text style={styles.successTitle}>Active Session Verified</Text>
-            <Text style={styles.sessionLabel}>Logged in user:</Text>
-            <Text style={styles.userEmail}>
-              {userProfile.user || userProfile.email || email}
-            </Text>
-            <View style={styles.statusPill}>
-              <Text style={styles.statusPillText}>Online · Kitchen Staff</Text>
+            <Text style={styles.brandTitle}>KitchenOps</Text>
+            <View style={styles.stationBadge}>
+              <Text style={styles.stationBadgeText}>STATION AUTHENTICATION</Text>
             </View>
-          </View>
-        )}
-
-        {message ? (
-          <View style={[styles.alert, isError ? styles.alertError : styles.alertSuccess]}>
-            <Text style={[styles.alertText, isError ? styles.alertTextError : styles.alertTextSuccess]}>
-              {message}
+            <Text style={styles.brandSubtitle}>
+              Commercial Kitchen Inventory & Prep Logistics
             </Text>
           </View>
-        ) : null}
-      </View>
+
+          {step === 1 && (
+            <View style={styles.form}>
+              <Text style={styles.label}>Chef or Station Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="chef@kitchenops.internal"
+                placeholderTextColor="#94A3B8"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoCorrect={false}
+                value={email}
+                onChangeText={setEmail}
+              />
+              <Text style={styles.helpText}>
+                A passwordless 4-digit OTP will be dispatched to your inbox.
+              </Text>
+              <TouchableOpacity
+                style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                onPress={handleRequestCode}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Dispatch 4-Digit Code</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {step === 2 && (
+            <View style={styles.form}>
+              <View style={styles.otpHeaderRow}>
+                <Text style={styles.label}>Enter 4-Digit OTP</Text>
+                <Text style={styles.targetEmailMask}>
+                  {email.length > 6 ? email.substring(0, 3) + '***@...' : email}
+                </Text>
+              </View>
+              <TextInput
+                style={[styles.input, styles.otpInput]}
+                placeholder="••••"
+                placeholderTextColor="#CBD5E1"
+                keyboardType="number-pad"
+                maxLength={4}
+                value={code}
+                onChangeText={setCode}
+                autoFocus
+              />
+              <TouchableOpacity
+                style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                onPress={handleVerifyCode}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.primaryButtonText}>Verify & Authorize Station</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => {
+                  setStep(1);
+                  setCode('');
+                  setMessage('');
+                  setIsError(false);
+                }}
+              >
+                <Text style={styles.backButtonText}>← Use a different email address</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {step === 3 && userProfile && (
+            <View style={styles.sessionSuccessBox}>
+              <Text style={styles.sessionSuccessTitle}>Station Session Active</Text>
+              <Text style={styles.sessionUserText}>
+                {userProfile.user || userProfile.email || email}
+              </Text>
+              <View style={styles.onlinePill}>
+                <Text style={styles.onlinePillText}>● Connected to Cloud Server</Text>
+              </View>
+            </View>
+          )}
+
+          {message ? (
+            <View
+              style={[
+                styles.messageBanner,
+                isError ? styles.messageBannerError : styles.messageBannerSuccess,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageBannerText,
+                  isError ? styles.messageTextError : styles.messageTextSuccess,
+                ]}
+              >
+                {message}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -204,150 +266,189 @@ export default function LoginScreen({ onLoginSuccess }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0f172a',
+    backgroundColor: '#EDF2F7',
     justifyContent: 'center',
-    padding: 16,
+  },
+  keyboardContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   card: {
-    backgroundColor: '#1e293b',
-    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#CBD5E1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  header: {
+  brandHeader: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  badge: {
-    backgroundColor: '#0ea5e9',
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: 'bold',
+  brandIcon: {
+    width: 68,
+    height: 68,
+    borderRadius: 16,
+    marginBottom: 10,
+  },
+  brandTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#1E3A8A',
+    letterSpacing: 0.3,
+  },
+  stationBadge: {
+    backgroundColor: '#DBEAFE',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 3,
+    borderRadius: 99,
+    marginTop: 6,
     marginBottom: 8,
-    overflow: 'hidden',
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#f8fafc',
-    marginBottom: 6,
+  stationBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1D4ED8',
+    letterSpacing: 0.5,
   },
-  description: {
+  brandSubtitle: {
     fontSize: 13,
-    color: '#94a3b8',
+    color: '#64748B',
     textAlign: 'center',
   },
   form: {
     width: '100%',
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#cbd5e1',
-    marginBottom: 8,
+    color: '#1A202C',
+    marginBottom: 6,
   },
-  input: {
-    backgroundColor: '#0f172a',
-    borderWidth: 1,
-    borderColor: '#475569',
-    borderRadius: 8,
-    color: '#f8fafc',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
+  helpText: {
+    fontSize: 11.5,
+    color: '#94A3B8',
     marginBottom: 16,
   },
-  codeInput: {
-    letterSpacing: 8,
+  input: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    height: 48,
+    fontSize: 15,
+    color: '#1A202C',
+    marginBottom: 8,
+  },
+  otpHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  targetEmailMask: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  otpInput: {
     textAlign: 'center',
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 10,
+    height: 56,
+    marginBottom: 16,
   },
-  button: {
-    backgroundColor: '#0ea5e9',
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkButton: {
-    marginTop: 14,
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#38bdf8',
-    fontSize: 14,
-  },
-  successBox: {
-    backgroundColor: '#022c22',
-    borderWidth: 1,
-    borderColor: '#059669',
+  primaryButton: {
+    backgroundColor: '#1D4ED8',
     borderRadius: 12,
-    padding: 18,
+    height: 48,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    shadowColor: '#1D4ED8',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  successTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#34d399',
-    marginBottom: 10,
-  },
-  sessionLabel: {
-    fontSize: 13,
-    color: '#a7f3d0',
-  },
-  userEmail: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#ffffff',
-    marginVertical: 4,
-  },
-  statusPill: {
-    backgroundColor: '#065f46',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-    marginTop: 8,
-  },
-  statusPillText: {
-    color: '#6ee7b7',
-    fontSize: 12,
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '600',
   },
-  alert: {
-    marginTop: 16,
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  backButton: {
+    marginTop: 12,
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  backButtonText: {
+    color: '#1D4ED8',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  sessionSuccessBox: {
+    backgroundColor: '#DCFCE7',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  sessionSuccessTitle: {
+    color: '#166534',
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  sessionUserText: {
+    color: '#14532D',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  onlinePill: {
+    marginTop: 8,
+    backgroundColor: '#BBF7D0',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 99,
+  },
+  onlinePillText: {
+    fontSize: 11,
+    color: '#166534',
+    fontWeight: '700',
+  },
+  messageBanner: {
+    marginTop: 14,
     padding: 12,
-    borderRadius: 8,
-  },
-  alertError: {
-    backgroundColor: '#450a0a',
-    borderColor: '#dc2626',
+    borderRadius: 10,
     borderWidth: 1,
   },
-  alertSuccess: {
-    backgroundColor: '#064e3b',
-    borderColor: '#059669',
-    borderWidth: 1,
+  messageBannerError: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
   },
-  alertText: {
+  messageBannerSuccess: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+  },
+  messageBannerText: {
     fontSize: 13,
     textAlign: 'center',
   },
-  alertTextError: {
-    color: '#fca5a5',
+  messageTextError: {
+    color: '#DC2626',
+    fontWeight: '500',
   },
-  alertTextSuccess: {
-    color: '#6ee7b7',
+  messageTextSuccess: {
+    color: '#1D4ED8',
+    fontWeight: '500',
   },
 });
-

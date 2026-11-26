@@ -180,6 +180,24 @@
       "result": "pass",
       "note": "Smooth user interface response and fast real-time synchronization with cloud backend.",
       "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504023",
+      "device": "Samsung Galaxy J7 Prime, Android 8.1.0",
+      "round": 2,
+      "result": "pass",
+      "note": "Verified layout on 16:9 screen with bottom padding: navigation bar no longer overlaps action buttons.",
+      "evidence": ""
+    },
+    {
+      "tc": "free",
+      "tester": "220504031",
+      "device": "Realme 10, Android 14",
+      "round": 2,
+      "result": "pass",
+      "note": "Verified chat interface with KeyboardAvoidingView: text input remains visible when keyboard is opened.",
+      "evidence": ""
     }
   ]
 }

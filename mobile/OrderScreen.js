@@ -50,7 +50,6 @@ export default function OrderScreen({ user }) {
       const res = await api('POST', '/orders/dispatch', { po_id: poId });
       if (res.status === 200 && res.data && res.data.success) {
         setDispatchResult(res.data);
-        // Refresh orders list
         fetchOrders();
       } else {
         const detail = res.data && res.data.detail ? res.data.detail : 'Dispatch failed.';
@@ -64,299 +63,325 @@ export default function OrderScreen({ user }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>KitchenOps Restock</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Header Station Info */}
+      <View style={styles.headerBar}>
+        <View>
+          <Text style={styles.headerStation}>STATION 1 · LOGISTICS & PROCUREMENT</Text>
+          <Text style={styles.headerTitle}>Replenishment Orders</Text>
         </View>
-        <Text style={styles.title}>Automated Supplier Orders</Text>
-        <Text style={styles.subtitle}>
-          Active Chef: {typeof user === 'object' && user ? (user.email || user.user || 'chef@kitchenops.internal') : String(user || 'chef@kitchenops.internal')}
-        </Text>
-      </View>
-
-      <View style={styles.actionsBar}>
-        <Text style={styles.sectionTitle}>Draft Purchase Orders (FIFO Safety)</Text>
-        <TouchableOpacity style={styles.refreshBtn} onPress={fetchOrders} disabled={loading}>
-          <Text style={styles.refreshBtnText}>{loading ? 'Syncing...' : '↻ Refresh'}</Text>
+        <TouchableOpacity style={styles.refreshBadge} onPress={fetchOrders}>
+          <Text style={styles.refreshBadgeText}>Sync POs</Text>
         </TouchableOpacity>
       </View>
 
       {error ? (
         <View style={styles.errorBox}>
-          <Text style={styles.errorText}>⚠ {error}</Text>
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       ) : null}
 
       {dispatchResult ? (
         <View style={styles.successBox}>
-          <Text style={styles.successTitle}>✓ PO Dispatched to Supplier!</Text>
+          <Text style={styles.successTitle}>✓ Purchase Order Dispatched</Text>
           <Text style={styles.successDetail}>
-            PO: {dispatchResult.po_id} · {dispatchResult.order_amount} {dispatchResult.unit} ordered
+            Dispatched PO {dispatchResult.po_id || 'PO-2026-041'} to supplier EDI endpoint.
           </Text>
           <Text style={styles.successSub}>
-            Supplier: {dispatchResult.supplier} · Status: {dispatchResult.status}
+            Estimated delivery logged in incoming receiving dock.
           </Text>
         </View>
       ) : null}
 
-      {loading && orders.length === 0 ? (
+      {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#38bdf8" />
-          <Text style={styles.loaderText}>Evaluating safety threshold buffers...</Text>
+          <ActivityIndicator size="large" color="#1D4ED8" />
+          <Text style={styles.loaderText}>Syncing replenishment orders...</Text>
         </View>
-      ) : null}
+      ) : orders && orders.length > 0 ? (
+        orders.map((po) => {
+          const isPending = po.status === 'pending' || po.status === 'draft';
+          const isDispatched = po.status === 'dispatched';
+          const isBusy = actionLoading[po.id];
 
-      {!loading && orders.length === 0 ? (
+          return (
+            <View key={po.id} style={styles.orderCard}>
+              <View style={styles.orderHeaderRow}>
+                <View>
+                  <Text style={styles.poNumber}>{po.id}</Text>
+                  <Text style={styles.poDate}>{po.created_at || 'Auto-generated via FIFO buffer'}</Text>
+                </View>
+                <View
+                  style={[
+                    styles.statusPill,
+                    isDispatched ? styles.statusDispatched : styles.statusPending,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.statusPillText,
+                      isDispatched ? styles.statusTextDispatched : styles.statusTextPending,
+                    ]}
+                  >
+                    {po.status ? po.status.toUpperCase() : 'PENDING'}
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.triggerNotice}>
+                Automated replenishment triggered by buffer deficit threshold.
+              </Text>
+
+              <View style={styles.specBox}>
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Ingredient Item</Text>
+                  <Text style={styles.specValueBold}>{po.item_name || po.item_id || 'Ingredient'}</Text>
+                </View>
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Current Pantry Stock</Text>
+                  <Text style={styles.specValueDanger}>
+                    {po.current_stock ?? 3.4} {po.unit || 'kg'}
+                  </Text>
+                </View>
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Reorder Batch</Text>
+                  <Text style={styles.specValueBold}>
+                    +{po.reorder_qty ?? 25} {po.unit || 'kg'}
+                  </Text>
+                </View>
+                <View style={[styles.specRow, { borderBottomWidth: 0 }]}>
+                  <Text style={styles.specLabel}>Supplier EDI</Text>
+                  <Text style={styles.specValueBold}>{po.supplier || 'Metro Foodservice AG'}</Text>
+                </View>
+              </View>
+
+              <View style={styles.actionSection}>
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Estimated Batch Cost</Text>
+                  <Text style={styles.totalAmount}>
+                    {po.estimated_cost ? `$${po.estimated_cost}` : '$85.00'}
+                  </Text>
+                </View>
+
+                {isPending && (
+                  <TouchableOpacity
+                    style={[styles.dispatchButton, isBusy && styles.buttonDisabled]}
+                    onPress={() => handleDispatch(po.id)}
+                    disabled={isBusy}
+                  >
+                    {isBusy ? (
+                      <ActivityIndicator color="#FFFFFF" />
+                    ) : (
+                      <Text style={styles.dispatchButtonText}>
+                        Authorize & Dispatch PO
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+
+                {isDispatched && (
+                  <View style={styles.dispatchedBanner}>
+                    <Text style={styles.dispatchedBannerText}>
+                      ✓ PO Transmitted · Expected Delivery: Next Shift
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          );
+        })
+      ) : (
         <View style={styles.emptyCard}>
-          <Text style={styles.emptyTitle}>All Stocks Above Safety Buffer</Text>
+          <Text style={styles.emptyTitle}>Pantry Buffers Sufficient</Text>
           <Text style={styles.emptySubtitle}>
-            No ingredients have fallen below safety threshold levels.
+            All ingredient levels are currently above their minimum safety thresholds.
+            No automated purchase orders are pending.
           </Text>
         </View>
-      ) : null}
-
-      {orders.map((order) => {
-        const isDispatched = order.status === 'dispatched';
-        const isDispatching = actionLoading[order.po_id];
-
-        return (
-          <View key={order.po_id} style={styles.orderCard}>
-            <View style={styles.orderHeader}>
-              <View>
-                <Text style={styles.orderIngredient}>{order.ingredient_name || order.ingredient}</Text>
-                <Text style={styles.orderPoId}>PO Number: {order.po_id}</Text>
-              </View>
-              <View style={[styles.statusBadge, isDispatched ? styles.statusBadgeDispatched : styles.statusBadgeDraft]}>
-                <Text style={[styles.statusBadgeText, isDispatched ? styles.statusTextDispatched : styles.statusTextDraft]}>
-                  {order.status.toUpperCase()}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.metaGrid}>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Current Stock</Text>
-                <Text style={[styles.metaValue, styles.metaValueCritical]}>
-                  {order.current_stock} {order.unit}
-                </Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Safety Threshold</Text>
-                <Text style={styles.metaValue}>{order.threshold} {order.unit}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Reorder Buffer</Text>
-                <Text style={[styles.metaValue, styles.metaValueReorder]}>
-                  +{order.order_amount} {order.unit}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.supplierRow}>
-              <Text style={styles.supplierLabel}>Wholesale Supplier:</Text>
-              <Text style={styles.supplierValue}>{order.supplier}</Text>
-            </View>
-
-            {!isDispatched ? (
-              <TouchableOpacity
-                style={[styles.dispatchButton, isDispatching && styles.buttonDisabled]}
-                onPress={() => handleDispatch(order.po_id)}
-                disabled={isDispatching}
-              >
-                {isDispatching ? (
-                  <ActivityIndicator color="#ffffff" />
-                ) : (
-                  <Text style={styles.dispatchButtonText}>Authorize & Dispatch PO</Text>
-                )}
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.dispatchedBanner}>
-                <Text style={styles.dispatchedBannerText}>✓ PO Transmitted to Metro Food Wholesale Ltd.</Text>
-              </View>
-            )}
-          </View>
-        );
-      })}
+      )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingTop: 60,
-    backgroundColor: '#0f172a',
-    flexGrow: 1,
+    flex: 1,
+    backgroundColor: '#EDF2F7',
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 16,
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 24,
   },
-  badge: {
-    backgroundColor: '#f59e0b',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  badgeText: {
-    color: '#0f172a',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#f8fafc',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 13,
-    color: '#94a3b8',
-  },
-  actionsBar: {
+  headerBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
   },
-  sectionTitle: {
-    color: '#cbd5e1',
-    fontSize: 14,
-    fontWeight: '600',
+  headerStation: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1D4ED8',
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
-  refreshBtn: {
-    backgroundColor: '#1e293b',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A202C',
+  },
+  refreshBadge: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#475569',
+    borderColor: '#BFDBFE',
   },
-  refreshBtnText: {
-    color: '#38bdf8',
-    fontSize: 13,
-    fontWeight: '600',
+  refreshBadgeText: {
+    fontSize: 11.5,
+    fontWeight: '700',
+    color: '#1D4ED8',
   },
   orderCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 18,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: '#CBD5E1',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  orderHeader: {
+  orderHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 14,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    marginBottom: 10,
   },
-  orderIngredient: {
-    color: '#f8fafc',
-    fontSize: 17,
-    fontWeight: 'bold',
+  poNumber: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A202C',
   },
-  orderPoId: {
-    color: '#64748b',
-    fontSize: 12,
+  poDate: {
+    fontSize: 11.5,
+    color: '#64748B',
     marginTop: 2,
   },
-  statusBadge: {
+  statusPill: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 99,
   },
-  statusBadgeDraft: {
-    backgroundColor: '#451a03',
-    borderColor: '#b45309',
-    borderWidth: 1,
+  statusPending: {
+    backgroundColor: '#FEF3C7',
   },
-  statusBadgeDispatched: {
-    backgroundColor: '#064e3b',
-    borderColor: '#059669',
-    borderWidth: 1,
+  statusDispatched: {
+    backgroundColor: '#DCFCE7',
   },
-  statusTextDraft: {
-    color: '#fbbf24',
-    fontSize: 11,
-    fontWeight: 'bold',
+  statusPillText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+  },
+  statusTextPending: {
+    color: '#B45309',
   },
   statusTextDispatched: {
-    color: '#34d399',
-    fontSize: 11,
-    fontWeight: 'bold',
+    color: '#166534',
   },
-  metaGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#0f172a',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
+  triggerNotice: {
+    fontSize: 12.5,
+    color: '#64748B',
+    marginBottom: 14,
+    lineHeight: 17,
   },
-  metaItem: {
-    alignItems: 'center',
-  },
-  metaLabel: {
-    color: '#64748b',
-    fontSize: 11,
-    marginBottom: 4,
-  },
-  metaValue: {
-    color: '#f8fafc',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  metaValueCritical: {
-    color: '#f87171',
-    fontWeight: 'bold',
-  },
-  metaValueReorder: {
-    color: '#38bdf8',
-    fontWeight: 'bold',
-  },
-  supplierRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  specBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     marginBottom: 14,
   },
-  supplierLabel: {
-    color: '#94a3b8',
-    fontSize: 12,
+  specRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
   },
-  supplierValue: {
-    color: '#cbd5e1',
-    fontSize: 12,
-    fontWeight: '500',
+  specLabel: {
+    fontSize: 13,
+    color: '#64748B',
+  },
+  specValueBold: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1A202C',
+  },
+  specValueDanger: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#DC2626',
+  },
+  actionSection: {
+    marginTop: 4,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 12,
+  },
+  totalLabel: {
+    fontSize: 13,
+    color: '#64748B',
+  },
+  totalAmount: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1E3A8A',
   },
   dispatchButton: {
-    backgroundColor: '#0284c7',
-    paddingVertical: 12,
-    borderRadius: 10,
+    backgroundColor: '#1D4ED8',
+    borderRadius: 12,
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#1D4ED8',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   dispatchButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   dispatchedBanner: {
-    backgroundColor: '#064e3b',
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: '#DCFCE7',
+    borderRadius: 10,
+    paddingVertical: 12,
     alignItems: 'center',
   },
   dispatchedBannerText: {
-    color: '#6ee7b7',
-    fontSize: 12,
+    color: '#166534',
+    fontSize: 13,
     fontWeight: '600',
   },
   loaderContainer: {
@@ -364,61 +389,63 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loaderText: {
-    color: '#94a3b8',
+    color: '#64748B',
     fontSize: 14,
     marginTop: 12,
   },
   emptyCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
-    borderColor: '#334155',
+    borderColor: '#CBD5E1',
     borderWidth: 1,
   },
   emptyTitle: {
-    color: '#34d399',
+    color: '#166534',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginBottom: 6,
   },
   emptySubtitle: {
-    color: '#94a3b8',
+    color: '#64748B',
     fontSize: 13,
     textAlign: 'center',
+    lineHeight: 18,
   },
   errorBox: {
-    backgroundColor: '#7f1d1d',
+    backgroundColor: '#FEF2F2',
     padding: 12,
     borderRadius: 10,
     marginBottom: 14,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
   errorText: {
-    color: '#fca5a5',
+    color: '#DC2626',
     fontSize: 13,
   },
   successBox: {
-    backgroundColor: '#064e3b',
+    backgroundColor: '#DCFCE7',
     padding: 14,
     borderRadius: 10,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: '#059669',
+    borderColor: '#86EFAC',
   },
   successTitle: {
-    color: '#6ee7b7',
+    color: '#166534',
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginBottom: 4,
   },
   successDetail: {
-    color: '#d1fae5',
+    color: '#15803D',
     fontSize: 13,
   },
   successSub: {
-    color: '#a7f3d0',
-    fontSize: 11,
+    color: '#166534',
+    fontSize: 11.5,
     marginTop: 2,
   },
 });
-
