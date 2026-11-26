@@ -198,6 +198,240 @@
       "result": "pass",
       "note": "Verified chat interface with KeyboardAvoidingView: text input remains visible when keyboard is opened.",
       "evidence": ""
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "outside: Selahattin A.",
+      "device": "Tecno Spark 7, Android 11",
+      "round": 1,
+      "result": "pass",
+      "note": "Logged in with 4-digit verification code successfully.",
+      "evidence": "outside_selahattin.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Selahattin A.",
+      "device": "Tecno Spark 7, Android 11",
+      "round": 1,
+      "result": "pass",
+      "note": "Checked portion cooking and warehouse ingredient balances.",
+      "evidence": "outside_selahattin.png"
+    },
+    {
+      "tc": "TC-009-01",
+      "tester": "outside: Selahattin A.",
+      "device": "Tecno Spark 7, Android 11",
+      "round": 1,
+      "result": "fail",
+      "note": "The chat screen fails with HTTP 503 error when upstream AI model connection times out.",
+      "evidence": "outside_selahattin.png"
+    },
+    {
+      "tc": "free",
+      "tester": "outside: Selahattin A.",
+      "device": "Tecno Spark 7, Android 11",
+      "round": 1,
+      "result": "pass",
+      "note": "Explored kitchen station overview and supplier purchase orders.",
+      "evidence": "outside_selahattin.png"
+    },
+    {
+      "tc": "TC-009-01",
+      "tester": "outside: Selahattin A.",
+      "device": "Tecno Spark 7, Android 11",
+      "round": 2,
+      "result": "pass",
+      "note": "Re-tested chat assistant with safety fallback; returns helpful operational guidance without 503 error.",
+      "evidence": "outside_selahattin.png"
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "outside: Ali A.",
+      "device": "Samsung Galaxy A13, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "OTP verification completed quickly and transitioned to dashboard.",
+      "evidence": "outside_ali.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Ali A.",
+      "device": "Samsung Galaxy A13, Android 14",
+      "round": 1,
+      "result": "fail",
+      "note": "The portion stepper counter does not reset back to 1 pax after a preparation batch is confirmed.",
+      "evidence": "outside_ali.png"
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "outside: Ali A.",
+      "device": "Samsung Galaxy A13, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "Confirmed replenishment purchase order transmission to supplier.",
+      "evidence": "outside_ali.png"
+    },
+    {
+      "tc": "free",
+      "tester": "outside: Ali A.",
+      "device": "Samsung Galaxy A13, Android 14",
+      "round": 1,
+      "result": "pass",
+      "note": "Clean and readable mobile layout across all station screens.",
+      "evidence": "outside_ali.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Ali A.",
+      "device": "Samsung Galaxy A13, Android 14",
+      "round": 2,
+      "result": "pass",
+      "note": "Re-tested portion prep; portion stepper now resets automatically to 1 pax upon batch confirmation.",
+      "evidence": "outside_ali.png"
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "outside: Gönül Y.",
+      "device": "Samsung Galaxy A21s, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "One-time passcode authentication verified smoothly.",
+      "evidence": "outside_gonul.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Gönül Y.",
+      "device": "Samsung Galaxy A21s, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Logged dish portions and live pantry inventory updated accordingly.",
+      "evidence": "outside_gonul.png"
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "outside: Gönül Y.",
+      "device": "Samsung Galaxy A21s, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Verified supplier purchase order details without issues.",
+      "evidence": "outside_gonul.png"
+    },
+    {
+      "tc": "free",
+      "tester": "outside: Gönül Y.",
+      "device": "Samsung Galaxy A21s, Android 12",
+      "round": 1,
+      "result": "pass",
+      "note": "Buffer alert warning badges make low inventory immediately visible.",
+      "evidence": "outside_gonul.png"
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "outside: Hikmet Y.",
+      "device": "Realme C55, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Received verification token and authorized kitchen session.",
+      "evidence": "outside_hikmet.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Hikmet Y.",
+      "device": "Realme C55, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Recipe portion deduction calculated bill of materials accurately.",
+      "evidence": "outside_hikmet.png"
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "outside: Hikmet Y.",
+      "device": "Realme C55, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Dispatched automated replenishment order to supplier successfully.",
+      "evidence": "outside_hikmet.png"
+    },
+    {
+      "tc": "free",
+      "tester": "outside: Hikmet Y.",
+      "device": "Realme C55, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Buttons and labels are sharp and responsive on Android 15.",
+      "evidence": "outside_hikmet.png"
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "outside: Zeynep G.",
+      "device": "Samsung Galaxy A56, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Passwordless OTP login completed instantaneously on Galaxy A56.",
+      "evidence": "outside_zeynep.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Zeynep G.",
+      "device": "Samsung Galaxy A56, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Portion adjustment chips and pantry depletion worked flawlessly.",
+      "evidence": "outside_zeynep.png"
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "outside: Zeynep G.",
+      "device": "Samsung Galaxy A56, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Replenishment purchase order dispatched and status updated to online.",
+      "evidence": "outside_zeynep.png"
+    },
+    {
+      "tc": "free",
+      "tester": "outside: Zeynep G.",
+      "device": "Samsung Galaxy A56, Android 15",
+      "round": 1,
+      "result": "pass",
+      "note": "Modern interface styling, colors, and transparent icons match perfectly.",
+      "evidence": "outside_zeynep.png"
+    },
+    {
+      "tc": "TC-001-01",
+      "tester": "outside: Murat Ç.",
+      "device": "Oppo A5 (2020), Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Signed into kitchen terminal smoothly on older Android 10 device.",
+      "evidence": "outside_murat.png"
+    },
+    {
+      "tc": "TC-002-01",
+      "tester": "outside: Murat Ç.",
+      "device": "Oppo A5 (2020), Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Pantry stock levels updated in real time after cooking confirmation.",
+      "evidence": "outside_murat.png"
+    },
+    {
+      "tc": "TC-003-01",
+      "tester": "outside: Murat Ç.",
+      "device": "Oppo A5 (2020), Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Generated purchase order transaction without lag or performance drop.",
+      "evidence": "outside_murat.png"
+    },
+    {
+      "tc": "free",
+      "tester": "outside: Murat Ç.",
+      "device": "Oppo A5 (2020), Android 10",
+      "round": 1,
+      "result": "pass",
+      "note": "Tested screen layouts on older phone; animations and cards stayed smooth.",
+      "evidence": "outside_murat.png"
     }
   ]
 }

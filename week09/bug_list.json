@@ -9,8 +9,8 @@
       "tc": "free",
       "severity": "low",
       "what": "The bottom navigation bar slightly overlaps the action buttons on older 16:9 small screen resolutions.",
-      "status": "open",
-      "fix_commit": "",
+      "status": "fixed",
+      "fix_commit": "af917a3",
       "why": ""
     },
     {
@@ -21,8 +21,32 @@
       "tc": "free",
       "severity": "medium",
       "what": "The chat screen message input field is partially covered when the virtual keyboard pops up.",
-      "status": "open",
-      "fix_commit": "",
+      "status": "fixed",
+      "fix_commit": "af917a3",
+      "why": ""
+    },
+    {
+      "id": "BUG-03",
+      "found_by": [
+        "outside: Selahattin A."
+      ],
+      "tc": "TC-009-01",
+      "severity": "medium",
+      "what": "The chat screen fails with HTTP 503 error when upstream AI model connection times out.",
+      "status": "fixed",
+      "fix_commit": "af917a3",
+      "why": ""
+    },
+    {
+      "id": "BUG-04",
+      "found_by": [
+        "outside: Ali A."
+      ],
+      "tc": "TC-002-01",
+      "severity": "low",
+      "what": "The portion stepper counter does not reset back to 1 pax after a preparation batch is confirmed.",
+      "status": "fixed",
+      "fix_commit": "af917a3",
       "why": ""
     }
   ]

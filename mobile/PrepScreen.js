@@ -59,6 +59,7 @@ export default function PrepScreen({ user, onLogout }) {
       if (res.status === 200 && res.data && res.data.success) {
         setResult(res.data);
         fetchInventory();
+        setPortions(1);
       } else {
         const detail =
           res.data && res.data.detail ? res.data.detail : 'Preparation request failed.';
