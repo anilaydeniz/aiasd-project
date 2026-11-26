@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "com.anilaydeniz.kitchenops",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#1A1D20"
