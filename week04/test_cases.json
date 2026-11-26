@@ -177,6 +177,61 @@
       ],
       "expected": "The screen displays the response with the 'AI answer' label, showing the pantry items below safety buffer, and decrements the user's daily quota from 20.",
       "run": "manual"
+    },
+    {
+      "id": "TC-009-02",
+      "req": "REQ-009",
+      "title": "The chatbot answers a logged-in user using a mock model",
+      "precondition": "Server is running; user has a valid authentication bearer token",
+      "steps": [
+        "Dispatch POST /chat with Bearer auth token and payload {'message': 'When is my next booking?'}"
+      ],
+      "expected": "HTTP 200 OK with answer string and remaining quota decremented",
+      "run": "server"
+    },
+    {
+      "id": "TC-009-03",
+      "req": "REQ-009",
+      "title": "Chatbot request without authorization token returns HTTP 401",
+      "precondition": "Server is running; client request omits Authorization header",
+      "steps": [
+        "Dispatch POST /chat with payload {'message': 'Hello assistant'} without Authorization header"
+      ],
+      "expected": "HTTP 401 Unauthorized",
+      "run": "server"
+    },
+    {
+      "id": "TC-009-04",
+      "req": "REQ-009",
+      "title": "Chatbot request after daily quota is exceeded returns HTTP 429",
+      "precondition": "Authenticated user has reached the daily limit of 20 messages",
+      "steps": [
+        "Dispatch POST /chat with valid bearer token after consuming full daily quota"
+      ],
+      "expected": "HTTP 429 Too Many Requests with daily quota exceeded error detail",
+      "run": "server"
+    },
+    {
+      "id": "TC-009-05",
+      "req": "REQ-009",
+      "title": "Chatbot handles external LLM API failure with HTTP 503 without crashing server",
+      "precondition": "Server is running; external LLM provider raises connection timeout or HTTP error",
+      "steps": [
+        "Dispatch POST /chat when external LLM API call fails or times out"
+      ],
+      "expected": "HTTP 503 Service Unavailable returned cleanly; server process does not crash",
+      "run": "server"
+    },
+    {
+      "id": "TC-010-01",
+      "req": "REQ-010",
+      "title": "Authenticated user submits a report for an AI answer via POST /chat/report",
+      "precondition": "Server is running; user is authenticated with bearer token",
+      "steps": [
+        "Dispatch POST /chat/report with Bearer token and payload {'answer': 'Inaccurate info', 'reason': 'incorrect data'}"
+      ],
+      "expected": "HTTP 200 OK with status reported, report_id, and persisted report entry in server storage",
+      "run": "server"
     }
   ]
 }

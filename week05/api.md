@@ -11,6 +11,7 @@
 | GET | /orders/replenish | Header: Authorization: Bearer <token> | 200 {"orders": [{"po_id": "PO-2026-041", "ingredient": "cooking_cream", "current_stock": 3.5, "threshold": 5.0, "order_amount": 20.0, "unit": "L", "status": "draft"}], "total_orders": 1} | 401 missing or invalid session token | REQ-003 |
 | POST | /orders/dispatch | {"po_id": "PO-2026-041"} | 200 {"success": true, "po_id": "PO-2026-041", "status": "dispatched", "dispatched_by": "chef@kitchenops.internal"} | 401 missing or invalid session token · 404 purchase order not found · 409 purchase order already dispatched · 422 missing po_id | REQ-003 |
 | POST | /chat | Header: Authorization: Bearer <token>, Body: {"message": "Which ingredients are low?"} | 200 {"reply": "Cooking cream is below 5.0L safety buffer.", "remaining_quota": 19} | 401 missing or invalid session token · 429 daily message limit reached (20 messages/day) · 503 LLM service unavailable or failed to respond | REQ-009 |
+| POST | /chat/report | Header: Authorization: Bearer <token>, Body: {"answer": "Rigatoni recipe contains nuts", "reason": "inaccurate allergen info"} | 200 {"status": "reported", "report_id": "rep_1"} | 401 missing or invalid session token · 422 missing reason or invalid request body | REQ-010 |
 
 
 

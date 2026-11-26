@@ -57,9 +57,13 @@ flowchart LR
     UC1([Log prepared dishes and deplete stock])
     UC2([Generate supplier replenishment order])
     UC3([Receive inbound crate and assign batch])
+    UC4([Query AI kitchen assistant])
+    UC5([Report inaccurate AI response])
   end
   CH --- UC0
   CH --- UC1
+  CH --- UC4
+  CH --- UC5
   PM --- UC0
   PM --- UC2
   RS --- UC0
@@ -84,6 +88,12 @@ flowchart LR
 
 - REQ-005 — A receiving staff member records inbound wholesale deliveries on mobile by entering quantities and lot dates, instantly incrementing warehouse inventory. — should — UC3  
   Acceptance: Submitting a received delivery of 25kg flour updates the active inventory count by 25kg and creates an inbound receipt record visible on the web dashboard.
+
+- REQ-009 — An authenticated kitchen staff member chats with an AI kitchen assistant to query inventory stock, recipe substitutions, and supplier restock advice. — must — UC4  
+  Acceptance: Only an authenticated logged-in chef can query the kitchen assistant about inventory depletion, recipe substitutions, and supplier restock advice using only their own restaurant kitchen data, with a daily quota limit of 20 messages per user per day.
+
+- REQ-010 — An authenticated kitchen staff member can report an inaccurate, inappropriate, or harmful AI assistant answer directly from the chat screen. — must — UC5  
+  Acceptance: Submitting a report with the AI answer text and a reason string persists the report in server storage and returns HTTP 200 confirmation.
 
 ## 5. Non-functional requirements
 

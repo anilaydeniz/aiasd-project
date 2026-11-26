@@ -94,6 +94,8 @@ Free core tier for single-station kitchens (up to 30 inventory items and 10 dail
 - 2026-10-28 — CR-01: TC-001-01 to TC-006-01: classified execution mode ("run": "server" | "web" | "manual") across all 14 test cases in week04/test_cases.json; transitioned server test cases from prototype clicksteps to live HTTP API operations with precise endpoint paths, JSON payloads, and status codes.
 - 2026-11-17 — CR-02: chatbot assistant. New REQ-009 (must), new TC-009-01 (manual), new api.md row POST /chat; affected files: week02/requirements.json, week04/test_cases.json, week05/api.md.
 - 2026-11-21 — data persistence: server state (inventory, purchase orders, chat quotas) persists across restarts in server/data/kitchenops_db.json; updated week05/DESIGN.md with persistent file storage and Google Gemini LLM API.
+- 2026-11-28 — CR-03: server-side chatbot tests with mock model. New TC-009-02 (server), TC-009-03 (server), TC-009-04 (server), TC-009-05 (server) under REQ-009 for headless verification of AI reply, HTTP 401 without token, HTTP 429 quota exhaustion, and HTTP 503 LLM failure fallback; affected files: week04/test_cases.json, server/tests/test_chat.py.
+- 2026-11-28 — CR-04: AI answer reporting mechanism for Google Play content policy. New REQ-010 (must), new TC-010-01 (server), new api.md row POST /chat/report; affected files: week02/requirements.json, week02/SRS.md, week04/test_cases.json, week05/api.md, server/chat.py, server/storage.py, server/tests/test_chat.py, mobile/ChatScreen.js.
 
 
 

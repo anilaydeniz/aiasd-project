@@ -63,6 +63,13 @@
       "functional": true,
       "priority": "must",
       "acceptance": "Only an authenticated logged-in chef can query the kitchen assistant about inventory depletion, recipe substitutions, and supplier restock advice using only their own restaurant kitchen data, with a daily quota limit of 20 messages per user per day."
+    },
+    {
+      "id": "REQ-010",
+      "description": "An authenticated kitchen staff member can report an inaccurate, inappropriate, or harmful AI assistant answer directly from the chat screen.",
+      "functional": true,
+      "priority": "must",
+      "acceptance": "Submitting a report with the AI answer text and a reason string persists the report in server storage and returns HTTP 200 confirmation."
     }
   ]
 }

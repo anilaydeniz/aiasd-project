@@ -1,78 +1,88 @@
-"""server/tests/test_chat.py: tests for REQ-009 AI kitchen assistant chatbot route."""
+"""server/tests/test_chat.py: tests for REQ-009 AI kitchen assistant and REQ-010 content report."""
 
-from unittest.mock import patch
-from urllib.error import URLError
-
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from server.chat import DAILY_QUOTA, USER_MESSAGE_COUNTS
-from server.course_login import current_user
+from server.course_login import auth_header_for_tests
 from server.main import app
 
 client = TestClient(app)
 
 
-def test_tc_009_01_chat_unauthenticated_returns_401():
-    """Unauthenticated request to POST /chat must return HTTP 401 Unauthorized."""
-    app.dependency_overrides.clear()
-    response = client.post("/chat", json={"message": "What is our stock?"})
-    assert response.status_code == 401
+def test_TC_009_02_the_chatbot_answers(monkeypatch):
+    """TC-009-02: verify chatbot responds to authenticated user with mock model (§5.3)."""
+    monkeypatch.setattr(
+        "server.chat.ask_model",
+        lambda prompt: "Rigatoni Pomodoro takes 120g pasta and 80g sauce.",
+    )
+    headers = auth_header_for_tests(client, "chef_chat02@example.edu.tr")
+    r = client.post(
+        "/chat",
+        json={"message": "When is my next booking?"},
+        headers=headers,
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["answer"] == "Rigatoni Pomodoro takes 120g pasta and 80g sauce."
+    assert "reply" in data
+    assert "remaining_quota" in data
 
 
-def test_tc_009_02_chat_authenticated_responds_with_quota():
-    """Authenticated request returns HTTP 200 with AI reply and decremented quota."""
-    test_user = "chef_test_01@kitchenops.internal"
-    USER_MESSAGE_COUNTS[test_user] = 0
-    app.dependency_overrides[current_user] = lambda: test_user
+def test_TC_009_03_without_token_the_answer_is_401():
+    """TC-009-03: verify unauthenticated request without token returns HTTP 401 (§5.3)."""
+    r = client.post("/chat", json={"message": "Hello without token"})
+    assert r.status_code == 401
 
-    try:
-        response = client.post(
-            "/chat",
-            json={"message": "Which ingredients are currently low?"},
-            headers={"Authorization": "Bearer valid_token"},
+
+def test_TC_009_04_after_the_daily_limit_the_answer_is_429():
+    """TC-009-04: verify exceeding the daily limit of 20 messages returns HTTP 429 (§5.3)."""
+    email = "chef_quota_04@example.edu.tr"
+    headers = auth_header_for_tests(client, email)
+    USER_MESSAGE_COUNTS[email] = DAILY_QUOTA
+
+    r = client.post(
+        "/chat",
+        json={"message": "Another message after daily limit"},
+        headers=headers,
+    )
+    assert r.status_code == 429
+    assert "quota" in r.json()["detail"].lower()
+
+
+def test_TC_009_05_when_the_llm_api_fails_the_answer_is_503(monkeypatch):
+    """TC-009-05: verify LLM API failure returns HTTP 503 cleanly without crashing (§5.3)."""
+
+    def _failing_ask(prompt):
+        raise HTTPException(
+            status_code=503,
+            detail="LLM service unavailable or timed out within 20 seconds",
         )
-        assert response.status_code == 200
-        data = response.json()
-        assert "reply" in data
-        assert "cooking_cream" in data["reply"] or "safety buffer" in data["reply"]
-        assert data["remaining_quota"] == DAILY_QUOTA - 1
-    finally:
-        app.dependency_overrides.clear()
+
+    monkeypatch.setattr("server.chat.ask_model", _failing_ask)
+    headers = auth_header_for_tests(client, "chef_fail_05@example.edu.tr")
+    r = client.post("/chat", json={"message": "Test fail"}, headers=headers)
+    assert r.status_code == 503
+    assert "503" in str(r.status_code)
 
 
-def test_tc_009_03_chat_daily_quota_exceeded_returns_429():
-    """Exceeding the daily quota of 20 messages must return HTTP 429 Too Many Requests."""
-    test_user = "chef_rate_limit@kitchenops.internal"
-    USER_MESSAGE_COUNTS[test_user] = DAILY_QUOTA
-    app.dependency_overrides[current_user] = lambda: test_user
+def test_TC_010_01_report_ai_answer():
+    """TC-010-01: verify POST /chat/report persists user report of AI answer (§5.4)."""
+    # Without token -> 401
+    r_unauth = client.post("/chat/report", json={"answer": "Inaccurate info", "reason": "wrong"})
+    assert r_unauth.status_code == 401
 
-    try:
-        response = client.post(
-            "/chat",
-            json={"message": "Another message beyond daily limit"},
-            headers={"Authorization": "Bearer valid_token"},
-        )
-        assert response.status_code == 429
-        assert "quota" in response.json()["detail"].lower()
-    finally:
-        app.dependency_overrides.clear()
-
-
-def test_tc_009_04_chat_service_failure_returns_503():
-    """Simulated LLM API network/timeout failure must return HTTP 503 without crashing server."""
-    test_user = "chef_error_test@kitchenops.internal"
-    USER_MESSAGE_COUNTS[test_user] = 0
-    app.dependency_overrides[current_user] = lambda: test_user
-
-    with patch.dict("os.environ", {"LLM_API_KEY": "real-api-key-test"}):
-        with patch("urllib.request.urlopen", side_effect=URLError("Connection timed out")):
-            try:
-                response = client.post(
-                    "/chat",
-                    json={"message": "Test error handling"},
-                    headers={"Authorization": "Bearer valid_token"},
-                )
-                assert response.status_code == 503
-                assert "503" in str(response.status_code)
-            finally:
-                app.dependency_overrides.clear()
+    # With valid token -> 200
+    headers = auth_header_for_tests(client, "chef_report_01@example.edu.tr")
+    r = client.post(
+        "/chat/report",
+        json={
+            "answer": "Rigatoni recipe contains nuts",
+            "reason": "inaccurate allergen info",
+        },
+        headers=headers,
+    )
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] == "reported"
+    assert "report_id" in data

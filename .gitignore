@@ -9,6 +9,9 @@ __pycache__/
 dist/
 build/
 *.so
+.coverage
+.coverage.*
+htmlcov/
 
 # Virtual environment
 .venv/

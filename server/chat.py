@@ -26,22 +26,24 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     remaining_quota: int
+    answer: str | None = None
 
 
-def _generate_ai_reply(user_message: str, user_email: str) -> str:
-    """Generate kitchen assistant reply using LLM API or context-aware kitchen heuristics."""
+class ReportRequest(BaseModel):
+    answer: str | None = None
+    message_id: str | None = None
+    reason: str = Field(min_length=1, description="Reason for reporting the AI answer")
+
+
+class ReportResponse(BaseModel):
+    status: str = "reported"
+    report_id: str
+    message: str = "Report submitted successfully."
+
+
+def ask_model(prompt: str) -> str:
+    """Calls external LLM model or returns context-aware culinary response."""
     api_key = os.getenv("LLM_API_KEY")
-
-    # Build kitchen context restricted exclusively to the authenticated user's kitchen
-    low_stock = [f"{ing} ({qty} kg/L)" for ing, qty in INVENTORY.items() if qty < 5.0]
-    pantry_summary = ", ".join([f"{ing}: {qty} kg/L" for ing, qty in INVENTORY.items()])
-    recipes_summary = ", ".join(RECIPES.keys())
-
-    system_instruction = (
-        f"You are KitchenOps AI Assistant, serving head chef {user_email}. "
-        f"Current pantry stock: {pantry_summary}. Low stock ingredients below 5kg buffer: {low_stock}. "
-        f"Available recipes: {recipes_summary}. Be concise and helpful for kitchen operations."
-    )
 
     if api_key and api_key != "mock-dev-key" and not api_key.startswith("mock"):
         # Real LLM API call (Gemini REST API endpoint) with strict 20-second timeout
@@ -50,7 +52,7 @@ def _generate_ai_reply(user_message: str, user_email: str) -> str:
             "contents": [
                 {
                     "role": "user",
-                    "parts": [{"text": f"{system_instruction}\n\nChef question: {user_message}"}],
+                    "parts": [{"text": prompt}],
                 }
             ]
         }
@@ -78,17 +80,38 @@ def _generate_ai_reply(user_message: str, user_email: str) -> str:
             ) from e
 
     # Deterministic context-aware assistant logic for development / test environments:
-    msg_lower = user_message.lower()
+    msg_lower = prompt.lower()
     if "low" in msg_lower or "threshold" in msg_lower or "buffer" in msg_lower:
+        low_stock = [f"{ing} ({qty} kg/L)" for ing, qty in INVENTORY.items() if qty < 5.0]
         if low_stock:
-            return f"Cooking cream is currently at {INVENTORY.get('cooking_cream', 3.5)}L, which is below the 5.0L safety buffer threshold. Purchase order PO-2026-041 is queued for replenishment."
+            return (
+                f"Cooking cream is currently at {INVENTORY.get('cooking_cream', 3.5)}L, "
+                "which is below the 5.0L safety buffer threshold. Purchase order PO-2026-041 is queued for replenishment."
+            )
         return "All pantry ingredients are currently above their safety thresholds."
     elif "stock" in msg_lower or "inventory" in msg_lower or "level" in msg_lower:
+        pantry_summary = ", ".join([f"{ing}: {qty} kg/L" for ing, qty in INVENTORY.items()])
         return f"Current live kitchen inventory: {pantry_summary}."
     elif "recipe" in msg_lower or "menu" in msg_lower or "prep" in msg_lower:
+        recipes_summary = ", ".join(RECIPES.keys())
         return f"Registered dish recipes: {recipes_summary}. You can log prep portions on the Prep tab to deduct stock automatically."
     else:
-        return f"KitchenOps Assistant received: '{user_message}'. All inventory levels and recipes are synchronized."
+        return "KitchenOps AI Assistant processed your request. Inventory levels and recipes are synchronized."
+
+
+def _generate_ai_reply(user_message: str, user_email: str) -> str:
+    """Generate kitchen assistant reply using LLM API or context-aware kitchen heuristics."""
+    low_stock = [f"{ing} ({qty} kg/L)" for ing, qty in INVENTORY.items() if qty < 5.0]
+    pantry_summary = ", ".join([f"{ing}: {qty} kg/L" for ing, qty in INVENTORY.items()])
+    recipes_summary = ", ".join(RECIPES.keys())
+
+    system_instruction = (
+        f"You are KitchenOps AI Assistant, serving head chef {user_email}. "
+        f"Current pantry stock: {pantry_summary}. Low stock ingredients below 5kg buffer: {low_stock}. "
+        f"Available recipes: {recipes_summary}. Be concise and helpful for kitchen operations."
+    )
+    prompt = f"{system_instruction}\n\nChef question: {user_message}"
+    return ask_model(prompt)
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -109,5 +132,27 @@ def chat_with_assistant(body: ChatRequest, user: str = Depends(current_user)) ->
 
     return {
         "reply": reply_text,
+        "answer": reply_text,
         "remaining_quota": remaining,
+    }
+
+
+@router.post("/chat/report", response_model=ReportResponse)
+def report_chat_answer(body: ReportRequest, user: str = Depends(current_user)) -> dict:
+    """REQ-010: report inaccurate or inappropriate AI responses for Google Play policy compliance."""
+    db = load_db()
+    reports = db.get("reports", [])
+    report_id = f"rep_{len(reports) + 1}"
+    report_entry = {
+        "report_id": report_id,
+        "reported_by": user,
+        "answer": body.answer or body.message_id or "unspecified",
+        "reason": body.reason,
+    }
+    reports.append(report_entry)
+    save_state(reports=reports)
+    return {
+        "status": "reported",
+        "report_id": report_id,
+        "message": "Report submitted successfully.",
     }

@@ -1,7 +1,7 @@
 {
   "inventory": {
-    "pasta": 48.8,
-    "tomato_sauce": 29.2,
+    "pasta": 50.0,
+    "tomato_sauce": 30.0,
     "cooking_cream": 3.5
   },
   "purchase_orders": {
@@ -14,11 +14,9 @@
       "order_amount": 20.0,
       "unit": "L",
       "supplier": "Metro Food Wholesale Ltd.",
-      "status": "draft",
-      "dispatched_by": "manager@kitchenops.internal"
+      "status": "draft"
     }
   },
-  "user_message_counts": {
-    "chef_test_01@kitchenops.internal": 1
-  }
+  "user_message_counts": {},
+  "reports": []
 }

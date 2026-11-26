@@ -45,6 +45,7 @@ def load_db() -> dict[str, Any]:
             "inventory": dict(DEFAULT_INVENTORY),
             "purchase_orders": dict(DEFAULT_PURCHASE_ORDERS),
             "user_message_counts": {},
+            "reports": [],
         }
         save_db(state)
         return state
@@ -60,12 +61,15 @@ def load_db() -> dict[str, Any]:
             data["purchase_orders"] = dict(DEFAULT_PURCHASE_ORDERS)
         if "user_message_counts" not in data or not isinstance(data["user_message_counts"], dict):
             data["user_message_counts"] = {}
+        if "reports" not in data or not isinstance(data["reports"], list):
+            data["reports"] = []
         return data
     except Exception:
         state = {
             "inventory": dict(DEFAULT_INVENTORY),
             "purchase_orders": dict(DEFAULT_PURCHASE_ORDERS),
             "user_message_counts": {},
+            "reports": [],
         }
         save_db(state)
         return state
@@ -84,6 +88,7 @@ def save_state(
     inventory: dict[str, float] | None = None,
     purchase_orders: dict[str, dict[str, Any]] | None = None,
     user_message_counts: dict[str, int] | None = None,
+    reports: list[dict[str, Any]] | None = None,
 ) -> None:
     """Save updated server state to persistent disk storage."""
     current = load_db()
@@ -93,4 +98,6 @@ def save_state(
         current["purchase_orders"] = purchase_orders
     if user_message_counts is not None:
         current["user_message_counts"] = user_message_counts
+    if reports is not None:
+        current["reports"] = reports
     save_db(current)
