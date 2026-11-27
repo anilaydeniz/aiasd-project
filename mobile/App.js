@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
+  ImageBackground,
   Platform,
   StatusBar,
 } from 'react-native';
@@ -57,9 +58,13 @@ export default function App() {
       : String(session.user || 'chef@kitchenops.internal')
     : 'chef@kitchenops.internal';
 
+  const isPrepActive = activeTab === 'prep';
+  const isOrdersActive = activeTab === 'orders';
+  const isChatActive = activeTab === 'chat';
+
   return (
     <ErrorBoundary>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent={true} />
       <SafeAreaView style={styles.safeContainer}>
         {!session ? (
           <LoginScreen
@@ -72,110 +77,108 @@ export default function App() {
             }}
           />
         ) : (
-          <View style={styles.mainShell}>
-            {/* Top Kitchen Station Header */}
-            <View style={styles.topHeader}>
-              <View style={styles.brandRow}>
-                <Image
-                  source={require('./assets/icon.png')}
-                  style={styles.headerLogo}
-                  resizeMode="contain"
-                />
-                <View>
-                  <Text style={styles.headerAppTitle}>KitchenOps</Text>
-                  <Text style={styles.headerStationSubtitle}>Commercial Kitchen Logistics</Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={() => setSession(null)}
-              >
-                <Text style={styles.logoutButtonText}>Switch Station</Text>
-              </TouchableOpacity>
-            </View>
-
+          <ImageBackground
+            source={require('./assets/arka_plan_ic_ekranlar.webp')}
+            style={styles.mainShell}
+            resizeMode="cover"
+          >
             {/* Active Screen View */}
             <View style={styles.screenContainer}>
               {activeTab === 'prep' && (
-                <PrepScreen user={safeUser} onLogout={() => setSession(null)} />
+                <PrepScreen
+                  user={safeUser}
+                  onNavigate={setActiveTab}
+                  onLogout={() => setSession(null)}
+                />
               )}
               {activeTab === 'orders' && (
-                <OrderScreen user={safeUser} onLogout={() => setSession(null)} />
+                <OrderScreen
+                  user={safeUser}
+                  onNavigate={setActiveTab}
+                  onLogout={() => setSession(null)}
+                />
               )}
               {activeTab === 'chat' && (
-                <ChatScreen user={safeUser} onLogout={() => setSession(null)} />
+                <ChatScreen
+                  user={safeUser}
+                  onNavigate={setActiveTab}
+                  onLogout={() => setSession(null)}
+                />
               )}
             </View>
 
-            {/* Bottom Navigation Bar with Designer Icons and Safe Padding */}
+            {/* Bottom Navigation Bar with Safe Padding */}
             <View style={styles.navBar}>
+              {/* Tab 1: Prep */}
               <TouchableOpacity
-                style={[styles.navItem, activeTab === 'prep' && styles.navItemActive]}
+                style={[styles.navItem, isPrepActive && styles.navItemActive]}
                 onPress={() => setActiveTab('prep')}
               >
                 <Image
                   source={require('./assets/icons/tab_prep.png')}
                   style={[
                     styles.navIcon,
-                    activeTab === 'prep' ? styles.navIconActive : styles.navIconInactive,
+                    isPrepActive ? styles.navIconActive : styles.navIconInactive,
                   ]}
                   resizeMode="contain"
                 />
                 <Text
                   style={[
                     styles.navLabel,
-                    activeTab === 'prep' ? styles.navLabelActive : styles.navLabelInactive,
+                    isPrepActive ? styles.navLabelActive : styles.navLabelInactive,
                   ]}
                 >
                   Prep
                 </Text>
               </TouchableOpacity>
 
+              {/* Tab 2: Orders */}
               <TouchableOpacity
-                style={[styles.navItem, activeTab === 'orders' && styles.navItemActive]}
+                style={[styles.navItem, isOrdersActive && styles.navItemActive]}
                 onPress={() => setActiveTab('orders')}
               >
                 <Image
                   source={require('./assets/icons/tab_orders.png')}
                   style={[
                     styles.navIcon,
-                    activeTab === 'orders' ? styles.navIconActive : styles.navIconInactive,
+                    isOrdersActive ? styles.navIconActive : styles.navIconInactive,
                   ]}
                   resizeMode="contain"
                 />
                 <Text
                   style={[
                     styles.navLabel,
-                    activeTab === 'orders' ? styles.navLabelActive : styles.navLabelInactive,
+                    isOrdersActive ? styles.navLabelActive : styles.navLabelInactive,
                   ]}
                 >
                   Orders
                 </Text>
               </TouchableOpacity>
 
+              {/* Tab 3: AI Chat */}
               <TouchableOpacity
-                style={[styles.navItem, activeTab === 'chat' && styles.navItemActive]}
+                style={[styles.navItem, isChatActive && styles.navItemActive]}
                 onPress={() => setActiveTab('chat')}
               >
                 <Image
                   source={require('./assets/icons/tab_ai_chat.png')}
                   style={[
                     styles.navIcon,
-                    activeTab === 'chat' ? styles.navIconActive : styles.navIconInactive,
+                    isChatActive ? styles.navIconActive : styles.navIconInactive,
                   ]}
                   resizeMode="contain"
                 />
                 <Text
                   style={[
                     styles.navLabel,
-                    activeTab === 'chat' ? styles.navLabelActive : styles.navLabelInactive,
+                    isChatActive ? styles.navLabelActive : styles.navLabelInactive,
                   ]}
                 >
-                  AI Chef
+                  AI Chat
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </ImageBackground>
         )}
       </SafeAreaView>
     </ErrorBoundary>
@@ -192,12 +195,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDF2F7',
   },
   topHeader: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 8 : 12,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#CBD5E1',
   },
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
   headerAppTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#1E3A8A',
+    color: '#1E293B',
   },
   headerStationSubtitle: {
     fontSize: 10.5,
@@ -235,19 +239,20 @@ const styles = StyleSheet.create({
   },
   screenContainer: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   navBar: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
     borderTopWidth: 1,
     borderTopColor: '#CBD5E1',
-    paddingVertical: 6,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 14, // Safe padding resolving BUG-01
-    elevation: 8,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 38, // Elevated safe padding avoiding Android soft navigation keys
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   navItem: {
     flex: 1,
@@ -263,20 +268,20 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   navIconActive: {
-    tintColor: '#1D4ED8',
+    tintColor: '#2F3B52',
   },
   navIconInactive: {
-    tintColor: '#94A3B8',
+    tintColor: '#5E6E85',
   },
   navLabel: {
     fontSize: 11,
   },
   navLabelActive: {
-    color: '#1D4ED8',
+    color: '#1E293B',
     fontWeight: '700',
   },
   navLabelInactive: {
-    color: '#64748B',
+    color: '#5E6E85',
     fontWeight: '500',
   },
   errorContainer: {

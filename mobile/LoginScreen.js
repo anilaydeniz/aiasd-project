@@ -12,8 +12,10 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Image,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  StatusBar,
 } from 'react-native';
 import { api, setToken } from './api';
 
@@ -113,8 +115,8 @@ export default function LoginScreen({ onLoginSuccess }) {
         const err =
           res.data && res.data.detail
             ? res.data.detail
-            : 'Invalid verification code. Please check your email or enter 1234.';
-        setMessage(typeof err === 'string' ? err : 'Invalid code.');
+            : 'Wrong code. Check the e-mail and try again.';
+        setMessage(typeof err === 'string' ? err : 'Wrong code. Check the e-mail and try again.');
         setIsError(true);
       }
     } catch (e) {
@@ -127,95 +129,93 @@ export default function LoginScreen({ onLoginSuccess }) {
         setStep(3);
         if (onLoginSuccess) onLoginSuccess(email.trim().toLowerCase(), demoToken);
       } else {
-        setMessage('Network error during verification. Try code 1234.');
+        setMessage('Wrong code. Check the e-mail and try again.');
         setIsError(true);
       }
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView
-        style={styles.keyboardContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <View style={styles.card}>
-          <View style={styles.brandHeader}>
-            <Image
-              source={require('./assets/icon.png')}
-              style={styles.brandIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.brandTitle}>KitchenOps</Text>
-            <View style={styles.stationBadge}>
-              <Text style={styles.stationBadgeText}>STATION AUTHENTICATION</Text>
-            </View>
-            <Text style={styles.brandSubtitle}>
-              Commercial Kitchen Inventory & Prep Logistics
-            </Text>
-          </View>
-
+    <ImageBackground
+      source={require('./assets/arka_plan_giris_kod.webp')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          style={styles.keyboardContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           {step === 1 && (
-            <View style={styles.form}>
-              <Text style={styles.label}>Chef or Station Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="chef@kitchenops.internal"
-                placeholderTextColor="#94A3B8"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                autoCorrect={false}
-                value={email}
-                onChangeText={setEmail}
-              />
-              <Text style={styles.helpText}>
-                A passwordless 4-digit OTP will be dispatched to your inbox.
-              </Text>
-              <TouchableOpacity
-                style={[styles.primaryButton, loading && styles.buttonDisabled]}
-                onPress={handleRequestCode}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Dispatch 4-Digit Code</Text>
-                )}
-              </TouchableOpacity>
+            <View style={styles.contentWrap}>
+              <View style={styles.brandHeader}>
+                <Image
+                  source={require('./assets/icon.png')}
+                  style={styles.brandIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.brandTitle}>KitchenOps</Text>
+                <Text style={styles.brandSubtitle}>
+                  Commercial Kitchen Inventory & Logistics
+                </Text>
+              </View>
+
+              <View style={styles.card}>
+                <Text style={styles.cardHeaderNotice}>
+                  Enter staff email to receive a login code.
+                </Text>
+                <Text style={styles.label}>E-mail address</Text>
+                <View style={styles.inputWrapper}>
+                  <Text style={styles.inputPrefixIcon}>✉</Text>
+                  <TextInput
+                    style={styles.inputWithIcon}
+                    placeholder="chef@kitchenops.internal"
+                    placeholderTextColor="#94A3B8"
+                    autoCapitalize="none"
+                    keyboardType="email-address"
+                    autoCorrect={false}
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                  onPress={handleRequestCode}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.primaryButtonText}>Send code</Text>
+                  )}
+                </TouchableOpacity>
+
+                {message ? (
+                  <View
+                    style={[
+                      styles.messageBanner,
+                      isError ? styles.messageBannerError : styles.messageBannerSuccess,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.messageBannerText,
+                        isError ? styles.messageTextError : styles.messageTextSuccess,
+                      ]}
+                    >
+                      {message}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
             </View>
           )}
 
           {step === 2 && (
-            <View style={styles.form}>
-              <View style={styles.otpHeaderRow}>
-                <Text style={styles.label}>Enter 4-Digit OTP</Text>
-                <Text style={styles.targetEmailMask}>
-                  {email.length > 6 ? email.substring(0, 3) + '***@...' : email}
-                </Text>
-              </View>
-              <TextInput
-                style={[styles.input, styles.otpInput]}
-                placeholder="••••"
-                placeholderTextColor="#CBD5E1"
-                keyboardType="number-pad"
-                maxLength={4}
-                value={code}
-                onChangeText={setCode}
-                autoFocus
-              />
+            <View style={styles.contentWrap}>
               <TouchableOpacity
-                style={[styles.primaryButton, loading && styles.buttonDisabled]}
-                onPress={handleVerifyCode}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Verify & Authorize Station</Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.backButton}
+                style={styles.topBackLink}
                 onPress={() => {
                   setStep(1);
                   setCode('');
@@ -223,182 +223,304 @@ export default function LoginScreen({ onLoginSuccess }) {
                   setIsError(false);
                 }}
               >
-                <Text style={styles.backButtonText}>← Use a different email address</Text>
+                <Text style={styles.topBackLinkText}>← Back</Text>
               </TouchableOpacity>
-            </View>
-          )}
 
-          {step === 3 && userProfile && (
-            <View style={styles.sessionSuccessBox}>
-              <Text style={styles.sessionSuccessTitle}>Station Session Active</Text>
-              <Text style={styles.sessionUserText}>
-                {userProfile.user || userProfile.email || email}
-              </Text>
-              <View style={styles.onlinePill}>
-                <Text style={styles.onlinePillText}>● Connected to Cloud Server</Text>
+              <View style={styles.step2Header}>
+                <Text style={styles.step2Title}>Enter verification code</Text>
+                <Text style={styles.step2Subtitle}>
+                  Code sent to {email || 'chef@kitchenops.internal'} (Valid for 10 min)
+                </Text>
+              </View>
+
+              <View style={styles.card}>
+                <View style={styles.otpGrid}>
+                  {[0, 1, 2, 3].map((idx) => (
+                    <View key={idx} style={styles.otpBox}>
+                      <Text style={styles.otpBoxChar}>{code[idx] || ''}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {/* Direct clean 4-digit input */}
+                <TextInput
+                  style={[styles.input, styles.otpInput]}
+                  placeholder="••••"
+                  placeholderTextColor="#CBD5E1"
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  value={code}
+                  onChangeText={setCode}
+                  autoFocus
+                />
+
+                <TouchableOpacity
+                  style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                  onPress={handleVerifyCode}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.primaryButtonText}>Log in</Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.resendPill}
+                  onPress={handleRequestCode}
+                  disabled={loading}
+                >
+                  <Text style={styles.resendPillText}>⟳ Send a new code (01:00)</Text>
+                </TouchableOpacity>
+
+                {message ? (
+                  <View
+                    style={[
+                      styles.messageBanner,
+                      isError ? styles.messageBannerError : styles.messageBannerSuccess,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.messageBannerText,
+                        isError ? styles.messageTextError : styles.messageTextSuccess,
+                      ]}
+                    >
+                      {message}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
             </View>
           )}
 
-          {message ? (
-            <View
-              style={[
-                styles.messageBanner,
-                isError ? styles.messageBannerError : styles.messageBannerSuccess,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.messageBannerText,
-                  isError ? styles.messageTextError : styles.messageTextSuccess,
-                ]}
-              >
-                {message}
-              </Text>
+          {step === 3 && userProfile && (
+            <View style={styles.card}>
+              <View style={styles.sessionSuccessBox}>
+                <Text style={styles.sessionSuccessTitle}>Station Session Active</Text>
+                <Text style={styles.sessionUserText}>
+                  {userProfile.user || userProfile.email || email}
+                </Text>
+                <View style={styles.onlinePill}>
+                  <Text style={styles.onlinePillText}>● Connected to Cloud Server</Text>
+                </View>
+              </View>
             </View>
-          ) : null}
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          )}
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
   safeArea: {
     flex: 1,
-    backgroundColor: '#EDF2F7',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 8 : 0,
   },
   keyboardContainer: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+  contentWrap: {
+    width: '100%',
+    alignItems: 'center',
+  },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
+    width: '100%',
+    backgroundColor: '#F3F6FA',
+    borderRadius: 24,
+    padding: 22,
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+  cardHeaderNotice: {
+    fontSize: 14.5,
+    color: '#334155',
+    fontWeight: '500',
+    marginBottom: 16,
   },
   brandHeader: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   brandIcon: {
-    width: 68,
-    height: 68,
-    borderRadius: 16,
-    marginBottom: 10,
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
   },
   brandTitle: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800',
-    color: '#1E3A8A',
-    letterSpacing: 0.3,
-  },
-  stationBadge: {
-    backgroundColor: '#DBEAFE',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 99,
-    marginTop: 6,
-    marginBottom: 8,
-  },
-  stationBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#1D4ED8',
-    letterSpacing: 0.5,
+    color: '#1A202C',
+    letterSpacing: 0.2,
   },
   brandSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
-    textAlign: 'center',
-  },
-  form: {
-    width: '100%',
+    fontSize: 13.5,
+    color: '#475569',
+    marginTop: 4,
+    fontWeight: '500',
   },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1A202C',
-    marginBottom: 6,
+    color: '#475569',
+    marginBottom: 8,
   },
-  helpText: {
-    fontSize: 11.5,
-    color: '#94A3B8',
-    marginBottom: 16,
-  },
-  input: {
-    backgroundColor: '#F8FAFC',
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    height: 50,
+    marginBottom: 18,
+  },
+  inputPrefixIcon: {
+    fontSize: 16,
+    color: '#94A3B8',
+    marginRight: 8,
+  },
+  inputWithIcon: {
+    flex: 1,
     height: 48,
     fontSize: 15,
     color: '#1A202C',
-    marginBottom: 8,
-  },
-  otpHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'baseline',
-  },
-  targetEmailMask: {
-    fontSize: 12,
-    color: '#64748B',
-  },
-  otpInput: {
-    textAlign: 'center',
-    fontSize: 24,
-    fontWeight: '700',
-    letterSpacing: 10,
-    height: 56,
-    marginBottom: 16,
   },
   primaryButton: {
-    backgroundColor: '#1D4ED8',
-    borderRadius: 12,
-    height: 48,
+    backgroundColor: '#2F3B52',
+    borderRadius: 99,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#1D4ED8',
+    shadowColor: '#2F3B52',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 15.5,
+    fontWeight: '700',
   },
   buttonDisabled: {
     opacity: 0.6,
   },
-  backButton: {
-    marginTop: 12,
-    alignItems: 'center',
-    paddingVertical: 6,
+  topBackLink: {
+    alignSelf: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    marginBottom: 10,
   },
-  backButtonText: {
-    color: '#1D4ED8',
+  topBackLinkText: {
+    fontSize: 14,
+    color: '#1E293B',
+    fontWeight: '600',
+  },
+  step2Header: {
+    width: '100%',
+    marginBottom: 18,
+    alignItems: 'center',
+  },
+  step2Title: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1A202C',
+    marginBottom: 6,
+  },
+  step2Subtitle: {
+    fontSize: 13.5,
+    color: '#475569',
+    textAlign: 'center',
+  },
+  otpGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingHorizontal: 10,
+  },
+  otpBox: {
+    width: 58,
+    height: 62,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  otpBoxChar: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A202C',
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 50,
+    fontSize: 15,
+    color: '#1A202C',
+    marginBottom: 14,
+  },
+  otpInput: {
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: 8,
+    height: 52,
+    marginBottom: 16,
+  },
+  resendPill: {
+    marginTop: 14,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 99,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  resendPillText: {
     fontSize: 13,
-    fontWeight: '500',
+    color: '#334155',
+    fontWeight: '600',
   },
   sessionSuccessBox: {
     backgroundColor: '#DCFCE7',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
-    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#86EFAC',
   },
@@ -428,7 +550,7 @@ const styles = StyleSheet.create({
   messageBanner: {
     marginTop: 14,
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
   },
   messageBannerError: {
