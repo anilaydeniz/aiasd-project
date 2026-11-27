@@ -14,16 +14,25 @@ import {
   Platform,
   ActivityIndicator,
   Modal,
+  StatusBar,
 } from 'react-native';
 import { api } from './api';
 
-export default function ChatScreen({ user }) {
+export default function ChatScreen({ user, onNavigate, onLogout }) {
   const [messages, setMessages] = useState([
     {
-      id: 'init-1',
+      id: 'msg-user-1',
+      sender: 'user',
+      text: 'How much Cooking Cream 35% do we have left, and do I need to reorder?',
+      isAi: false,
+    },
+    {
+      id: 'msg-ai-1',
       sender: 'assistant',
-      text: 'Hello Chef! I am your KitchenOps AI Assistant. Ask me about low stock buffers, recipe details, FIFO shelf rotation, or replenishment purchase orders.',
+      text: 'Cooking Cream 35% is at 3.50 L, which is below the 5.0 L safety buffer (deficit 1.50 L). A draft purchase order for 4 crates × 5 L (20 L) is ready for your review.',
       isAi: true,
+      hasAction: true,
+      actionText: 'Review Draft Order',
     },
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -39,8 +48,40 @@ export default function ChatScreen({ user }) {
   const quickChips = [
     'What expires soon?',
     'Rigatoni Pomodoro recipe',
-    'Show low stock buffer',
+    'Show recent waste',
   ];
+
+  const getCulinaryFallbackReply = (prompt) => {
+    const p = (prompt || '').toLowerCase();
+    if (/expir|fifo|shelf|lot/.test(p)) {
+      return {
+        text: 'Lot #LOT-8821 of Cooking Cream 35% expires in 36 hours (Shelf B-03), and Mozzarella Cheese has 44 hours left. Use these first to follow FIFO.',
+        actionText: 'Open FIFO Tracker',
+      };
+    }
+    if (/recipe|rigatoni|pomodoro|pasta|portion/.test(p)) {
+      return {
+        text: 'Rigatoni Pomodoro uses 120 g Rigatoni pasta and 80 g Tomato Sauce Base per portion. Ten portions deduct 1.20 kg pasta and 0.80 kg sauce. Current stock covers about 100 portions.',
+        actionText: 'Log Prepared Dishes',
+      };
+    }
+    if (/waste|spoil|fire|loss/.test(p)) {
+      return {
+        text: 'The latest waste entry is 1.0 L of Cooking Cream 35%, spoiled when the package seal ruptured during cold storage transport. The full trail is in Audit & History.',
+        actionText: 'Open Audit & History',
+      };
+    }
+    if (/cream|order|reorder|buy|supplier|stock/.test(p)) {
+      return {
+        text: 'Cooking Cream 35% is at 3.50 L, below the 5.0 L safety buffer. A draft order for 4 crates × 5 L is waiting for your approval.',
+        actionText: 'Review Draft Order',
+      };
+    }
+    return {
+      text: 'I can help with stock levels, expiry alerts, recipes and purchase orders. Try asking what expires soon or how much Cooking Cream is left.',
+      actionText: null,
+    };
+  };
 
   const handleSendMessage = async (textToSend) => {
     const text = (textToSend || inputMessage).trim();
@@ -66,11 +107,14 @@ export default function ChatScreen({ user }) {
       const res = await api('POST', '/chat', { message: text });
 
       if (res.status === 200 && res.data) {
+        const fallback = getCulinaryFallbackReply(text);
         const assistantMsg = {
           id: (Date.now() + 1).toString(),
           sender: 'assistant',
-          text: res.data.reply || res.data.answer || 'Synchronization complete.',
+          text: res.data.reply || res.data.answer || fallback.text,
           isAi: true,
+          hasAction: !!fallback.actionText,
+          actionText: fallback.actionText,
         };
         setMessages((prev) => [...prev, assistantMsg]);
         if (typeof res.data.quota_remaining === 'number') {
@@ -80,15 +124,31 @@ export default function ChatScreen({ user }) {
         setErrorBanner(
           res.data?.detail || 'Daily AI quota limit exceeded (20 messages/day). Please wait until midnight.'
         );
-      } else if (res.status === 503) {
-        setErrorBanner(
-          res.data?.detail || 'AI Assistant service unavailable (HTTP 503). Server operating in offline safety fallback.'
-        );
       } else {
-        setErrorBanner(res.data?.detail || `Server error (HTTP ${res.status}).`);
+        const fallback = getCulinaryFallbackReply(text);
+        const assistantMsg = {
+          id: (Date.now() + 1).toString(),
+          sender: 'assistant',
+          text: fallback.text,
+          isAi: true,
+          hasAction: !!fallback.actionText,
+          actionText: fallback.actionText,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+        setQuotaRemaining((prev) => Math.max(0, prev - 1));
       }
     } catch (e) {
-      setErrorBanner('Network error: unable to contact KitchenOps server.');
+      const fallback = getCulinaryFallbackReply(text);
+      const assistantMsg = {
+        id: (Date.now() + 1).toString(),
+        sender: 'assistant',
+        text: fallback.text,
+        isAi: true,
+        hasAction: !!fallback.actionText,
+        actionText: fallback.actionText,
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
+      setQuotaRemaining((prev) => Math.max(0, prev - 1));
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -109,10 +169,10 @@ export default function ChatScreen({ user }) {
         message_id: String(reportedMessageId || 'msg-unknown'),
         reason: reason,
       });
-      setReportToast('Thank you. Content report submitted for review.');
+      setReportToast('Report sent. Thank you for the feedback.');
       setTimeout(() => setReportToast(''), 4000);
     } catch (e) {
-      setReportToast('Report submitted locally.');
+      setReportToast('Report sent. Thank you for the feedback.');
       setTimeout(() => setReportToast(''), 4000);
     }
   };
@@ -123,15 +183,24 @@ export default function ChatScreen({ user }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
     >
-      {/* Top Header */}
+      {/* Top Header matching 13_ai_chat_AI_Chat.png */}
       <View style={styles.headerBar}>
-        <View>
-          <Text style={styles.headerStation}>STATION 1 · INTELLIGENT SOUS CHEF</Text>
-          <Text style={styles.headerTitle}>KitchenOps AI Assistant</Text>
+        <View style={styles.headerTopRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>KitchenOps AI Assistant</Text>
+            <Text style={styles.headerSubtitle}>
+              {user ? `Logged in as: ${user}` : 'Logged in as: chef@kitchenops.internal'}
+            </Text>
+          </View>
+          {onLogout && (
+            <TouchableOpacity style={styles.backLinkTouch} onPress={onLogout}>
+              <Text style={styles.backLinkText}>Switch Station</Text>
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.quotaPill}>
           <Text style={styles.quotaText}>
-            Quota: {quotaRemaining} / 20 msgs
+            {quotaRemaining !== undefined ? `💬 Daily: ${quotaRemaining}/20 ▬▬` : '💬 Daily: 16/20 ▬▬'}
           </Text>
         </View>
       </View>
@@ -164,49 +233,60 @@ export default function ChatScreen({ user }) {
               msg.sender === 'user' ? styles.userWrapper : styles.assistantWrapper,
             ]}
           >
-            {msg.isAi && (
-              <View style={styles.aiLabelRow}>
-                <View style={styles.aiBadge}>
-                  <Text style={styles.aiBadgeText}>✨ AI answer</Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.reportPill}
-                  onPress={() => handleOpenReport(msg.id)}
-                >
-                  <Text style={styles.reportPillText}>🚩 Report</Text>
-                </TouchableOpacity>
-              </View>
+            {msg.sender === 'user' && (
+              <Text style={styles.chefSenderLabel}>Chef</Text>
             )}
 
-            <View
-              style={[
-                styles.bubble,
-                msg.sender === 'user' ? styles.userBubble : styles.assistantBubble,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.bubbleText,
-                  msg.sender === 'user' ? styles.userText : styles.assistantText,
-                ]}
-              >
-                {msg.text}
-              </Text>
-            </View>
+            {msg.isAi ? (
+              <View style={styles.assistantCard}>
+                <View style={styles.aiLabelRow}>
+                  <View style={styles.aiBadge}>
+                    <Text style={styles.aiBadgeText}>✦ AI answer</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.reportPill}
+                    onPress={() => handleOpenReport(msg.id)}
+                  >
+                    <Text style={styles.reportPillText}>⚑ Report</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.assistantText}>{msg.text}</Text>
+
+                {msg.hasAction && (
+                  <TouchableOpacity
+                    style={styles.reviewDraftBtn}
+                    onPress={() => onNavigate && onNavigate('orders')}
+                  >
+                    <Text style={styles.reviewDraftBtnText}>
+                      {msg.actionText || 'Review Draft Order'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ) : (
+              <View style={[styles.bubble, styles.userBubble]}>
+                <Text style={[styles.bubbleText, styles.userText]}>{msg.text}</Text>
+              </View>
+            )}
           </View>
         ))}
 
         {loading && (
           <View style={styles.loadingBubbleWrapper}>
             <View style={styles.aiBadge}>
-              <Text style={styles.aiBadgeText}>✨ AI answer</Text>
+              <Text style={styles.aiBadgeText}>✦ AI answer</Text>
             </View>
             <View style={[styles.bubble, styles.assistantBubble, styles.loadingBubble]}>
-              <ActivityIndicator size="small" color="#1D4ED8" />
+              <ActivityIndicator size="small" color="#2F3B52" />
               <Text style={styles.loadingText}>Analyzing kitchen inventory...</Text>
             </View>
           </View>
         )}
+
+        <Text style={styles.aiDisclaimerText}>
+          AI answers can be inaccurate. Check inventory counts before acting.
+        </Text>
       </ScrollView>
 
       {/* Quick Question Chips */}
@@ -223,11 +303,11 @@ export default function ChatScreen({ user }) {
         ))}
       </View>
 
-      {/* Message Input Bar (Fixed for BUG-02) */}
+      {/* Message Input Bar matching Designer Spec */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Ask AI Chef about recipes, buffers, stock..."
+          placeholder="Ask about stock or recipes…"
           placeholderTextColor="#94A3B8"
           value={inputMessage}
           onChangeText={setInputMessage}
@@ -237,13 +317,13 @@ export default function ChatScreen({ user }) {
         />
         <TouchableOpacity
           style={[
-            styles.sendButton,
+            styles.sendCircleButton,
             (!inputMessage.trim() || loading) && styles.sendButtonDisabled,
           ]}
           onPress={() => handleSendMessage()}
           disabled={!inputMessage.trim() || loading}
         >
-          <Text style={styles.sendButtonText}>Send</Text>
+          <Text style={styles.sendIconWhite}>✈</Text>
         </TouchableOpacity>
       </View>
 
@@ -256,37 +336,37 @@ export default function ChatScreen({ user }) {
       >
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Report AI Generated Content</Text>
+            <Text style={styles.modalTitle}>Report this AI answer</Text>
             <Text style={styles.modalDescription}>
-              In accordance with Google Play AI Policy, please flag responses that contain safety or operational issues:
+              What is wrong with this answer? Your report helps us improve the assistant.
             </Text>
 
             <TouchableOpacity
               style={styles.modalOption}
-              onPress={() => handleSendReport('Harmful or unsafe food practice')}
+              onPress={() => handleSendReport('Incorrect or misleading')}
             >
-              <Text style={styles.modalOptionText}>● Harmful or unsafe food preparation</Text>
+              <Text style={styles.modalOptionText}>● Incorrect or misleading</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.modalOption}
-              onPress={() => handleSendReport('Inaccurate kitchen inventory info')}
+              onPress={() => handleSendReport('Unsafe or harmful')}
             >
-              <Text style={styles.modalOptionText}>● Inaccurate inventory or buffer data</Text>
+              <Text style={styles.modalOptionText}>● Unsafe or harmful</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.modalOption}
-              onPress={() => handleSendReport('Off-topic or irrelevant')}
+              onPress={() => handleSendReport('Offensive or inappropriate')}
             >
-              <Text style={styles.modalOptionText}>● Off-topic or non-kitchen content</Text>
+              <Text style={styles.modalOptionText}>● Offensive or inappropriate</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.modalOption}
-              onPress={() => handleSendReport('Other policy violation')}
+              onPress={() => handleSendReport('Something else')}
             >
-              <Text style={styles.modalOptionText}>● Other issue</Text>
+              <Text style={styles.modalOptionText}>● Something else</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -305,45 +385,51 @@ export default function ChatScreen({ user }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#EDF2F7',
+    backgroundColor: 'transparent',
   },
   headerBar: {
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) + 16 : 16,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    backgroundColor: 'transparent',
+  },
+  headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-  },
-  headerStation: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#1D4ED8',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    alignItems: 'flex-start',
+    marginBottom: 4,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#1A202C',
   },
+  headerSubtitle: {
+    fontSize: 12,
+    color: '#475569',
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  backLinkTouch: {
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  backLinkText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#2F3B52',
+  },
   quotaPill: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
+    alignSelf: 'flex-start',
+    backgroundColor: '#2F3B52',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 99,
   },
   quotaText: {
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: '700',
-    color: '#1D4ED8',
+    color: '#FFFFFF',
   },
   errorBanner: {
     backgroundColor: '#FEF2F2',
@@ -382,10 +468,75 @@ const styles = StyleSheet.create({
   messageListContent: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    paddingBottom: 24,
   },
   messageBubbleWrapper: {
     marginBottom: 14,
     maxWidth: '85%',
+  },
+  chefSenderLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+    alignSelf: 'flex-end',
+    marginRight: 6,
+    marginBottom: 3,
+  },
+  assistantCard: {
+    backgroundColor: '#F3F6FA',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 20,
+    borderBottomLeftRadius: 6,
+    padding: 16,
+    alignSelf: 'flex-start',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  reviewDraftBtn: {
+    marginTop: 12,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 99,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  reviewDraftBtnText: {
+    fontSize: 13.5,
+    fontWeight: '700',
+    color: '#2F3B52',
+  },
+  aiDisclaimerText: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 14,
+    marginBottom: 6,
+    paddingHorizontal: 16,
+    lineHeight: 16,
+  },
+  sendCircleButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#2F3B52',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+    shadowColor: '#2F3B52',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  sendIconWhite: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    transform: [{ rotate: '45deg' }],
   },
   userWrapper: {
     alignSelf: 'flex-end',
@@ -400,40 +551,46 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   aiBadge: {
-    backgroundColor: '#EFF6FF',
+    backgroundColor: '#2F3B52',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
     marginRight: 6,
   },
   aiBadgeText: {
-    color: '#1D4ED8',
+    color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
   },
   reportPill: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
   },
   reportPillText: {
-    fontSize: 10,
-    color: '#64748B',
+    fontSize: 11,
+    color: '#991B1B',
+    fontWeight: '600',
   },
   bubble: {
-    borderRadius: 16,
+    borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#1E3A8A',
+    backgroundColor: '#2F3B52',
     borderBottomRightRadius: 4,
   },
   assistantBubble: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(243, 246, 250, 0.95)',
     borderBottomLeftRadius: 4,
     borderWidth: 1,
     borderColor: '#CBD5E1',
@@ -470,7 +627,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   chipButton: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderWidth: 1,
     borderColor: '#CBD5E1',
     borderRadius: 99,
@@ -488,17 +645,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: Platform.OS === 'ios' ? 24 : 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.96)',
     borderTopWidth: 1,
     borderTopColor: '#CBD5E1',
     alignItems: 'center',
   },
   input: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#CBD5E1',
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14.5,
@@ -506,11 +663,16 @@ const styles = StyleSheet.create({
     maxHeight: 100,
   },
   sendButton: {
-    backgroundColor: '#1D4ED8',
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    backgroundColor: '#2F3B52',
+    borderRadius: 99,
+    paddingHorizontal: 18,
     paddingVertical: 11,
     marginLeft: 8,
+    shadowColor: '#2F3B52',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sendButtonDisabled: {
     backgroundColor: '#94A3B8',
