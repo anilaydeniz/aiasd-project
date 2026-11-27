@@ -81,7 +81,16 @@ def save_db(data: dict[str, Any]) -> None:
     temp_file = DB_FILE.with_suffix(".tmp")
     payload = json.dumps(data, indent=2, ensure_ascii=False)
     temp_file.write_text(payload, encoding="utf-8")
-    temp_file.replace(DB_FILE)
+    try:
+        temp_file.replace(DB_FILE)
+    except PermissionError:
+        # Fallback for transient Windows file locks
+        DB_FILE.write_text(payload, encoding="utf-8")
+        if temp_file.exists():
+            try:
+                temp_file.unlink()
+            except OSError:
+                pass
 
 
 def save_state(

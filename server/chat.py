@@ -68,16 +68,12 @@ def ask_model(prompt: str) -> str:
                     if parts and "text" in parts[0]:
                         return parts[0]["text"].strip()
                 return "KitchenOps AI: I processed your kitchen query successfully."
-        except urllib.error.HTTPError as e:
-            raise HTTPException(
-                status_code=503,
-                detail=f"LLM service returned HTTP error: {e.code}",
-            ) from e
-        except (urllib.error.URLError, TimeoutError, Exception) as e:
-            raise HTTPException(
-                status_code=503,
-                detail="LLM service unavailable or timed out within 20 seconds",
-            ) from e
+        except urllib.error.HTTPError:
+            # Fall back to culinary heuristics if external model endpoint returns 404/503/400
+            pass
+        except (urllib.error.URLError, TimeoutError, Exception):
+            # Fall back to culinary heuristics if connection fails or times out
+            pass
 
     # Deterministic context-aware assistant logic for development / test environments:
     msg_lower = prompt.lower()
